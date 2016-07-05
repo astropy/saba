@@ -1,11 +1,13 @@
 import numpy as np
 from collections import OrderedDict
 from sherpa.fit import Fit
-from sherpa.data import Data1D, Data1DInt, Data2D, Data2DInt, DataSimulFit, BaseData
+from sherpa.data import Data1D, Data1DInt, Data2D, Data2DInt, DataSimulFit
+from sherpa.data import BaseData
 from sherpa.models import UserModel, Parameter, SimulFitModel
 from astropy.modeling.fitting import Fitter
 from astropy.utils.exceptions import AstropyUserWarning
-from sherpa.stats import Chi2, Chi2ConstVar, Chi2DataVar, Chi2Gehrels, Chi2ModVar, Chi2XspecVar, LeastSq
+from sherpa.stats import Chi2, Chi2ConstVar, Chi2DataVar, Chi2Gehrels
+from sherpa.stats import Chi2ModVar, Chi2XspecVar, LeastSq
 from sherpa.stats import CStat, WStat, Cash
 from sherpa.optmethods import GridSearch, LevMar, MonCar, NelderMead
 from sherpa.estmethods import Confidence, Covariance, Projection
@@ -128,17 +130,17 @@ class SherpaFitter(Fitter):
         ----------
         model : `~astropy.modeling.FittableModel`
             model to fit to x, y, z
-        x : array
+        x : array or list of arrays
             input coordinates
-        y : array
+        y : array or list of arrays
             input coordinates
-        z : array (optional)
+        z : array or list of arrays (optional)
             input coordinates
-        xerr : array (optional)
+        xerr : array or list of arrays (optional)
             an array of errors in x
-        yerr : array (optional)
+        yerr : array or list of arrays (optional)
             an array of errors in y
-        zerr : array (optional)
+        zerr : array or list of arrays (optional)
             an array of errors in z
         **kwargs:
             keyword arguments will be passed on to sherpa fit routine
@@ -460,6 +462,33 @@ class ConvertedModel(object):
 
 
 class Data1DIntBkg(Data1DInt):
+    """
+       Data1DInt which tricks sherpa into using the background object without using DataPHA
+
+        name: string
+            dataset name
+
+        xlo: array
+           the array which represents the lower x value for the x bins
+
+        xhi: array
+           the array which represents the upper x value for the x bins
+
+        y: array
+           the array which represents y data
+
+        bkg: array
+           the array which represents bkgdata
+
+        staterror: array (optional)
+            the array which represents the errors on z
+
+        bkg_scale: float
+            the scaling factor for background data
+
+        src_scale: float
+            the scaling factor for source data
+    """
 
     _response_ids = [0]
     _background_ids = [0]
@@ -479,9 +508,9 @@ class Data1DIntBkg(Data1DInt):
     def get_background(self, index):
         return self._backgrounds[index]
 
-    def __init__(self, name, xlo, xhi, y, bkg, staterror=None, bkg_scale=1):
+    def __init__(self, name, xlo, xhi, y, bkg, staterror=None, bkg_scale=1, src_scale=1):
         self._bkg = np.asanyarray(bkg)
-        self._bkg_scale = bkg_scale
+        self._bkg_scale = src_scale
         self.exposure = 1
 
         self.subtracted = False
@@ -496,6 +525,30 @@ class Data1DIntBkg(Data1DInt):
 
 
 class Data1DBkg(Data1D):
+    """
+       Data1D which tricks sherpa into using the background object without using DataPHA
+
+        name: string
+            dataset name
+
+        x: array
+           the array which represents the x values
+
+        y: array
+           the array which represents y data
+
+        bkg: array
+           the array which represents background data
+
+        staterror: array (optional)
+            the array which represents the errors on z
+
+        bkg_scale: float
+            the scaling factor for background data
+
+        src_scale: float
+            the scaling factor for source data
+    """
 
     _response_ids = [0]
     _background_ids = [0]
@@ -515,9 +568,9 @@ class Data1DBkg(Data1D):
     def get_background(self, index):
         return self._backgrounds[index]
 
-    def __init__(self, name, x, y, bkg, staterror=None, bkg_scale=1):
+    def __init__(self, name, x, y, bkg, staterror=None, bkg_scale=1, src_scale=1):
         self._bkg = np.asanyarray(bkg)
-        self._bkg_scale = bkg_scale
+        self._bkg_scale = src_scale
         self.exposure = 1
         self.subtracted = False
 
@@ -530,6 +583,40 @@ class Data1DBkg(Data1D):
 
 
 class Data2DIntBkg(Data2DInt):
+    """
+       Data2DInt which tricks sherpa into using the background object without using DataPHA
+
+        name: string
+            dataset name
+
+        xlo: array
+           the array which represents the lower x value for the x bins
+
+        xhi: array
+           the array which represents the upper x value for the x bins
+
+        ylo: array
+           the array which represents the lower y value for the y bins
+
+        yhi: array
+           the array which represents the upper y value for the y bins
+
+
+        z: array
+           the array which represents z data
+
+        bkg: array
+           the array which represents bkgdata
+
+        staterror: array (optional)
+            the array which represents the errors on z
+
+        bkg_scale: float
+            the scaling factor for background data
+
+        src_scale: float
+            the scaling factor for source data
+    """
 
     _response_ids = [0]
     _background_ids = [0]
@@ -549,9 +636,9 @@ class Data2DIntBkg(Data2DInt):
     def get_background(self, index):
         return self._backgrounds[index]
 
-    def __init__(self, name, xlo, xhi, ylo, yhi, z, bkg, staterror=None, bkg_scale=1):
+    def __init__(self, name, xlo, xhi, ylo, yhi, z, bkg, staterror=None, bkg_scale=1, src_scale=1):
         self._bkg = np.asanyarray(bkg)
-        self._bkg_scale = bkg_scale
+        self._bkg_scale = src_scale
         self.exposure = 1
 
         self.subtracted = False
@@ -568,6 +655,34 @@ class Data2DIntBkg(Data2DInt):
 
 
 class Data2DBkg(Data2D):
+    """
+       Data2D which tricks sherpa into using the background object without
+       using DataPHA
+
+       name: string
+            dataset name
+
+        x: array
+           the array which represents x data
+
+        y: array
+           the array which represents y data
+
+        z: array
+           the array which represents z data
+
+        bkg: array
+           the array which represents bkgdata
+
+        staterror: array (optional)
+            the array which represents the errors on z
+
+        bkg_scale: float
+            the scaling factor for background data
+
+        src_scale: float
+            the scaling factor for source data
+    """
 
     _response_ids = [0]
     _background_ids = [0]
@@ -587,9 +702,9 @@ class Data2DBkg(Data2D):
     def get_background(self, index):
         return self._backgrounds[index]
 
-    def __init__(self, name, x, y, z, bkg, staterror=None, bkg_scale=1):
+    def __init__(self, name, x, y, z, bkg, staterror=None, bkg_scale=1, src_scale=1):
         self._bkg = np.asanyarray(bkg)
-        self._bkg_scale = bkg_scale
+        self._bkg_scale = src_scale
         self.exposure = 1
         self.subtracted = False
 
@@ -603,6 +718,15 @@ class Data2DBkg(Data2D):
 
 
 class BkgDataset(object):
+    """
+        The background object which is used to caclulate fit
+        stat's which require it.
+
+        bkg: array
+            the background data
+        bkg_scale: float
+            the ratio of src/bkg
+    """
 
     def __init__(self, bkg, bkg_scale):
         self._bkg = bkg
@@ -619,7 +743,17 @@ class BkgDataset(object):
 
 class SherpaMCMC(object):
     """
-        Makes use of sherpa's MCMC(pyBLoCXS) functionality.
+        An interface which makes use of sherpa's MCMC(pyBLoCXS) functionality.
+
+        fitter: a SherpaFitter instance:
+                used to caluate the fit statstics, must have been fit as t
+                he covariance matrix is used.
+        smapler: string
+                the name of a valid sherpa sampler
+
+        walker: string
+                the name of a valid sherpa walker
+
     """
 
     def __init__(self, fitter, sampler='mh', walker='mh'):
@@ -628,7 +762,6 @@ class SherpaMCMC(object):
         if hasattr(fitter.fit_info, "extra_output"):
             self._fitter = fitter
         else:
-            print "Hello?"
             raise AstropyUserWarning("Must have valid fit! "
                                      "Convariance matrix is not present")
 
@@ -636,4 +769,5 @@ class SherpaMCMC(object):
         draws = self._mcmc.get_draws(self._fitter._fit,
                                      self.fit_info.extra_output,
                                      niter=niter)
+        self._stat_vals, self._accepted, self._parameter_vals = draws
         return draws

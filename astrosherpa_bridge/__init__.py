@@ -3,7 +3,9 @@
 """
 This is an Astropy affiliated package.
 """
-from main import Dataset, SherpaFitter, ConvertedModel, OptMethod, Stat, EstMethod, SherpaMCMC
+
+from main import Dataset, SherpaFitter, ConvertedModel, OptMethod, Stat
+from main import EstMethod, SherpaMCMC
 # Affiliated packages may add whatever they like to this file, but
 # should keep this content at the top.
 # ----------------------------------------------------------------------------
@@ -14,7 +16,9 @@ from ._astropy_init import *
 if not _ASTROPY_SETUP_:
     pass
 
-def make_dataset(n_dim, x, y, z=None, xerr=None, yerr=None, zerr=None, bkg=None, bkg_scale=1):  
+
+def make_dataset(n_dim, x, y, z=None, xerr=None, yerr=None, zerr=None,
+                 bkg=None, bkg_scale=1):
 
     """
     Parameters
@@ -41,7 +45,8 @@ def make_dataset(n_dim, x, y, z=None, xerr=None, yerr=None, zerr=None, bkg=None,
     return Dataset(n_dim, x, y, z, xerr, yerr, zerr, bkg, bkg_scale)
 
 
-def make_fitter(optimizer="levmar", statistic="leastsq", estmethod="covariance"):
+def make_fitter(optimizer="levmar", statistic="leastsq",
+                estmethod="covariance"):
 
     """
     Sherpa Fitter for astropy models. Yay :)
@@ -96,14 +101,16 @@ def make_est(value):
 
 def make_converted_model(models, tie_list=None):
     """
-    This  wraps the model convertion to sherpa models and from astropy models and back!
+    This  wraps the model convertion to sherpa models and from astropy
+    models and back!
 
     Parameters:
         models: model : `~astropy.modeling.FittableModel` (or list of)
 
         tie_list: list (optional)
             a list of parameter pairs which will be tied accross models
-            e.g. [(modelB.y, modelA.x)] will mean that y in modelB will be tied to x of modelA
+            e.g. [(modelB.y, modelA.x)] will mean that y in modelB will be
+            tied to x of modelA
     """
 
     return ConvertedModel(models, tie_list)
@@ -111,6 +118,16 @@ def make_converted_model(models, tie_list=None):
 
 def make_mcmc(fitter, sampler='mh', walker='mh'):
     """
-        interface with Sherpa MCMC
+        An interface which mkes use of sherpa's MCMC(pyBLoCXS) functionality.
+
+        fitter: a SherpaFitter instance:
+                used to caluate the fit statstics, must have been fit as t
+                he covariance matrix is used.
+        smapler: string
+                the name of a valid sherpa sampler
+
+        walker: string
+                the name of a valid sherpa walker
+
     """
-    return SherpaMCMC(fitter, sampler, walker)
+   return SherpaMCMC(fitter, sampler, walker)
