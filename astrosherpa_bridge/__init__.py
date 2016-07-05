@@ -118,7 +118,7 @@ def make_converted_model(models, tie_list=None):
 
 def make_mcmc(fitter, sampler='mh', walker='mh'):
     """
-        An interface which mkes use of sherpa's MCMC(pyBLoCXS) functionality.
+        An interface which makes use of sherpa's MCMC(pyBLoCXS) functionality.
 
         fitter: a SherpaFitter instance:
                 used to caluate the fit statstics, must have been fit as t
@@ -130,4 +130,4 @@ def make_mcmc(fitter, sampler='mh', walker='mh'):
                 the name of a valid sherpa walker
 
     """
-   return SherpaMCMC(fitter, sampler, walker)
+    return SherpaMCMC(fitter, sampler, walker)
