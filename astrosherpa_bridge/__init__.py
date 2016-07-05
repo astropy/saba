@@ -109,7 +109,7 @@ def make_converted_model(models, tie_list=None):
     return ConvertedModel(models, tie_list)
 
 
-def make_MCMC(fitter, sampler='mh', walker='mh'):
+def make_mcmc(fitter, sampler='mh', walker='mh'):
     """
         interface with Sherpa MCMC
     """
