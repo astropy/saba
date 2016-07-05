@@ -113,9 +113,9 @@ class SherpaFitter(Fitter):
         super(SherpaFitter, self).__init__(optimizer=optimizer, statistic=statistic)
 
         try:
-            self._est_method = estmethod.value
+            self._est_method = estmethod.value()
         except AttributeError:
-            self._est_method = EstMethod(estmethod).value
+            self._est_method = EstMethod(estmethod).value()
 
         self.fit_info = {}
         self._fitter = None  # a handle for sherpa fit function
@@ -760,14 +760,114 @@ class SherpaMCMC(object):
         self._mcmc = MCMC()
 
         if hasattr(fitter.fit_info, "extra_output"):
-            self._fitter = fitter
+            self._fitter = fitter._fitter
+            self._cmatrix = fitter.est_errors().extra_output
+            pars = fitter._fitmodel.sherpa_model.pars
+            self.parameter_map = dict(map(lambda x: (x.name, x),
+                                          pars))
         else:
             raise AstropyUserWarning("Must have valid fit! "
                                      "Convariance matrix is not present")
 
     def __call__(self, niter=200000):
-        draws = self._mcmc.get_draws(self._fitter._fit,
-                                     self.fit_info.extra_output,
+        draws = self._mcmc.get_draws(self._fitter, self._cmatrix,
                                      niter=niter)
         self._stat_vals, self._accepted, self._parameter_vals = draws
         return draws
+
+    def set_sampler_options(self, opt, value):
+        """
+        Set an option for the current MCMC sampler.
+
+        Parameters
+        ----------
+        opt : str
+           The option to change. Use `get_sampler` to view the
+           available options for the current sampler.
+        value
+           The value for the option.
+
+        Notes
+        -----
+        The options depend on the sampler. The options include:
+
+        defaultprior
+           Set to ``False`` when the default prior (flat, between the
+           parameter's soft limits) should not be used. Use
+           `set_prior` to set the form of the prior for each
+           parameter.
+
+        inv
+           A bool, or array of bools, to indicate which parameter is
+           on the inverse scale.
+
+        log
+           A bool, or array of bools, to indicate which parameter is
+           on the logarithm (natural log) scale.
+
+        original
+           A bool, or array of bools, to indicate which parameter is
+           on the original scale.
+
+        p_M
+           The proportion of jumps generatd by the Metropolis
+           jumping rule.
+
+        priorshape
+           An array of bools indicating which parameters have a
+           user-defined prior functions set with `set_prior`.
+
+        scale
+           Multiply the output of `covar` by this factor and
+           use the result as the scale of the t-distribution.
+
+        Examples
+        --------
+        >>> mcmc = SherpaMCMC()
+        >>> mcmc.set_sampler_opt('scale', 3)
+        """
+
+        self._mcmc.set_sampler_opt(opt, value)
+
+    def set_prior(self, parameter, prior):
+        """
+        Set the prior function to use with a parameter.
+
+        The default prior used by ``get_draws`` for each parameter
+        is flat, varying between the hard minimum and maximum
+        values of the parameter (as given by the ``hard_min`` and
+        ``hard_max`` attributes of the parameter object). The ``set_prior``
+        function is used to change the form of the prior for a
+        parameter.
+
+        Parameters
+        ----------
+        par : sherpa.models.parameter.Parameter instance
+           A parameter of a model instance.
+        prior : function or sherpa.models.model.Model instance
+           The function to use for a prior. It must accept a
+           single argument and return a value of the same size
+           as the input.
+
+        Examples
+        --------
+
+        Create a function (``lognorm``) and use it as the prior the the
+        ``nH`` parameter of the ``abs1`` instance::
+
+            >>> create_model_component('xsphabs', 'abs1')
+            >>> def lognorm(x):
+               # center on 10^20 cm^2 with a sigma of 0.5
+               sigma = 0.5
+               x0 = 20
+               # nH is in units of 10^-22 so convert
+               dx = np.log10(x) + 22 - x0
+               norm = sigma / np.sqrt(2 * np.pi)
+               return norm * np.exp(-0.5*dx*dx/(sigma*sigma))
+
+            >>> set_prior('nH', lognorm)
+        """
+        if parameter in self.parameter_map:
+            self._mcmc.set_prior(self.parameter_map[parameter], prior)
+        else:
+            raise AstropyUserWarning("Parmater {name} not found in parameter_map").format(name=parameter)
