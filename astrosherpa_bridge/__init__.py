@@ -3,7 +3,7 @@
 """
 This is an Astropy affiliated package.
 """
-from main import Dataset, SherpaFitter, ConvertedModel, OptMethod, Stat, EstMethod
+from main import Dataset, SherpaFitter, ConvertedModel, OptMethod, Stat, EstMethod, SherpaMCMC
 # Affiliated packages may add whatever they like to this file, but
 # should keep this content at the top.
 # ----------------------------------------------------------------------------
@@ -107,3 +107,10 @@ def make_converted_model(models, tie_list=None):
     """
 
     return ConvertedModel(models, tie_list)
+
+
+def make_MCMC(fitter, sampler='mh', walker='mh'):
+    """
+        interface with Sherpa MCMC
+    """
+    return SherpaMCMC(fitter, sampler, walker)

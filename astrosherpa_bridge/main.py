@@ -9,9 +9,10 @@ from sherpa.stats import Chi2, Chi2ConstVar, Chi2DataVar, Chi2Gehrels, Chi2ModVa
 from sherpa.stats import CStat, WStat, Cash
 from sherpa.optmethods import GridSearch, LevMar, MonCar, NelderMead
 from sherpa.estmethods import Confidence, Covariance, Projection
+from sherpa.sim import MCMC
 # from astropy.modeling
 
-__all__ = ('SherpaFitter',)
+__all__ = ('SherpaFitter', 'SherpaMCMC')
 
 
 class SherpaWrapper(object):
@@ -614,3 +615,25 @@ class BkgDataset(object):
     @property
     def backscal(self):
         return self._bkg_scale
+
+
+class SherpaMCMC(object):
+    """
+        Makes use of sherpa's MCMC(pyBLoCXS) functionality.
+    """
+
+    def __init__(self, fitter, sampler='mh', walker='mh'):
+        self._mcmc = MCMC()
+
+        if hasattr(fitter.fit_info, "extra_output"):
+            self._fitter = fitter
+        else:
+            print "Hello?"
+            raise AstropyUserWarning("Must have valid fit! "
+                                     "Convariance matrix is not present")
+
+    def __call__(self, niter=200000):
+        draws = self._mcmc.get_draws(self._fitter._fit,
+                                     self.fit_info.extra_output,
+                                     niter=niter)
+        return draws
