@@ -17,117 +17,38 @@ if not _ASTROPY_SETUP_:
     pass
 
 
-def make_dataset(n_dim, x, y, z=None, xerr=None, yerr=None, zerr=None,
-                 bkg=None, bkg_scale=1):
 
-    """
-    Parameters
-        ----------
-        n_dim: int
-            Used to veirfy required number of dimentions.
-        x : array (or list of arrays)
-            input coordinates
-        y : array (or list of arrays)
-            input coordinates
-        z : array (or list of arrays) (optional)
-            input coordinates
-        xerr : array (or list of arrays) (optional)
-            an array of errors in x
-        yerr : array (or list of arrays) (optional)
-            an array of errors in y
-        zerr : array (or list of arrays) (optional)
-            an array of errors in z
+#from astropy.modeling.plugin import ModelingEntryPoint
+#I'll move this later
+class ModelingEntryPoint(object):
 
-    returns:
-        _data: a sherpa dataset
-    """
+    
+    def __init__(self):
+        self.__doc__=self.entry.__doc__
 
-    return Dataset(n_dim, x, y, z, xerr, yerr, zerr, bkg, bkg_scale)
+    def get_info(self):
+        return self.module, self.name, self.doc
+    
+    def __call__(self,*args,**kwargs):
+
+        return self.entry(*args,**kwargs)
 
 
-def make_fitter(optimizer="levmar", statistic="leastsq",
-                estmethod="covariance"):
 
-    """
-    Sherpa Fitter for astropy models. Yay :)
+class MCMC_Entry(ModelingEntryPoint):
 
-    Parameters
-        ----------
-        optimizer : string
-            the name of a sherpa optimizer.
-        statistic : string
-            the name of a sherpa statistic.
-        estmethod : string
-            the name of a sherpa estmethod.
-    """
-    return SherpaFitter(optimizer, statistic, estmethod)
+    doc = "An interface which makes use of sherpa's MCMC(pyBLoCXS) functionality."
+    name = "SherpaMCMC"
+    module = "astrosherpa_bridge"
+    entry = SherpaMCMC
+    
 
 
-def make_stat(value):
 
-    """
-    A wrapper for the fit statistics of sherpa
+class Fitter_Entry(ModelingEntryPoint):
+   
+    doc = "An interface to allow astropy models to use sherpa's fit routines"
+    name = "SherpaFitter"
+    module = "astrosherpa_bridge"
+    entry = SherpaFitter
 
-    Parameter:
-        value: String
-            the name of a sherpa statistics.
-    """
-    return Stat(value)
-
-
-def make_opt(value):
-
-    """
-    A wrapper for the optimization methods of sherpa
-
-    Parameter:
-        value: String
-            the name of a sherpa optimization method.
-    """
-    return OptMethod(value)
-
-
-def make_est(value):
-
-    """
-    A wrapper for the error estimation methods of sherpa
-
-    Parameter:
-        value: String
-            the name of a sherpa statistics.
-    """
-    return EstMethod(value)
-
-
-def make_converted_model(models, tie_list=None):
-    """
-    This  wraps the model convertion to sherpa models and from astropy
-    models and back!
-
-    Parameters:
-        models: model : `~astropy.modeling.FittableModel` (or list of)
-
-        tie_list: list (optional)
-            a list of parameter pairs which will be tied accross models
-            e.g. [(modelB.y, modelA.x)] will mean that y in modelB will be
-            tied to x of modelA
-    """
-
-    return ConvertedModel(models, tie_list)
-
-
-def make_mcmc(fitter, sampler='mh', walker='mh'):
-    """
-        An interface which makes use of sherpa's MCMC(pyBLoCXS) functionality.
-
-        fitter: a SherpaFitter instance:
-                used to caluate the fit statstics, must have been fit as t
-                he covariance matrix is used.
-        smapler: string
-                the name of a valid sherpa sampler
-
-        walker: string
-                the name of a valid sherpa walker
-
-    """
-    return SherpaMCMC(fitter, sampler, walker)

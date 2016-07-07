@@ -128,7 +128,7 @@ class SherpaFitter(Fitter):
 
         Parameters
         ----------
-        model : `~astropy.modeling.FittableModel`
+        models : `~astropy.modeling.FittableModel` or list of `~astropy.modeling.FittableModel`
             model to fit to x, y, z
         x : array or list of arrays
             input coordinates
@@ -763,8 +763,8 @@ class SherpaMCMC(object):
             self._fitter = fitter._fitter
             self._cmatrix = fitter.est_errors().extra_output
             pars = fitter._fitmodel.sherpa_model.pars
-            self.parameter_map = dict(map(lambda x: (x.name, x),
-                                          pars))
+            self.parameter_map = OrderedDict(map(lambda x: (x.name, x),
+                                             pars))
         else:
             raise AstropyUserWarning("Must have valid fit! "
                                      "Convariance matrix is not present")
@@ -773,6 +773,12 @@ class SherpaMCMC(object):
         draws = self._mcmc.get_draws(self._fitter, self._cmatrix,
                                      niter=niter)
         self._stat_vals, self._accepted, self._parameter_vals = draws
+        self.acception_rate = (self._accepted.sum() * 100.0 /
+                               self._accepted.size)
+        self.parameters = OrderedDict()
+        for n, parameter_set in enumerate(self._parameter_vals):
+            pname = self.parameter_map.keys()[n]
+            self.parameters[pname] = self._parameter_vals[n, :]
         return draws
 
     def set_sampler_options(self, opt, value):
@@ -826,8 +832,10 @@ class SherpaMCMC(object):
         >>> mcmc = SherpaMCMC()
         >>> mcmc.set_sampler_opt('scale', 3)
         """
-
         self._mcmc.set_sampler_opt(opt, value)
+
+    def get_sampler(self,):
+        return self._mcmc.get_sampler()
 
     def set_prior(self, parameter, prior):
         """
@@ -852,10 +860,8 @@ class SherpaMCMC(object):
         Examples
         --------
 
-        Create a function (``lognorm``) and use it as the prior the the
-        ``nH`` parameter of the ``abs1`` instance::
-
-            >>> create_model_component('xsphabs', 'abs1')
+        Create a function (``lognorm``) and use it as the prior the
+        ``nH`` parameter:
             >>> def lognorm(x):
                # center on 10^20 cm^2 with a sigma of 0.5
                sigma = 0.5
@@ -870,4 +876,5 @@ class SherpaMCMC(object):
         if parameter in self.parameter_map:
             self._mcmc.set_prior(self.parameter_map[parameter], prior)
         else:
-            raise AstropyUserWarning("Parmater {name} not found in parameter_map").format(name=parameter)
+            raise AstropyUserWarning("Parmater {name} not found in parameter"
+                                     "map".format(name=parameter))
