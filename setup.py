@@ -79,7 +79,7 @@ package_info['package_data'].setdefault(PACKAGENAME, [])
 package_info['package_data'][PACKAGENAME].append('data/*')
 
 # Define entry points for astrosherpa_bridge
-entry_points = {'console_scripts': [], 'astrosherpa':[]}
+entry_points = {'console_scripts': [], 'astropy.modeling':[]}
 
 entry_point_list = conf.items('entry_points')
 for entry_point in entry_point_list:
@@ -88,7 +88,7 @@ for entry_point in entry_point_list:
 
 astrosherpa_entry_point_list = conf.items('asb_entry_points')
 for astrosherpa_entry_point in astrosherpa_entry_point_list:
-    entry_points['astrosherpa'].append('{0} = {1}'.format(
+    entry_points['astropy.modeling'].append('{0} = {1}'.format(
                                        astrosherpa_entry_point[0],
                                        astrosherpa_entry_point[1]))
 
