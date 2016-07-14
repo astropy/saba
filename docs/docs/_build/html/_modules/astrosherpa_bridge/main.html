@@ -1,0 +1,1076 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>astrosherpa_bridge.main &mdash; astrosherpa_bridge 0.1 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../_static/astropy_logo.ico"/>
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="astrosherpa_bridge 0.1 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> astrosherpa_bridge
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.dev9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../sherpafitter.html">SherpaFitter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sherpafitter_examples.html">How to use SherpaFitter</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">astrosherpa_bridge</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>astrosherpa_bridge.main</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for astrosherpa_bridge.main</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">sherpa.fit</span> <span class="kn">import</span> <span class="n">Fit</span>
+<span class="kn">from</span> <span class="nn">sherpa.data</span> <span class="kn">import</span> <span class="n">Data1D</span><span class="p">,</span> <span class="n">Data1DInt</span><span class="p">,</span> <span class="n">Data2D</span><span class="p">,</span> <span class="n">Data2DInt</span><span class="p">,</span> <span class="n">DataSimulFit</span>
+<span class="kn">from</span> <span class="nn">sherpa.data</span> <span class="kn">import</span> <span class="n">BaseData</span>
+<span class="kn">from</span> <span class="nn">sherpa.models</span> <span class="kn">import</span> <span class="n">UserModel</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">SimulFitModel</span>
+<span class="kn">from</span> <span class="nn">astropy.modeling.fitting</span> <span class="kn">import</span> <span class="n">Fitter</span>
+<span class="kn">from</span> <span class="nn">astropy.utils.exceptions</span> <span class="kn">import</span> <span class="n">AstropyUserWarning</span>
+<span class="kn">from</span> <span class="nn">sherpa.stats</span> <span class="kn">import</span> <span class="n">Chi2</span><span class="p">,</span> <span class="n">Chi2ConstVar</span><span class="p">,</span> <span class="n">Chi2DataVar</span><span class="p">,</span> <span class="n">Chi2Gehrels</span>
+<span class="kn">from</span> <span class="nn">sherpa.stats</span> <span class="kn">import</span> <span class="n">Chi2ModVar</span><span class="p">,</span> <span class="n">Chi2XspecVar</span><span class="p">,</span> <span class="n">LeastSq</span>
+<span class="kn">from</span> <span class="nn">sherpa.stats</span> <span class="kn">import</span> <span class="n">CStat</span><span class="p">,</span> <span class="n">WStat</span><span class="p">,</span> <span class="n">Cash</span>
+<span class="kn">from</span> <span class="nn">sherpa.optmethods</span> <span class="kn">import</span> <span class="n">GridSearch</span><span class="p">,</span> <span class="n">LevMar</span><span class="p">,</span> <span class="n">MonCar</span><span class="p">,</span> <span class="n">NelderMead</span>
+<span class="kn">from</span> <span class="nn">sherpa.estmethods</span> <span class="kn">import</span> <span class="n">Confidence</span><span class="p">,</span> <span class="n">Covariance</span><span class="p">,</span> <span class="n">Projection</span>
+<span class="kn">from</span> <span class="nn">sherpa.sim</span> <span class="kn">import</span> <span class="n">MCMC</span>
+<span class="c1"># from astropy.modeling</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;SherpaFitter&#39;</span><span class="p">,</span> <span class="s1">&#39;SherpaMCMC&#39;</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">SherpaWrapper</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sherpa_values</span><span class="p">[</span><span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="ne">UserWarning</span><span class="p">(</span><span class="s2">&quot;Value not found&quot;</span><span class="p">)</span>  <span class="c1"># todo handle</span>
+
+
+<span class="k">class</span> <span class="nc">Stat</span><span class="p">(</span><span class="n">SherpaWrapper</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A wrapper for the fit statistics of sherpa</span>
+
+<span class="sd">    Parameter:</span>
+<span class="sd">        value: String</span>
+<span class="sd">            the name of a sherpa statistics.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_sherpa_values</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;cash&#39;</span><span class="p">:</span> <span class="n">Cash</span><span class="p">,</span> <span class="s1">&#39;wstat&#39;</span><span class="p">:</span> <span class="n">WStat</span><span class="p">,</span> <span class="s1">&#39;cstat&#39;</span><span class="p">:</span> <span class="n">CStat</span><span class="p">,</span>
+                      <span class="s1">&#39;chi2&#39;</span><span class="p">:</span> <span class="n">Chi2</span><span class="p">,</span> <span class="s1">&#39;chi2constvar&#39;</span><span class="p">:</span> <span class="n">Chi2ConstVar</span><span class="p">,</span>
+                      <span class="s1">&#39;chi2datavar&#39;</span><span class="p">:</span> <span class="n">Chi2DataVar</span><span class="p">,</span>
+                      <span class="s1">&#39;chi2gehrels&#39;</span><span class="p">:</span> <span class="n">Chi2Gehrels</span><span class="p">,</span>
+                      <span class="s1">&#39;chi2modvar&#39;</span><span class="p">:</span> <span class="n">Chi2ModVar</span><span class="p">,</span>
+                      <span class="s1">&#39;chi2xspecvar&#39;</span><span class="p">:</span> <span class="n">Chi2XspecVar</span><span class="p">,</span>
+                      <span class="s1">&#39;leastsq&#39;</span><span class="p">:</span> <span class="n">LeastSq</span><span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">OptMethod</span><span class="p">(</span><span class="n">SherpaWrapper</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A wrapper for the optimization methods of sherpa</span>
+
+<span class="sd">    Parameter:</span>
+<span class="sd">        value: String</span>
+<span class="sd">            the name of a sherpa optimization method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_sherpa_values</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;simplex&#39;</span><span class="p">:</span> <span class="n">GridSearch</span><span class="p">,</span> <span class="s1">&#39;levmar&#39;</span><span class="p">:</span> <span class="n">LevMar</span><span class="p">,</span>
+                      <span class="s1">&#39;moncar&#39;</span><span class="p">:</span> <span class="n">MonCar</span><span class="p">,</span> <span class="s1">&#39;neldermead&#39;</span><span class="p">:</span> <span class="n">NelderMead</span><span class="p">}</span>
+
+
+<span class="k">class</span> <span class="nc">EstMethod</span><span class="p">(</span><span class="n">SherpaWrapper</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A wrapper for the error estimation methods of sherpa</span>
+
+<span class="sd">    Parameter:</span>
+<span class="sd">        value: String</span>
+<span class="sd">            the name of a sherpa statistics.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_sherpa_values</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;confidence&#39;</span><span class="p">:</span> <span class="n">Confidence</span><span class="p">,</span> <span class="s1">&#39;covariance&#39;</span><span class="p">:</span> <span class="n">Covariance</span><span class="p">,</span>
+                      <span class="s1">&#39;projection&#39;</span><span class="p">:</span> <span class="n">Projection</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="SherpaFitter"><a class="viewcode-back" href="../../sherpafitter.html#astrosherpa_bridge.SherpaFitter">[docs]</a><span class="k">class</span> <span class="nc">SherpaFitter</span><span class="p">(</span><span class="n">Fitter</span><span class="p">):</span>
+    <span class="n">__doc__</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    Sherpa Fitter for astropy models. Yay :)</span>
+
+<span class="s2">    Parameters</span>
+<span class="s2">        ----------</span>
+<span class="s2">        optimizer : string</span>
+<span class="s2">            the name of a sherpa optimizer.</span>
+<span class="s2">            posible options include:</span>
+<span class="s2">                {opt}</span>
+<span class="s2">        statistic : string</span>
+<span class="s2">            the name of a sherpa statistic.</span>
+<span class="s2">            posible options include:</span>
+<span class="s2">                {stat}</span>
+<span class="s2">        estmethod : string</span>
+<span class="s2">            the name of a sherpa estmethod.</span>
+<span class="s2">            posible options include:</span>
+<span class="s2">                {est}</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">opt</span><span class="o">=</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">OptMethod</span><span class="o">.</span><span class="n">_sherpa_values</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+               <span class="n">stat</span><span class="o">=</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Stat</span><span class="o">.</span><span class="n">_sherpa_values</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span>
+               <span class="n">est</span><span class="o">=</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">EstMethod</span><span class="o">.</span><span class="n">_sherpa_values</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>  <span class="c1"># is this evil?</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="s2">&quot;levmar&quot;</span><span class="p">,</span> <span class="n">statistic</span><span class="o">=</span><span class="s2">&quot;leastsq&quot;</span><span class="p">,</span> <span class="n">estmethod</span><span class="o">=</span><span class="s2">&quot;covariance&quot;</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">optimizer</span> <span class="o">=</span> <span class="n">OptMethod</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">statistic</span> <span class="o">=</span> <span class="n">statistic</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">statistic</span> <span class="o">=</span> <span class="n">Stat</span><span class="p">(</span><span class="n">statistic</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">SherpaFitter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">statistic</span><span class="o">=</span><span class="n">statistic</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_est_method</span> <span class="o">=</span> <span class="n">estmethod</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_est_method</span> <span class="o">=</span> <span class="n">EstMethod</span><span class="p">(</span><span class="n">estmethod</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit_info</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitter</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># a handle for sherpa fit function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitmodel</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># a handle for sherpa fit model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># a handle for sherpa dataset</span>
+
+<div class="viewcode-block" id="SherpaFitter.__call__"><a class="viewcode-back" href="../../sherpafitter.html#astrosherpa_bridge.SherpaFitter.__call__">[docs]</a>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">models</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">xerr</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">zerr</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bkg</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fit the astropy model with a the sherpa fit routines.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        models : `~astropy.modeling.FittableModel` or list of `~astropy.modeling.FittableModel`</span>
+<span class="sd">            model to fit to x, y, z</span>
+<span class="sd">        x : array or list of arrays</span>
+<span class="sd">            input coordinates</span>
+<span class="sd">        y : array or list of arrays</span>
+<span class="sd">            input coordinates</span>
+<span class="sd">        z : array or list of arrays (optional)</span>
+<span class="sd">            input coordinates</span>
+<span class="sd">        xerr : array or list of arrays (optional)</span>
+<span class="sd">            an array of errors in x</span>
+<span class="sd">        yerr : array or list of arrays (optional)</span>
+<span class="sd">            an array of errors in y</span>
+<span class="sd">        zerr : array or list of arrays (optional)</span>
+<span class="sd">            an array of errors in z</span>
+<span class="sd">        **kwargs:</span>
+<span class="sd">            keyword arguments will be passed on to sherpa fit routine</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        model_copy : `~astropy.modeling.FittableModel` or a list of models.</span>
+<span class="sd">            a copy of the input model with parameters set by the fitter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">tie_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+           <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">n_inputs</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">xerr</span><span class="p">,</span> <span class="n">yerr</span><span class="p">,</span> <span class="n">zerr</span><span class="p">,</span> <span class="n">bkg</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">Dataset</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">n_inputs</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">xerr</span><span class="p">,</span> <span class="n">yerr</span><span class="p">,</span> <span class="n">zerr</span><span class="p">,</span> <span class="n">bkg</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">ndata</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_fitmodel</span> <span class="o">=</span> <span class="n">ConvertedModel</span><span class="p">([</span><span class="n">models</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">ndata</span><span class="p">)],</span> <span class="n">tie_list</span><span class="p">)</span>
+                <span class="c1"># Copy the model so each data set has the same model!</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">ndata</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_fitmodel</span> <span class="o">=</span> <span class="n">ConvertedModel</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">tie_list</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Don&#39;t know how to handle multiple models unless there is one foreach dataset&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">make_simfit</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">models</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_fitmodel</span> <span class="o">=</span> <span class="n">ConvertedModel</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">tie_list</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_fitmodel</span> <span class="o">=</span> <span class="n">ConvertedModel</span><span class="p">(</span><span class="n">models</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fitter</span> <span class="o">=</span> <span class="n">Fit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fitmodel</span><span class="o">.</span><span class="n">sherpa_model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stat_method</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_opt_method</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_est_method</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fitter</span><span class="o">.</span><span class="n">fit</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fitmodel</span><span class="o">.</span><span class="n">get_astropy_model</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SherpaFitter.est_errors"><a class="viewcode-back" href="../../sherpafitter.html#astrosherpa_bridge.SherpaFitter.est_errors">[docs]</a>    <span class="k">def</span> <span class="nf">est_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">maxiters</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">numcores</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">methoddict</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parlist</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Use sherpa error estimators based on the last fit.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            sigma: float</span>
+<span class="sd">                this will be set as the confidance interval for which the errors are found too.</span>
+<span class="sd">            maxiters: int</span>
+<span class="sd">                the maximum number of iterations the error estimator will run before giving up.</span>
+<span class="sd">            methoddict: dict</span>
+<span class="sd">                !not quite sure couldn&#39;t figure this one out yet!</span>
+<span class="sd">            parlist: list</span>
+<span class="sd">                a list of parameters to find the confidance interval of if none are provided all free</span>
+<span class="sd">                parameters will be estimated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fitter</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Must complete a valid fit before errors can be calculated&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sigma</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fitter</span><span class="o">.</span><span class="n">estmethod</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;sigma&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigma</span>
+        <span class="k">if</span> <span class="n">maxiters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fitter</span><span class="o">.</span><span class="n">estmethod</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;maxiters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">maxiters</span>
+        <span class="k">if</span> <span class="s1">&#39;numcores&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fitter</span><span class="o">.</span><span class="n">estmethod</span><span class="o">.</span><span class="n">config</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">numcores</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fitter</span><span class="o">.</span><span class="n">estmethod</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;numcores&#39;</span><span class="p">]:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_fitter</span><span class="o">.</span><span class="n">estmethod</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;numcores&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numcores</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fitter</span><span class="o">.</span><span class="n">est_errors</span><span class="p">(</span><span class="n">methoddict</span><span class="o">=</span><span class="n">methoddict</span><span class="p">,</span> <span class="n">parlist</span><span class="o">=</span><span class="n">parlist</span><span class="p">)</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">Dataset</span><span class="p">(</span><span class="n">SherpaWrapper</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n_dim: int</span>
+<span class="sd">            Used to veirfy required number of dimentions.</span>
+<span class="sd">        x : array (or list of arrays)</span>
+<span class="sd">            input coordinates</span>
+<span class="sd">        y : array (or list of arrays)</span>
+<span class="sd">            input coordinates</span>
+<span class="sd">        z : array (or list of arrays) (optional)</span>
+<span class="sd">            input coordinates</span>
+<span class="sd">        xerr : array (or list of arrays) (optional)</span>
+<span class="sd">            an array of errors in x</span>
+<span class="sd">        yerr : array (or list of arrays) (optional)</span>
+<span class="sd">            an array of errors in y</span>
+<span class="sd">        zerr : array (or list of arrays) (optional)</span>
+<span class="sd">            an array of errors in z</span>
+
+<span class="sd">    returns:</span>
+<span class="sd">        _data: a sherpa dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_dim</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">xerr</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">zerr</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bkg</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">or</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">object</span> <span class="ow">or</span> <span class="n">y</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">object</span><span class="p">):</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">z</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">xerr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">xerr</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">yerr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">yerr</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="o">*</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">zerr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">zerr</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="o">*</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">bkg</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">bkg</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="nb">iter</span><span class="p">(</span><span class="n">bkg_scale</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                <span class="n">bkg_scale</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="p">[</span><span class="n">bkg_scale</span><span class="p">]</span>
+
+
+            <span class="k">for</span> <span class="n">nn</span><span class="p">,</span> <span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">zz</span><span class="p">,</span> <span class="n">xxe</span><span class="p">,</span> <span class="n">yye</span><span class="p">,</span> <span class="n">zze</span><span class="p">,</span> <span class="n">bkg</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">xerr</span><span class="p">,</span> <span class="n">yerr</span><span class="p">,</span> <span class="n">zerr</span><span class="p">,</span> <span class="n">bkg</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="p">)):</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_make_dataset</span><span class="p">(</span><span class="n">n_dim</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">xx</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">yy</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">zz</span><span class="p">,</span> <span class="n">xerr</span><span class="o">=</span><span class="n">xxe</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">yye</span><span class="p">,</span> <span class="n">zerr</span><span class="o">=</span><span class="n">zze</span><span class="p">,</span> <span class="n">bkg</span><span class="o">=</span><span class="n">bkg</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="o">=</span><span class="n">bkg_scale</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">nn</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">DataSimulFit</span><span class="p">(</span><span class="s2">&quot;wrapped_data&quot;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ndata</span> <span class="o">=</span> <span class="n">nn</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_dataset</span><span class="p">(</span><span class="n">n_dim</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="n">xerr</span><span class="o">=</span><span class="n">xerr</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">yerr</span><span class="p">,</span> <span class="n">zerr</span><span class="o">=</span><span class="n">zerr</span><span class="p">,</span> <span class="n">bkg</span><span class="o">=</span><span class="n">bkg</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="o">=</span><span class="n">bkg_scale</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ndata</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_make_dataset</span><span class="p">(</span><span class="n">n_dim</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">xerr</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">zerr</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bkg</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">            ----------</span>
+<span class="sd">            n_dim: int</span>
+<span class="sd">                Used to veirfy required number of dimentions.</span>
+<span class="sd">            x : array</span>
+<span class="sd">                input coordinates</span>
+<span class="sd">            y : array</span>
+<span class="sd">                input coordinates</span>
+<span class="sd">            z : array (optional)</span>
+<span class="sd">                input coordinatesbkg</span>
+<span class="sd">            xerr : array (optional)</span>
+<span class="sd">                an array of errors in x</span>
+<span class="sd">            yerr : array (optional)</span>
+<span class="sd">                an array of errors in y</span>
+<span class="sd">            zerr : array (optional)</span>
+<span class="sd">                an array of errors in z</span>
+<span class="sd">            n  : int</span>
+<span class="sd">                used in error reporting</span>
+
+<span class="sd">        returns:</span>
+<span class="sd">            _data: a sherpa dataset</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">z</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">n_dim</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">n_dim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Model and data dimentions don&#39;t match in dataset </span><span class="si">%i</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">n</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;shape of x and y don&#39;t match in dataset </span><span class="si">%i</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">n</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">z</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;shapes x,y and z don&#39;t match in dataset </span><span class="si">%i</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">n</span>
+
+        <span class="k">if</span> <span class="n">yerr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">yerr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">yerr</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">y</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">yerr</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;y&#39;s and yerr&#39;s shapes do not match in dataset </span><span class="si">%i</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">n</span>
+
+        <span class="k">if</span> <span class="n">xerr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">xerr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">xerr</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">xerr</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;x&#39;s and xerr&#39;s shapes do not match in dataset </span><span class="si">%i</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">n</span>
+
+        <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">zerr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">zerr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">zerr</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">z</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">zerr</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s2">&quot;z&#39;s and zerr&#39;s shapes do not match in dataset </span><span class="si">%i</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">n</span>
+
+        <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">xerr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">yerr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">bkg</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">Data1D</span><span class="p">(</span><span class="s2">&quot;wrapped_data&quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">Data1DBkg</span><span class="p">(</span><span class="s2">&quot;wrapped_data&quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">bkg</span><span class="o">=</span><span class="n">bkg</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="o">=</span><span class="n">bkg_scale</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">bkg</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">Data1D</span><span class="p">(</span><span class="s2">&quot;wrapped_data&quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">staterror</span><span class="o">=</span><span class="n">yerr</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">Data1DBkg</span><span class="p">(</span><span class="s2">&quot;wrapped_data&quot;</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">staterror</span><span class="o">=</span><span class="n">yerr</span><span class="p">,</span> <span class="n">bkg</span><span class="o">=</span><span class="n">bkg</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="o">=</span><span class="n">bkg_scale</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">yerr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">bkg</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">Data1DInt</span><span class="p">(</span><span class="s2">&quot;wrapped_data&quot;</span><span class="p">,</span> <span class="n">xlo</span><span class="o">=</span><span class="n">x</span> <span class="o">-</span> <span class="n">xerr</span><span class="p">,</span> <span class="n">xhi</span><span class="o">=</span><span class="n">x</span> <span class="o">+</span> <span class="n">xerr</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">Data1DIntBkg</span><span class="p">(</span><span class="s2">&quot;wrapped_data&quot;</span><span class="p">,</span> <span class="n">xlo</span><span class="o">=</span><span class="n">x</span> <span class="o">-</span> <span class="n">xerr</span><span class="p">,</span> <span class="n">xhi</span><span class="o">=</span><span class="n">x</span> <span class="o">+</span> <span class="n">xerr</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">bkg</span><span class="o">=</span><span class="n">bkg</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="o">=</span><span class="n">bkg_scale</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">bkg</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">Data1DInt</span><span class="p">(</span><span class="s2">&quot;wrapped_data&quot;</span><span class="p">,</span> <span class="n">xlo</span><span class="o">=</span><span class="n">x</span> <span class="o">-</span> <span class="n">xerr</span><span class="p">,</span> <span class="n">xhi</span><span class="o">=</span><span class="n">x</span> <span class="o">+</span> <span class="n">xerr</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">staterror</span><span class="o">=</span><span class="n">yerr</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">Data1DIntBkg</span><span class="p">(</span><span class="s2">&quot;wrapped_data&quot;</span><span class="p">,</span> <span class="n">xlo</span><span class="o">=</span><span class="n">x</span> <span class="o">-</span> <span class="n">xerr</span><span class="p">,</span> <span class="n">xhi</span><span class="o">=</span><span class="n">x</span> <span class="o">+</span> <span class="n">xerr</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">staterror</span><span class="o">=</span><span class="n">yerr</span><span class="p">,</span> <span class="n">bkg</span><span class="o">=</span><span class="n">bkg</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="o">=</span><span class="n">bkg_scale</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">xerr</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">yerr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">zerr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">bkg</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">Data2D</span><span class="p">(</span><span class="s2">&quot;wrapped_data&quot;</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">z</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">Data2DBkg</span><span class="p">(</span><span class="s2">&quot;wrapped_data&quot;</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="n">bkg</span><span class="o">=</span><span class="n">bkg</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="o">=</span><span class="n">bkg_scale</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">bkg</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">Data2D</span><span class="p">(</span><span class="s2">&quot;wrapped_data&quot;</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="n">staterror</span><span class="o">=</span><span class="n">zerr</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">Data2DBkg</span><span class="p">(</span><span class="s2">&quot;wrapped_data&quot;</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">x1</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="n">staterror</span><span class="o">=</span><span class="n">zerr</span><span class="p">,</span> <span class="n">bkg</span><span class="o">=</span><span class="n">bkg</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="o">=</span><span class="n">bkg_scale</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">xerr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">yerr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">zerr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">bkg</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">Data2DInt</span><span class="p">(</span><span class="s2">&quot;wrapped_data&quot;</span><span class="p">,</span> <span class="n">x0lo</span><span class="o">=</span><span class="n">x</span> <span class="o">-</span> <span class="n">xerr</span><span class="p">,</span> <span class="n">x0hi</span><span class="o">=</span><span class="n">x</span> <span class="o">+</span> <span class="n">xerr</span><span class="p">,</span> <span class="n">x1lo</span><span class="o">=</span><span class="n">y</span> <span class="o">-</span> <span class="n">yerr</span><span class="p">,</span> <span class="n">x1hi</span><span class="o">=</span><span class="n">y</span> <span class="o">+</span> <span class="n">yerr</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">z</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">Data2DIntBkg</span><span class="p">(</span><span class="s2">&quot;wrapped_data&quot;</span><span class="p">,</span> <span class="n">x0lo</span><span class="o">=</span><span class="n">x</span> <span class="o">-</span> <span class="n">xerr</span><span class="p">,</span> <span class="n">x0hi</span><span class="o">=</span><span class="n">x</span> <span class="o">+</span> <span class="n">xerr</span><span class="p">,</span> <span class="n">x1lo</span><span class="o">=</span><span class="n">y</span> <span class="o">-</span> <span class="n">yerr</span><span class="p">,</span> <span class="n">x1hi</span><span class="o">=</span><span class="n">y</span> <span class="o">+</span> <span class="n">yerr</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="n">bkg</span><span class="o">=</span><span class="n">bkg</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="o">=</span><span class="n">bkg_scale</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">bkg</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">Data2DInt</span><span class="p">(</span><span class="s2">&quot;wrapped_data&quot;</span><span class="p">,</span> <span class="n">x0lo</span><span class="o">=</span><span class="n">x</span> <span class="o">-</span> <span class="n">xerr</span><span class="p">,</span> <span class="n">x0hi</span><span class="o">=</span><span class="n">x</span> <span class="o">+</span> <span class="n">xerr</span><span class="p">,</span> <span class="n">x1lo</span><span class="o">=</span><span class="n">y</span> <span class="o">-</span> <span class="n">yerr</span><span class="p">,</span> <span class="n">x1hi</span><span class="o">=</span><span class="n">y</span> <span class="o">+</span> <span class="n">yerr</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="n">staterror</span><span class="o">=</span><span class="n">zerr</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">Data2DIntBkg</span><span class="p">(</span><span class="s2">&quot;wrapped_data&quot;</span><span class="p">,</span> <span class="n">x0lo</span><span class="o">=</span><span class="n">x</span> <span class="o">-</span> <span class="n">xerr</span><span class="p">,</span> <span class="n">x0hi</span><span class="o">=</span><span class="n">x</span> <span class="o">+</span> <span class="n">xerr</span><span class="p">,</span> <span class="n">x1lo</span><span class="o">=</span><span class="n">y</span> <span class="o">-</span> <span class="n">yerr</span><span class="p">,</span> <span class="n">x1hi</span><span class="o">=</span><span class="n">y</span> <span class="o">+</span> <span class="n">yerr</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="n">staterror</span><span class="o">=</span><span class="n">zerr</span><span class="p">,</span> <span class="n">bkg</span><span class="o">=</span><span class="n">bkg</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="o">=</span><span class="n">bkg_scale</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Set xerr and yerr, or set neither!&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">make_simfit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numdata</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This makes a single datasets into a simdatafit at allow fitting of multiple models by copying the single dataset!</span>
+
+<span class="sd">        Parameter:</span>
+
+<span class="sd">        numdata: int</span>
+<span class="sd">            the number of times you want to copy the dataset i.e if you want 2 datasets total you put 1!</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">DataSimulFit</span><span class="p">(</span><span class="s2">&quot;wrapped_data&quot;</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">numdata</span><span class="p">)])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ndata</span> <span class="o">=</span> <span class="n">numdata</span> <span class="o">+</span> <span class="mi">1</span>
+
+
+<span class="k">class</span> <span class="nc">ConvertedModel</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This  wraps the model convertion to sherpa models and from astropy models and back!</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        models: model : `~astropy.modeling.FittableModel` (or list of)</span>
+
+<span class="sd">        tie_list: list (optional)</span>
+<span class="sd">            a list of parameter pairs which will be tied accross models</span>
+<span class="sd">            e.g. [(modelB.y, modelA.x)] will mean that y in modelB will be tied to x of modelA</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">models</span><span class="p">,</span> <span class="n">tie_list</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">models</span><span class="o">.</span><span class="n">parameters</span>  <span class="c1"># does it quack</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sherpa_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_astropy_to_sherpa_model</span><span class="p">(</span><span class="n">models</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model_dict</span><span class="p">[</span><span class="n">models</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sherpa_model</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">mod</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model_dict</span><span class="p">[</span><span class="n">mod</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_astropy_to_sherpa_model</span><span class="p">(</span><span class="n">mod</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">tie_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">par1</span><span class="p">,</span> <span class="n">par2</span> <span class="ow">in</span> <span class="n">tie_list</span><span class="p">:</span>
+                        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_dict</span><span class="p">[</span><span class="n">par1</span><span class="o">.</span><span class="n">_model</span><span class="p">],</span> <span class="n">par1</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">link</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_dict</span><span class="p">[</span><span class="n">par2</span><span class="o">.</span><span class="n">_model</span><span class="p">],</span> <span class="n">par2</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sherpa_model</span> <span class="o">=</span> <span class="n">SimulFitModel</span><span class="p">(</span><span class="s2">&quot;wrapped_fit_model&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_astropy_to_sherpa_model</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts the model using sherpa&#39;s usermodel suppling the parameter detail to sherpa</span>
+<span class="sd">        then using a decorator to allow the call method to act like the calc method</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">_calc2call</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;This decorator makes call and calc work together.&quot;&quot;&quot;</span>
+            <span class="k">def</span> <span class="nf">_converter</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="o">*</span><span class="n">x</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">func</span><span class="o">.</span><span class="n">n_inputs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">retvals</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">*</span><span class="n">inp</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">retvals</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">evaluate</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">*</span><span class="n">inp</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">retvals</span>
+            <span class="k">return</span> <span class="n">_converter</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">ineqcons</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">eqcons</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">AstropyUserWarning</span><span class="p">(</span><span class="s1">&#39;In/eqcons are not supported by sherpa these will be ignored!&#39;</span><span class="p">)</span>
+
+        <span class="n">pars</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">linkedpars</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">pname</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">param_names</span><span class="p">:</span>
+            <span class="n">param</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">pname</span><span class="p">)</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">min</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">min</span><span class="p">,</span>
+                    <span class="n">param</span><span class="o">.</span><span class="n">max</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">fixed</span><span class="p">,</span> <span class="bp">False</span><span class="p">]</span>
+            <span class="n">attrnames</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;val&quot;</span><span class="p">,</span> <span class="s2">&quot;min&quot;</span><span class="p">,</span> <span class="s2">&quot;max&quot;</span><span class="p">,</span> <span class="s2">&quot;hard_min&quot;</span><span class="p">,</span> <span class="s2">&quot;hard_max&quot;</span><span class="p">,</span>
+                         <span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="s2">&quot;frozen&quot;</span><span class="p">,</span> <span class="s2">&quot;alwaysfrozen&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+            <span class="n">pars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="n">modelname</span><span class="o">=</span><span class="s2">&quot;wrap_&quot;</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="nb">dict</span><span class="p">([(</span><span class="n">atr</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">atr</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">attrnames</span><span class="p">,</span> <span class="n">vals</span><span class="p">)</span> <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">])))</span>
+            <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">tied</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">False</span><span class="p">:</span>
+                <span class="n">linkedpars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pname</span><span class="p">)</span>
+
+        <span class="n">smodel</span> <span class="o">=</span> <span class="n">UserModel</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pars</span><span class="p">)</span>
+        <span class="n">smodel</span><span class="o">.</span><span class="n">calc</span> <span class="o">=</span> <span class="n">_calc2call</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">pname</span> <span class="ow">in</span> <span class="n">linkedpars</span><span class="p">:</span>
+            <span class="n">param</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">pname</span><span class="p">)</span>
+            <span class="n">sparam</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">smodel</span><span class="p">,</span> <span class="n">pname</span><span class="p">)</span>
+            <span class="n">sparam</span><span class="o">.</span><span class="n">link</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">tied</span><span class="p">(</span><span class="n">smodel</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">smodel</span>
+
+    <span class="k">def</span> <span class="nf">get_astropy_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns an astropy model based on the sherpa model&quot;&quot;&quot;</span>
+        <span class="n">return_models</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">apymod</span><span class="p">,</span> <span class="n">shmod</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">return_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">apymod</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+            <span class="k">for</span> <span class="n">pname</span><span class="p">,</span> <span class="n">pval</span> <span class="ow">in</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">val</span><span class="p">),</span> <span class="n">shmod</span><span class="o">.</span><span class="n">pars</span><span class="p">):</span>
+                <span class="nb">getattr</span><span class="p">(</span><span class="n">return_models</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">pname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">pval</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">return_models</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">return_models</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">return_models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+
+<span class="k">class</span> <span class="nc">Data1DIntBkg</span><span class="p">(</span><span class="n">Data1DInt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">       Data1DInt which tricks sherpa into using the background object without using DataPHA</span>
+
+<span class="sd">        name: string</span>
+<span class="sd">            dataset name</span>
+
+<span class="sd">        xlo: array</span>
+<span class="sd">           the array which represents the lower x value for the x bins</span>
+
+<span class="sd">        xhi: array</span>
+<span class="sd">           the array which represents the upper x value for the x bins</span>
+
+<span class="sd">        y: array</span>
+<span class="sd">           the array which represents y data</span>
+
+<span class="sd">        bkg: array</span>
+<span class="sd">           the array which represents bkgdata</span>
+
+<span class="sd">        staterror: array (optional)</span>
+<span class="sd">            the array which represents the errors on z</span>
+
+<span class="sd">        bkg_scale: float</span>
+<span class="sd">            the scaling factor for background data</span>
+
+<span class="sd">        src_scale: float</span>
+<span class="sd">            the scaling factor for source data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_response_ids</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">_background_ids</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">response_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_ids</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">background_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_background_ids</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">backscal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bkg_scale</span>
+
+    <span class="k">def</span> <span class="nf">get_background</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backgrounds</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">xlo</span><span class="p">,</span> <span class="n">xhi</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">bkg</span><span class="p">,</span> <span class="n">staterror</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">src_scale</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bkg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">bkg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bkg_scale</span> <span class="o">=</span> <span class="n">src_scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exposure</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">subtracted</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_backgrounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">BkgDataset</span><span class="p">(</span><span class="n">bkg</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="p">)]</span>
+        <span class="n">BaseData</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">xlo</span> <span class="o">=</span> <span class="n">xlo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xhi</span> <span class="o">=</span> <span class="n">xhi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">staterror</span> <span class="o">=</span> <span class="n">staterror</span>
+
+
+<span class="k">class</span> <span class="nc">Data1DBkg</span><span class="p">(</span><span class="n">Data1D</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">       Data1D which tricks sherpa into using the background object without using DataPHA</span>
+
+<span class="sd">        name: string</span>
+<span class="sd">            dataset name</span>
+
+<span class="sd">        x: array</span>
+<span class="sd">           the array which represents the x values</span>
+
+<span class="sd">        y: array</span>
+<span class="sd">           the array which represents y data</span>
+
+<span class="sd">        bkg: array</span>
+<span class="sd">           the array which represents background data</span>
+
+<span class="sd">        staterror: array (optional)</span>
+<span class="sd">            the array which represents the errors on z</span>
+
+<span class="sd">        bkg_scale: float</span>
+<span class="sd">            the scaling factor for background data</span>
+
+<span class="sd">        src_scale: float</span>
+<span class="sd">            the scaling factor for source data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_response_ids</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">_background_ids</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">response_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_ids</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">background_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_background_ids</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">backscal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bkg_scale</span>
+
+    <span class="k">def</span> <span class="nf">get_background</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backgrounds</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">bkg</span><span class="p">,</span> <span class="n">staterror</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">src_scale</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bkg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">bkg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bkg_scale</span> <span class="o">=</span> <span class="n">src_scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exposure</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subtracted</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_backgrounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">BkgDataset</span><span class="p">(</span><span class="n">bkg</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="p">)]</span>
+        <span class="n">BaseData</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">staterror</span> <span class="o">=</span> <span class="n">staterror</span>
+
+
+<span class="k">class</span> <span class="nc">Data2DIntBkg</span><span class="p">(</span><span class="n">Data2DInt</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">       Data2DInt which tricks sherpa into using the background object without using DataPHA</span>
+
+<span class="sd">        name: string</span>
+<span class="sd">            dataset name</span>
+
+<span class="sd">        xlo: array</span>
+<span class="sd">           the array which represents the lower x value for the x bins</span>
+
+<span class="sd">        xhi: array</span>
+<span class="sd">           the array which represents the upper x value for the x bins</span>
+
+<span class="sd">        ylo: array</span>
+<span class="sd">           the array which represents the lower y value for the y bins</span>
+
+<span class="sd">        yhi: array</span>
+<span class="sd">           the array which represents the upper y value for the y bins</span>
+
+
+<span class="sd">        z: array</span>
+<span class="sd">           the array which represents z data</span>
+
+<span class="sd">        bkg: array</span>
+<span class="sd">           the array which represents bkgdata</span>
+
+<span class="sd">        staterror: array (optional)</span>
+<span class="sd">            the array which represents the errors on z</span>
+
+<span class="sd">        bkg_scale: float</span>
+<span class="sd">            the scaling factor for background data</span>
+
+<span class="sd">        src_scale: float</span>
+<span class="sd">            the scaling factor for source data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_response_ids</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">_background_ids</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">response_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_ids</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">background_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_background_ids</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">backscal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bkg_scale</span>
+
+    <span class="k">def</span> <span class="nf">get_background</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backgrounds</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">xlo</span><span class="p">,</span> <span class="n">xhi</span><span class="p">,</span> <span class="n">ylo</span><span class="p">,</span> <span class="n">yhi</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">bkg</span><span class="p">,</span> <span class="n">staterror</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">src_scale</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bkg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">bkg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bkg_scale</span> <span class="o">=</span> <span class="n">src_scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exposure</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">subtracted</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_backgrounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">BkgDataset</span><span class="p">(</span><span class="n">bkg</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="p">)]</span>
+        <span class="n">BaseData</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">xlo</span> <span class="o">=</span> <span class="n">xlo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xhi</span> <span class="o">=</span> <span class="n">xhi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ylo</span> <span class="o">=</span> <span class="n">ylo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">yhi</span> <span class="o">=</span> <span class="n">yhi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">z</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">staterror</span> <span class="o">=</span> <span class="n">staterror</span>
+
+
+<span class="k">class</span> <span class="nc">Data2DBkg</span><span class="p">(</span><span class="n">Data2D</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">       Data2D which tricks sherpa into using the background object without</span>
+<span class="sd">       using DataPHA</span>
+
+<span class="sd">       name: string</span>
+<span class="sd">            dataset name</span>
+
+<span class="sd">        x: array</span>
+<span class="sd">           the array which represents x data</span>
+
+<span class="sd">        y: array</span>
+<span class="sd">           the array which represents y data</span>
+
+<span class="sd">        z: array</span>
+<span class="sd">           the array which represents z data</span>
+
+<span class="sd">        bkg: array</span>
+<span class="sd">           the array which represents bkgdata</span>
+
+<span class="sd">        staterror: array (optional)</span>
+<span class="sd">            the array which represents the errors on z</span>
+
+<span class="sd">        bkg_scale: float</span>
+<span class="sd">            the scaling factor for background data</span>
+
+<span class="sd">        src_scale: float</span>
+<span class="sd">            the scaling factor for source data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_response_ids</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">_background_ids</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">response_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_response_ids</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">background_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_background_ids</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">backscal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bkg_scale</span>
+
+    <span class="k">def</span> <span class="nf">get_background</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_backgrounds</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">bkg</span><span class="p">,</span> <span class="n">staterror</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">src_scale</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bkg</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asanyarray</span><span class="p">(</span><span class="n">bkg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bkg_scale</span> <span class="o">=</span> <span class="n">src_scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exposure</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subtracted</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_backgrounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">BkgDataset</span><span class="p">(</span><span class="n">bkg</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="p">)]</span>
+        <span class="n">BaseData</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">z</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">staterror</span> <span class="o">=</span> <span class="n">staterror</span>
+
+
+<span class="k">class</span> <span class="nc">BkgDataset</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The background object which is used to caclulate fit</span>
+<span class="sd">        stat&#39;s which require it.</span>
+
+<span class="sd">        bkg: array</span>
+<span class="sd">            the background data</span>
+<span class="sd">        bkg_scale: float</span>
+<span class="sd">            the ratio of src/bkg</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bkg</span><span class="p">,</span> <span class="n">bkg_scale</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bkg</span> <span class="o">=</span> <span class="n">bkg</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bkg_scale</span> <span class="o">=</span> <span class="n">bkg_scale</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exposure</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">get_dep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flag</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bkg</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">backscal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bkg_scale</span>
+
+
+<div class="viewcode-block" id="SherpaMCMC"><a class="viewcode-back" href="../../sherpafitter.html#astrosherpa_bridge.SherpaMCMC">[docs]</a><span class="k">class</span> <span class="nc">SherpaMCMC</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        An interface which makes use of sherpa&#39;s MCMC(pyBLoCXS) functionality.</span>
+
+<span class="sd">        fitter: a SherpaFitter instance:</span>
+<span class="sd">                used to caluate the fit statstics, must have been fit as t</span>
+<span class="sd">                he covariance matrix is used.</span>
+<span class="sd">        smapler: string</span>
+<span class="sd">                the name of a valid sherpa sampler</span>
+
+<span class="sd">        walker: string</span>
+<span class="sd">                the name of a valid sherpa walker</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fitter</span><span class="p">,</span> <span class="n">sampler</span><span class="o">=</span><span class="s1">&#39;mh&#39;</span><span class="p">,</span> <span class="n">walker</span><span class="o">=</span><span class="s1">&#39;mh&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mcmc</span> <span class="o">=</span> <span class="n">MCMC</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">fitter</span><span class="o">.</span><span class="n">fit_info</span><span class="p">,</span> <span class="s2">&quot;extra_output&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_fitter</span> <span class="o">=</span> <span class="n">fitter</span><span class="o">.</span><span class="n">_fitter</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cmatrix</span> <span class="o">=</span> <span class="n">fitter</span><span class="o">.</span><span class="n">est_errors</span><span class="p">()</span><span class="o">.</span><span class="n">extra_output</span>
+            <span class="n">pars</span> <span class="o">=</span> <span class="n">fitter</span><span class="o">.</span><span class="n">_fitmodel</span><span class="o">.</span><span class="n">sherpa_model</span><span class="o">.</span><span class="n">pars</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameter_map</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span>
+                                             <span class="n">pars</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">AstropyUserWarning</span><span class="p">(</span><span class="s2">&quot;Must have valid fit! &quot;</span>
+                                     <span class="s2">&quot;Convariance matrix is not present&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">niter</span><span class="o">=</span><span class="mi">200000</span><span class="p">):</span>
+        <span class="n">draws</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mcmc</span><span class="o">.</span><span class="n">get_draws</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fitter</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cmatrix</span><span class="p">,</span>
+                                     <span class="n">niter</span><span class="o">=</span><span class="n">niter</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stat_vals</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accepted</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_vals</span> <span class="o">=</span> <span class="n">draws</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">acception_rate</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_accepted</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">*</span> <span class="mf">100.0</span> <span class="o">/</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">_accepted</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">parameter_set</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameter_vals</span><span class="p">):</span>
+            <span class="n">pname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter_map</span><span class="o">.</span><span class="n">keys</span><span class="p">()[</span><span class="n">n</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pname</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_vals</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="k">return</span> <span class="n">draws</span>
+
+<div class="viewcode-block" id="SherpaMCMC.set_sampler_options"><a class="viewcode-back" href="../../sherpafitter.html#astrosherpa_bridge.SherpaMCMC.set_sampler_options">[docs]</a>    <span class="k">def</span> <span class="nf">set_sampler_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opt</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set an option for the current MCMC sampler.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        opt : str</span>
+<span class="sd">           The option to change. Use `get_sampler` to view the</span>
+<span class="sd">           available options for the current sampler.</span>
+<span class="sd">        value</span>
+<span class="sd">           The value for the option.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        The options depend on the sampler. The options include:</span>
+
+<span class="sd">        defaultprior</span>
+<span class="sd">           Set to ``False`` when the default prior (flat, between the</span>
+<span class="sd">           parameter&#39;s soft limits) should not be used. Use</span>
+<span class="sd">           `set_prior` to set the form of the prior for each</span>
+<span class="sd">           parameter.</span>
+
+<span class="sd">        inv</span>
+<span class="sd">           A bool, or array of bools, to indicate which parameter is</span>
+<span class="sd">           on the inverse scale.</span>
+
+<span class="sd">        log</span>
+<span class="sd">           A bool, or array of bools, to indicate which parameter is</span>
+<span class="sd">           on the logarithm (natural log) scale.</span>
+
+<span class="sd">        original</span>
+<span class="sd">           A bool, or array of bools, to indicate which parameter is</span>
+<span class="sd">           on the original scale.</span>
+
+<span class="sd">        p_M</span>
+<span class="sd">           The proportion of jumps generatd by the Metropolis</span>
+<span class="sd">           jumping rule.</span>
+
+<span class="sd">        priorshape</span>
+<span class="sd">           An array of bools indicating which parameters have a</span>
+<span class="sd">           user-defined prior functions set with `set_prior`.</span>
+
+<span class="sd">        scale</span>
+<span class="sd">           Multiply the output of `covar` by this factor and</span>
+<span class="sd">           use the result as the scale of the t-distribution.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; mcmc = SherpaMCMC()</span>
+<span class="sd">        &gt;&gt;&gt; mcmc.set_sampler_opt(&#39;scale&#39;, 3)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_mcmc</span><span class="o">.</span><span class="n">set_sampler_opt</span><span class="p">(</span><span class="n">opt</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">get_sampler</span><span class="p">(</span><span class="bp">self</span><span class="p">,):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mcmc</span><span class="o">.</span><span class="n">get_sampler</span><span class="p">()</span>
+
+<div class="viewcode-block" id="SherpaMCMC.set_prior"><a class="viewcode-back" href="../../sherpafitter.html#astrosherpa_bridge.SherpaMCMC.set_prior">[docs]</a>    <span class="k">def</span> <span class="nf">set_prior</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">prior</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the prior function to use with a parameter.</span>
+
+<span class="sd">        The default prior used by ``get_draws`` for each parameter</span>
+<span class="sd">        is flat, varying between the hard minimum and maximum</span>
+<span class="sd">        values of the parameter (as given by the ``hard_min`` and</span>
+<span class="sd">        ``hard_max`` attributes of the parameter object). The ``set_prior``</span>
+<span class="sd">        function is used to change the form of the prior for a</span>
+<span class="sd">        parameter.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        par : sherpa.models.parameter.Parameter instance</span>
+<span class="sd">           A parameter of a model instance.</span>
+<span class="sd">        prior : function or sherpa.models.model.Model instance</span>
+<span class="sd">           The function to use for a prior. It must accept a</span>
+<span class="sd">           single argument and return a value of the same size</span>
+<span class="sd">           as the input.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+
+<span class="sd">        Create a function (``lognorm``) and use it as the prior the</span>
+<span class="sd">        ``nH`` parameter:</span>
+<span class="sd">            &gt;&gt;&gt; def lognorm(x):</span>
+<span class="sd">               # center on 10^20 cm^2 with a sigma of 0.5</span>
+<span class="sd">               sigma = 0.5</span>
+<span class="sd">               x0 = 20</span>
+<span class="sd">               # nH is in units of 10^-22 so convert</span>
+<span class="sd">               dx = np.log10(x) + 22 - x0</span>
+<span class="sd">               norm = sigma / np.sqrt(2 * np.pi)</span>
+<span class="sd">               return norm * np.exp(-0.5*dx*dx/(sigma*sigma))</span>
+
+<span class="sd">            &gt;&gt;&gt; set_prior(&#39;nH&#39;, lognorm)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter_map</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_mcmc</span><span class="o">.</span><span class="n">set_prior</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameter_map</span><span class="p">[</span><span class="n">parameter</span><span class="p">],</span> <span class="n">prior</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">AstropyUserWarning</span><span class="p">(</span><span class="s2">&quot;Parmater {name} not found in parameter&quot;</span>
+                                     <span class="s2">&quot;map&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">parameter</span><span class="p">))</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+      Last updated on 14 Jul 2016.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

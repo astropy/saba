@@ -1,0 +1,438 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>SherpaFitter &mdash; astrosherpa_bridge 0.1 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="_static/astropy_logo.ico"/>
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="astrosherpa_bridge 0.1 documentation" href="index.html"/>
+        <link rel="next" title="How to use SherpaFitter" href="sherpafitter_examples.html"/>
+        <link rel="prev" title="Welcome to AstroSherpaBridge’s documentation!" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> astrosherpa_bridge
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.1.dev9
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <p class="caption"><span class="caption-text">Table of Contents</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">SherpaFitter</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sherpafitter_examples.html">How to use SherpaFitter</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">astrosherpa_bridge</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>SherpaFitter</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/sherpafitter.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-astrosherpa_bridge">
+<span id="sherpafitter"></span><h1>SherpaFitter<a class="headerlink" href="#module-astrosherpa_bridge" title="Permalink to this headline">¶</a></h1>
+<p>This is an Astropy affiliated package.</p>
+<span class="target" id="sfit"></span><dl class="class">
+<dt id="astrosherpa_bridge.SherpaFitter">
+<em class="property">class </em><code class="descclassname">astrosherpa_bridge.</code><code class="descname">SherpaFitter</code><span class="sig-paren">(</span><em>optimizer='levmar'</em>, <em>statistic='leastsq'</em>, <em>estmethod='covariance'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/astrosherpa_bridge/main.html#SherpaFitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#astrosherpa_bridge.SherpaFitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sherpa Fitter for astropy models. Yay :)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>optimizer</strong> : string</p>
+<blockquote class="last">
+<div><blockquote>
+<div><p>the name of a sherpa optimizer.
+posible options include:</p>
+<blockquote>
+<div><p>levmar, moncar, simplex, neldermead</p>
+</div></blockquote>
+</div></blockquote>
+<dl class="docutils">
+<dt>statistic</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">string</span><dd><p class="first">the name of a sherpa statistic.
+posible options include:</p>
+<blockquote class="last">
+<div><p>leastsq, chi2, chi2gehrels, chi2datavar, chi2modvar, wstat, chi2constvar, cstat, cash, chi2xspecvar</p>
+</div></blockquote>
+</dd>
+<dt>estmethod</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">string</span><dd><p class="first">the name of a sherpa estmethod.
+posible options include:</p>
+<blockquote class="last">
+<div><p>confidence, covariance, projection</p>
+</div></blockquote>
+</dd>
+</dl>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="astrosherpa_bridge.SherpaFitter.__call__">
+<code class="descname">__call__</code><span class="sig-paren">(</span><em>models</em>, <em>x</em>, <em>y</em>, <em>z=None</em>, <em>xerr=None</em>, <em>yerr=None</em>, <em>zerr=None</em>, <em>bkg=None</em>, <em>bkg_scale=1</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/astrosherpa_bridge/main.html#SherpaFitter.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#astrosherpa_bridge.SherpaFitter.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit the astropy model with a the sherpa fit routines.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>models</strong> : <a class="reference external" href="http://docs.astropy.org/en/stable/api/astropy.modeling.FittableModel.html#astropy.modeling.FittableModel" title="(in Astropy v1.2.1)"><code class="xref py py-obj docutils literal"><span class="pre">FittableModel</span></code></a> or list of <a class="reference external" href="http://docs.astropy.org/en/stable/api/astropy.modeling.FittableModel.html#astropy.modeling.FittableModel" title="(in Astropy v1.2.1)"><code class="xref py py-obj docutils literal"><span class="pre">FittableModel</span></code></a></p>
+<blockquote>
+<div><p>model to fit to x, y, z</p>
+</div></blockquote>
+<p><strong>x</strong> : array or list of arrays</p>
+<blockquote>
+<div><p>input coordinates</p>
+</div></blockquote>
+<p><strong>y</strong> : array or list of arrays</p>
+<blockquote>
+<div><p>input coordinates</p>
+</div></blockquote>
+<p><strong>z</strong> : array or list of arrays (optional)</p>
+<blockquote>
+<div><p>input coordinates</p>
+</div></blockquote>
+<p><strong>xerr</strong> : array or list of arrays (optional)</p>
+<blockquote>
+<div><p>an array of errors in x</p>
+</div></blockquote>
+<p><strong>yerr</strong> : array or list of arrays (optional)</p>
+<blockquote>
+<div><p>an array of errors in y</p>
+</div></blockquote>
+<p><strong>zerr</strong> : array or list of arrays (optional)</p>
+<blockquote>
+<div><p>an array of errors in z</p>
+</div></blockquote>
+<p><strong>**kwargs:</strong></p>
+<blockquote>
+<div><p>keyword arguments will be passed on to sherpa fit routine</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>model_copy</strong> : <a class="reference external" href="http://docs.astropy.org/en/stable/api/astropy.modeling.FittableModel.html#astropy.modeling.FittableModel" title="(in Astropy v1.2.1)"><code class="xref py py-obj docutils literal"><span class="pre">FittableModel</span></code></a> or a list of models.</p>
+<blockquote class="last">
+<div><p>a copy of the input model with parameters set by the fitter</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="astrosherpa_bridge.SherpaFitter.est_errors">
+<code class="descname">est_errors</code><span class="sig-paren">(</span><em>sigma=None</em>, <em>maxiters=None</em>, <em>numcores=1</em>, <em>methoddict=None</em>, <em>parlist=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/astrosherpa_bridge/main.html#SherpaFitter.est_errors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#astrosherpa_bridge.SherpaFitter.est_errors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use sherpa error estimators based on the last fit.</p>
+<dl class="docutils">
+<dt>Parameters:</dt>
+<dd><dl class="first last docutils">
+<dt>sigma: float</dt>
+<dd>this will be set as the confidance interval for which the errors are found too.</dd>
+<dt>maxiters: int</dt>
+<dd>the maximum number of iterations the error estimator will run before giving up.</dd>
+<dt>methoddict: dict</dt>
+<dd>!not quite sure couldn&#8217;t figure this one out yet!</dd>
+<dt>parlist: list</dt>
+<dd>a list of parameters to find the confidance interval of if none are provided all free
+parameters will be estimated.</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="smcmc"></span><dl class="class">
+<dt id="astrosherpa_bridge.SherpaMCMC">
+<em class="property">class </em><code class="descclassname">astrosherpa_bridge.</code><code class="descname">SherpaMCMC</code><span class="sig-paren">(</span><em>fitter</em>, <em>sampler='mh'</em>, <em>walker='mh'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/astrosherpa_bridge/main.html#SherpaMCMC"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#astrosherpa_bridge.SherpaMCMC" title="Permalink to this definition">¶</a></dt>
+<dd><p>An interface which makes use of sherpa&#8217;s MCMC(pyBLoCXS) functionality.</p>
+<dl class="docutils">
+<dt>fitter: a SherpaFitter instance:</dt>
+<dd>used to caluate the fit statstics, must have been fit as t
+he covariance matrix is used.</dd>
+<dt>smapler: string</dt>
+<dd>the name of a valid sherpa sampler</dd>
+<dt>walker: string</dt>
+<dd>the name of a valid sherpa walker</dd>
+</dl>
+<dl class="method">
+<dt id="astrosherpa_bridge.SherpaMCMC.set_prior">
+<code class="descname">set_prior</code><span class="sig-paren">(</span><em>parameter</em>, <em>prior</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/astrosherpa_bridge/main.html#SherpaMCMC.set_prior"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#astrosherpa_bridge.SherpaMCMC.set_prior" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the prior function to use with a parameter.</p>
+<p>The default prior used by <code class="docutils literal"><span class="pre">get_draws</span></code> for each parameter
+is flat, varying between the hard minimum and maximum
+values of the parameter (as given by the <code class="docutils literal"><span class="pre">hard_min</span></code> and
+<code class="docutils literal"><span class="pre">hard_max</span></code> attributes of the parameter object). The <code class="docutils literal"><span class="pre">set_prior</span></code>
+function is used to change the form of the prior for a
+parameter.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>par</strong> : sherpa.models.parameter.Parameter instance</p>
+<blockquote>
+<div><p>A parameter of a model instance.</p>
+</div></blockquote>
+<p><strong>prior</strong> : function or sherpa.models.model.Model instance</p>
+<blockquote class="last">
+<div><p>The function to use for a prior. It must accept a
+single argument and return a value of the same size
+as the input.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<p>Create a function (<code class="docutils literal"><span class="pre">lognorm</span></code>) and use it as the prior the
+<code class="docutils literal"><span class="pre">nH</span></code> parameter:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span> <span class="nf">lognorm</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+<span class="go">   # center on 10^20 cm^2 with a sigma of 0.5</span>
+<span class="go">   sigma = 0.5</span>
+<span class="go">   x0 = 20</span>
+<span class="go">   # nH is in units of 10^-22 so convert</span>
+<span class="go">   dx = np.log10(x) + 22 - x0</span>
+<span class="go">   norm = sigma / np.sqrt(2 * np.pi)</span>
+<span class="go">   return norm * np.exp(-0.5*dx*dx/(sigma*sigma))</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">set_prior</span><span class="p">(</span><span class="s1">&#39;nH&#39;</span><span class="p">,</span> <span class="n">lognorm</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="astrosherpa_bridge.SherpaMCMC.set_sampler_options">
+<code class="descname">set_sampler_options</code><span class="sig-paren">(</span><em>opt</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/astrosherpa_bridge/main.html#SherpaMCMC.set_sampler_options"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#astrosherpa_bridge.SherpaMCMC.set_sampler_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set an option for the current MCMC sampler.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>opt</strong> : str</p>
+<blockquote>
+<div><p>The option to change. Use <code class="xref py py-obj docutils literal"><span class="pre">get_sampler</span></code> to view the
+available options for the current sampler.</p>
+</div></blockquote>
+<p><strong>value</strong></p>
+<blockquote class="last">
+<div><p>The value for the option.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<p>The options depend on the sampler. The options include:</p>
+<dl class="docutils">
+<dt>defaultprior</dt>
+<dd>Set to <code class="docutils literal"><span class="pre">False</span></code> when the default prior (flat, between the
+parameter&#8217;s soft limits) should not be used. Use
+<a class="reference internal" href="#astrosherpa_bridge.SherpaMCMC.set_prior" title="astrosherpa_bridge.SherpaMCMC.set_prior"><code class="xref py py-obj docutils literal"><span class="pre">set_prior</span></code></a> to set the form of the prior for each
+parameter.</dd>
+<dt>inv</dt>
+<dd>A bool, or array of bools, to indicate which parameter is
+on the inverse scale.</dd>
+<dt>log</dt>
+<dd>A bool, or array of bools, to indicate which parameter is
+on the logarithm (natural log) scale.</dd>
+<dt>original</dt>
+<dd>A bool, or array of bools, to indicate which parameter is
+on the original scale.</dd>
+<dt>p_M</dt>
+<dd>The proportion of jumps generatd by the Metropolis
+jumping rule.</dd>
+<dt>priorshape</dt>
+<dd>An array of bools indicating which parameters have a
+user-defined prior functions set with <a class="reference internal" href="#astrosherpa_bridge.SherpaMCMC.set_prior" title="astrosherpa_bridge.SherpaMCMC.set_prior"><code class="xref py py-obj docutils literal"><span class="pre">set_prior</span></code></a>.</dd>
+<dt>scale</dt>
+<dd>Multiply the output of <code class="xref py py-obj docutils literal"><span class="pre">covar</span></code> by this factor and
+use the result as the scale of the t-distribution.</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mcmc</span> <span class="o">=</span> <span class="n">SherpaMCMC</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mcmc</span><span class="o">.</span><span class="n">set_sampler_opt</span><span class="p">(</span><span class="s1">&#39;scale&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="sherpafitter_examples.html" class="btn btn-neutral float-right" title="How to use SherpaFitter" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="Welcome to AstroSherpaBridge’s documentation!" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright .
+      Last updated on 14 Jul 2016.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
