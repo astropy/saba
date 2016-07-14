@@ -1,4 +1,4 @@
-from astropy.modeling.fitting import SherpaFitter, Stat, OptMethod, EstMethod
+from astropy.modeling.fitting import SherpaFitter
 sfitter = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='convariance')
 
 
