@@ -30,7 +30,6 @@ class SherpaWrapper(object):
         except KeyError:
             UserWarning("Value not found")  # todo handle
 
-
 class Stat(SherpaWrapper):
 
     """
