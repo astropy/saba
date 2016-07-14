@@ -4,7 +4,7 @@
 This is an Astropy affiliated package.
 """
 
-from main import SherpaFitter, SherpaMCMC
+from main import SherpaFitter, SherpaMCMC, Stat, OptMethod, EstMethod
 # Affiliated packages may add whatever they like to this file, but
 # should keep this content at the top.
 # ----------------------------------------------------------------------------
