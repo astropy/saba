@@ -262,7 +262,7 @@ class Dataset(SherpaWrapper):
             self.data = DataSimulFit("wrapped_data", data)
             self.ndata = nn + 1
         else:
-            self.data = self._make_dataset(n_dim, x=x, y=y, z=z, xbinsize=binsize, ybinsize=ybinsize, err=err, bkg=bkg, bkg_scale=bkg_scale)
+            self.data = self._make_dataset(n_dim, x=x, y=y, z=z, xbinsize=xbinsize, ybinsize=ybinsize, err=err, bkg=bkg, bkg_scale=bkg_scale)
             self.ndata = 1
 
     @staticmethod
@@ -301,7 +301,7 @@ class Dataset(SherpaWrapper):
             assert x.shape == y.shape == z.shape, "shapes x,y and z don't match in dataset %i" % n
 
         if xbinsize is not None:
-            xbinsize = np.array(binsize)
+            xbinsize = np.array(xbinsize)
             assert x.shape == xbinsize.shape, "x's and xbinsize's shapes do not match in dataset %i" % n
 
         if z is not None and err is not None:
@@ -310,12 +310,12 @@ class Dataset(SherpaWrapper):
 
             if ybinsize is not None:
                 ybinsize = np.array(ybinsize)
-            assert y.shape == ybinsize.shape, "y's and ybinsize's shapes do not match in dataset %i" % n
+                assert y.shape == ybinsize.shape, "y's and ybinsize's shapes do not match in dataset %i" % n
 
         else:
             if err is not None:
                 err = np.array(err)
-            assert y.shape == err.shape, "y's and err's shapes do not match in dataset %i" % n
+                assert y.shape == err.shape, "y's and err's shapes do not match in dataset %i" % n
 
         if xbinsize is not None:
             
@@ -842,8 +842,8 @@ class SherpaMCMC(object):
 
         Examples
         --------
-        >>> mcmc = SherpaMCMC()
-        >>> mcmc.set_sampler_opt('scale', 3)
+        >> mcmc = SherpaMCMC(sfit) # doctest: +SKIP
+        >> mcmc.set_sampler_opt('scale', 3)
         """
         self._mcmc.set_sampler_opt(opt, value)
 
@@ -875,7 +875,7 @@ class SherpaMCMC(object):
 
         Create a function (``lognorm``) and use it as the prior the
         ``nH`` parameter:
-            >>> def lognorm(x):
+            >> def lognorm(x):
                # center on 10^20 cm^2 with a sigma of 0.5
                sigma = 0.5
                x0 = 20
@@ -884,7 +884,7 @@ class SherpaMCMC(object):
                norm = sigma / np.sqrt(2 * np.pi)
                return norm * np.exp(-0.5*dx*dx/(sigma*sigma))
 
-            >>> set_prior('nH', lognorm)
+            >> mcmc.set_prior('nH', lognorm)
         """
         if parameter in self.parameter_map:
             self._mcmc.set_prior(self.parameter_map[parameter], prior)
