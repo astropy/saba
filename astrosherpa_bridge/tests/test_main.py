@@ -93,21 +93,21 @@ class TestSherpaFitter(object):
         assert_allclose(data_noerr.get_x(), self.x1)
         assert_allclose(data_noerr.get_y(), self.y1)
 
-        data_binsize = Dataset(1, x=self.x1, y=self.y1, binsize=self.dx1).data
+        data_binsize = Dataset(1, x=self.x1, y=self.y1, xbinsize=self.dx1).data
         assert_allclose(data_binsize.get_x(), self.x1)
         assert_allclose(data_binsize.get_y(), self.y1)
-        assert_allclose(data_binsize.get_binsize(), 2 * self.dx1)
+        assert_allclose(data_binsize.get_xerr(), self.dx1)
 
         data_yerr = Dataset(1, x=self.x1, y=self.y1, err=self.dy1).data
         assert_allclose(data_yerr.get_x(), self.x1)
         assert_allclose(data_yerr.get_y(), self.y1)
         assert_allclose(data_yerr.get_yerr(), self.dy1)
 
-        data_botherr = Dataset(1, x=self.x1, y=self.y1, err=self.dy1, binsize=self.dx1).data
+        data_botherr = Dataset(1, x=self.x1, y=self.y1, err=self.dy1, xbinsize=self.dx1).data
         assert_allclose(data_botherr.get_x(), self.x1)
         assert_allclose(data_botherr.get_y(), self.y1)
         assert_allclose(data_botherr.get_yerr(), self.dy1)
-        assert_allclose(data_botherr.get_binsize(), 2 * self.dx1)
+        assert_allclose(data_botherr.get_xerr(), self.dx1)
 
     def test_make_datasets_2d(self):
         """
@@ -118,12 +118,12 @@ class TestSherpaFitter(object):
         assert_allclose(data_noerr.get_x1(), self.xx2)
         assert_allclose(data_noerr.get_y(), self.yy)
 
-        data_xyerr = Dataset(2, x=self.xx1, y=self.xx2, binsize=self.dxx1, ybinsize=self.dxx2, z=self.yy).data
-        assert_allclose(data_xyerr.get_indep(), np.vstack([self.xx1 - self.dxx1, self.xx2 - self.dxx2, self.xx1 + self.dxx1, self.xx2 + self.dxx2]))
+        data_xyerr = Dataset(2, x=self.xx1, y=self.xx2, xbinsize=self.dxx1, ybinsize=self.dxx2, z=self.yy).data
+        assert_allclose(data_xyerr.get_indep(), np.vstack([self.xx1 - self.dxx1/2, self.xx2 - self.dxx2/2, self.xx1 + self.dxx1/2, self.xx2 + self.dxx2/2]))
         assert_allclose(data_xyerr.get_y(), self.yy)
 
-        data_xyzerr = Dataset(2, x=self.xx1, y=self.xx2, binsize=self.dxx1, ybinsize=self.dxx2, z=self.yy, err=self.dyy).data
-        assert_allclose(data_xyerr.get_indep(), np.vstack([self.xx1 - self.dxx1, self.xx2 - self.dxx2, self.xx1 + self.dxx1, self.xx2 + self.dxx2]))
+        data_xyzerr = Dataset(2, x=self.xx1, y=self.xx2, xbinsize=self.dxx1, ybinsize=self.dxx2, z=self.yy, err=self.dyy).data
+        assert_allclose(data_xyerr.get_indep(), np.vstack([self.xx1 - self.dxx1/2, self.xx2 - self.dxx2/2, self.xx1 + self.dxx1/2, self.xx2 + self.dxx2/2]))
         assert_allclose(data_xyzerr.get_y(), self.yy)
         assert_allclose(data_xyzerr.get_yerr(), self.dyy)
 
@@ -138,12 +138,12 @@ class TestSherpaFitter(object):
         map(lambda x, y: assert_allclose(x, y), map(lambda x: x.get_x(), data_noerr.datasets), [self.x1, self.x2])
         map(lambda x, y: assert_allclose(x, y), map(lambda x: x.get_y(), data_noerr.datasets), [self.y1, self.y2])
 
-        data_binsize = Dataset(1, x=[self.x1, self.x2], y=[self.y1, self.y2], binsize=[self.dx1, self.dx2]).data
+        data_binsize = Dataset(1, x=[self.x1, self.x2], y=[self.y1, self.y2], xbinsize=[self.dx1, self.dx2]).data
         assert len(data_binsize.datasets) == 2
         assert isinstance(data_binsize, DataSimulFit)
         map(lambda x, y: assert_allclose(x, y), map(lambda x: x.get_x(), data_binsize.datasets), [self.x1, self.x2])
         map(lambda x, y: assert_allclose(x, y), map(lambda x: x.get_y(), data_binsize.datasets), [self.y1, self.y2])
-        map(lambda x, y: assert_allclose(x, y), map(lambda x: x.get_binsize(), data_binsize.datasets), [2 * self.dx1, 2 * self.dx2])
+        map(lambda x, y: assert_allclose(x, y), map(lambda x: x.get_xerr(), data_binsize.datasets), [self.dx1, self.dx2])
 
         data_yerr = Dataset(1, x=[self.x1, self.x2], y=[self.y1, self.y2], err=[self.dy1, self.dy2]).data
         assert len(data_yerr.datasets) == 2
@@ -152,13 +152,13 @@ class TestSherpaFitter(object):
         map(lambda x, y: assert_allclose(x, y), map(lambda x: x.get_y(), data_yerr.datasets), [self.y1, self.y2])
         map(lambda x, y: assert_allclose(x, y), map(lambda x: x.get_yerr(), data_yerr.datasets), [self.dy1, self.dy2])
 
-        data_xyerr = Dataset(1, x=[self.x1, self.x2], y=[self.y1, self.y2], err=[self.dy1, self.dy2], binsize=[self.dx1, self.dx2]).data
+        data_xyerr = Dataset(1, x=[self.x1, self.x2], y=[self.y1, self.y2], err=[self.dy1, self.dy2], xbinsize=[self.dx1, self.dx2]).data
         assert len(data_xyerr.datasets) == 2
         assert isinstance(data_xyerr, DataSimulFit)
         map(lambda x, y: assert_allclose(x, y), map(lambda x: x.get_x(), data_xyerr.datasets), [self.x1, self.x2])
         map(lambda x, y: assert_allclose(x, y), map(lambda x: x.get_y(), data_xyerr.datasets), [self.y1, self.y2])
         map(lambda x, y: assert_allclose(x, y), map(lambda x: x.get_yerr(), data_xyerr.datasets), [self.dy1, self.dy2])
-        map(lambda x, y: assert_allclose(x, y), map(lambda x: x.get_binsize(), data_xyerr.datasets), [2 * self.dx1, 2 * self.dx2])
+        map(lambda x, y: assert_allclose(x, y), map(lambda x: x.get_xerr(), data_xyerr.datasets), [ self.dx1, self.dx2])
 
     def test_convert_model_1d(self):
         """
@@ -218,7 +218,7 @@ class TestSherpaFitter(object):
     def test_two_dataset_single_model(self):
         """Tests two datasets with a single model."""
         fmod = self.fitter(self.model1d.copy(), [self.x1, self.x1], [
-                           self.y1, self.y1], yerr=[self.dy1, self.dy1])
+                           self.y1, self.y1], err=[self.dy1, self.dy1])
         for ff in fmod:
             for nn, pp in enumerate(ff.param_names):
                 assert_allclose(getattr(ff, pp), getattr(
@@ -255,7 +255,7 @@ class TestSherpaFitter(object):
         amodel.mean.tied = tiefunc
         with warnings.catch_warnings():
             # Sherpa uses something which throws this warning
-            warnings.filterwarnings("ignore", category  =DeprecationWarning)
+            warnings.filterwarnings("ignore", category=DeprecationWarning)
             fmod = self.fitter(amodel, self.x1, self.y1, err=self.dy1)
 
         assert fmod.amplitude.value == self.model1d.amplitude.value
