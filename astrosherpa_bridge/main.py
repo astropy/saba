@@ -27,7 +27,7 @@ class SherpaWrapper(object):
     def set(self, value):
         try:
             self.value = self._sherpa_values[value.lower()]
-        except KeyError:
+        except Keybinsizeor:
             UserWarning("Value not found")  # todo handle
 
 class Stat(SherpaWrapper):
@@ -121,7 +121,7 @@ class SherpaFitter(Fitter):
         self._fitmodel = None  # a handle for sherpa fit model
         self._data = None  # a handle for sherpa dataset
 
-    def __call__(self, models, x, y, z=None, xerr=None, yerr=None, zerr=None, bkg=None, bkg_scale=1, **kwargs):
+    def __call__(self, models, x, y, z=None, xbinsize=None, ybinsize=None, err=None, bkg=None, bkg_scale=1, **kwargs):
         """
         Fit the astropy model with a the sherpa fit routines.
 
@@ -135,12 +135,12 @@ class SherpaFitter(Fitter):
             input coordinates
         z : array or list of arrays (optional)
             input coordinates
-        xerr : array or list of arrays (optional)
-            an array of errors in x
-        yerr : array or list of arrays (optional)
-            an array of errors in y
-        zerr : array or list of arrays (optional)
-            an array of errors in z
+        xbinsize : array or list of arrays (optional)
+            an array of xbinsizes in x  - this will be x -/+ (binsize  / 2.0)
+        ybinsize : array or list of arrays (optional)
+            an array of xbinsizes in y  - this will be y -/+ (ybinsize / 2.0)
+        err : array or list of arrays (optional)
+            an array of errors in dependant variable
         **kwargs:
             keyword arguments will be passed on to sherpa fit routine
 
@@ -152,9 +152,12 @@ class SherpaFitter(Fitter):
 
         tie_list = []
         try:
-           self._data = Dataset(models[0].n_inputs, x, y, z, xerr, yerr, zerr, bkg, bkg_scale)
+           n_inputs = models[0].n_inputs
         except TypeError:
-            self._data = Dataset(models.n_inputs, x, y, z, xerr, yerr, zerr, bkg, bkg_scale)
+            n_inputs = models.n_inputs
+
+
+        self._data = Dataset(n_inputs, x, y, z, xbinsize, ybinsize, err, bkg, bkg_scale)
 
         if self._data.ndata > 1:
             if len(models) == 1:
@@ -217,18 +220,18 @@ class Dataset(SherpaWrapper):
             input coordinates
         z : array (or list of arrays) (optional)
             input coordinates
-        xerr : array (or list of arrays) (optional)
+        xbinsize : array (or list of arrays) (optional)
             an array of errors in x
-        yerr : array (or list of arrays) (optional)
+        ybinsize : array (or list of arrays) (optional)
             an array of errors in y
-        zerr : array (or list of arrays) (optional)
+        err : array (or list of arrays) (optional)
             an array of errors in z
 
     returns:
         _data: a sherpa dataset
     """
 
-    def __init__(self, n_dim, x, y, z=None, xerr=None, yerr=None, zerr=None, bkg=None, bkg_scale=1):
+    def __init__(self, n_dim, x, y, z=None, xbinsize=None, ybinsize=None, err=None, bkg=None, bkg_scale=1):
 
         x = np.array(x)
         y = np.array(y)
@@ -237,14 +240,14 @@ class Dataset(SherpaWrapper):
             if z is None:
                 z = len(x) * [None]
 
-            if xerr is None:
-                xerr = len(x) * [None]
+            if xbinsize is None:
+                xbinsize = len(x) * [None]
 
-            if yerr is None:
-                yerr = len(y) * [None]
+            if ybinsize is None:
+                ybinsize = len(y) * [None]
 
-            if zerr is None:
-                zerr = len(z) * [None]
+            if err is None:
+                err = len(z) * [None]
 
             if bkg is None:
                 bkg = len(x) * [None]
@@ -254,16 +257,16 @@ class Dataset(SherpaWrapper):
                 bkg_scale = len(x) * [bkg_scale]
 
 
-            for nn, (xx, yy, zz, xxe, yye, zze, bkg, bkg_scale) in enumerate(zip(x, y, z, xerr, yerr, zerr, bkg, bkg_scale)):
-                data.append(self._make_dataset(n_dim, x=xx, y=yy, z=zz, xerr=xxe, yerr=yye, zerr=zze, bkg=bkg, bkg_scale=bkg_scale, n=nn))
+            for nn, (xx, yy, zz, xxe, yye, zze, bkg, bkg_scale) in enumerate(zip(x, y, z, xbinsize, ybinsize, err, bkg, bkg_scale)):
+                data.append(self._make_dataset(n_dim, x=xx, y=yy, z=zz, xbinsize=xxe, ybinsize=yye, err=zze, bkg=bkg, bkg_scale=bkg_scale, n=nn))
             self.data = DataSimulFit("wrapped_data", data)
             self.ndata = nn + 1
         else:
-            self.data = self._make_dataset(n_dim, x=x, y=y, z=z, xerr=xerr, yerr=yerr, zerr=zerr, bkg=bkg, bkg_scale=bkg_scale)
+            self.data = self._make_dataset(n_dim, x=x, y=y, z=z, xbinsize=binsize, ybinsize=ybinsize, err=err, bkg=bkg, bkg_scale=bkg_scale)
             self.ndata = 1
 
     @staticmethod
-    def _make_dataset(n_dim, x, y, z=None, xerr=None, yerr=None, zerr=None, bkg=None, bkg_scale=1, n=0):
+    def _make_dataset(n_dim, x, y, z=None, xbinsize=None, ybinsize=None, err=None, bkg=None, bkg_scale=1, n=0):
         """
         Parameters
             ----------
@@ -275,11 +278,11 @@ class Dataset(SherpaWrapper):
                 input coordinates
             z : array (optional)
                 input coordinatesbkg
-            xerr : array (optional)
+            xbinsize : array (optional)
                 an array of errors in x
-            yerr : array (optional)
+            ybinsize : array (optional)
                 an array of errors in y
-            zerr : array (optional)
+            err : array (optional)
                 an array of errors in z
             n  : int
                 used in error reporting
@@ -297,66 +300,77 @@ class Dataset(SherpaWrapper):
             z = np.asarray(z)
             assert x.shape == y.shape == z.shape, "shapes x,y and z don't match in dataset %i" % n
 
-        if yerr is not None:
-            yerr = np.array(yerr)
-            assert y.shape == yerr.shape, "y's and yerr's shapes do not match in dataset %i" % n
+        if xbinsize is not None:
+            xbinsize = np.array(binsize)
+            assert x.shape == xbinsize.shape, "x's and xbinsize's shapes do not match in dataset %i" % n
 
-        if xerr is not None:
-            xerr = np.array(xerr)
-            assert x.shape == xerr.shape, "x's and xerr's shapes do not match in dataset %i" % n
+        if z is not None and err is not None:
+            err = np.array(err)
+            assert z.shape == err.shape, "z's and err's shapes do not match in dataset %i" % n
 
-        if z is not None and zerr is not None:
-            zerr = np.array(zerr)
-            assert z.shape == zerr.shape, "z's and zerr's shapes do not match in dataset %i" % n
+            if ybinsize is not None:
+                ybinsize = np.array(ybinsize)
+            assert y.shape == ybinsize.shape, "y's and ybinsize's shapes do not match in dataset %i" % n
+
+        else:
+            if err is not None:
+                err = np.array(err)
+            assert y.shape == err.shape, "y's and err's shapes do not match in dataset %i" % n
+
+        if xbinsize is not None:
+            
+            bs = xbinsize / 2.0
 
         if z is None:
-            if xerr is None:
-                if yerr is None:
+            if xbinsize is None:
+                if err is None:
                     if bkg is None:
                         data = Data1D("wrapped_data", x=x, y=y)
                     else:
                         data = Data1DBkg("wrapped_data", x=x, y=y, bkg=bkg, bkg_scale=bkg_scale)
                 else:
                     if bkg is None:
-                        data = Data1D("wrapped_data", x=x, y=y, staterror=yerr)
+                        data = Data1D("wrapped_data", x=x, y=y, staterror=err)
                     else:
-                        data = Data1DBkg("wrapped_data", x=x, y=y, staterror=yerr, bkg=bkg, bkg_scale=bkg_scale)
+                        data = Data1DBkg("wrapped_data", x=x, y=y, staterror=err, bkg=bkg, bkg_scale=bkg_scale)
             else:
-                if yerr is None:
+                if err is None:
                     if bkg is None:
-                        data = Data1DInt("wrapped_data", xlo=x - xerr, xhi=x + xerr, y=y)
+                        
+                        data = Data1DInt("wrapped_data", xlo=x - bs, xhi=x + bs, y=y)
                     else:
-                        data = Data1DIntBkg("wrapped_data", xlo=x - xerr, xhi=x + xerr, y=y, bkg=bkg, bkg_scale=bkg_scale)
+                        data = Data1DIntBkg("wrapped_data", xlo=x - bs, xhi=x + bs, y=y, bkg=bkg, bkg_scale=bkg_scale)
                 else:
                     if bkg is None:
-                        data = Data1DInt("wrapped_data", xlo=x - xerr, xhi=x + xerr, y=y, staterror=yerr)
+                        data = Data1DInt("wrapped_data", xlo=x - bs, xhi=x + bs, y=y, staterror=err)
                     else:
-                        data = Data1DIntBkg("wrapped_data", xlo=x - xerr, xhi=x + xerr, y=y, staterror=yerr, bkg=bkg, bkg_scale=bkg_scale)
+                        data = Data1DIntBkg("wrapped_data", xlo=x - bs, xhi=x + bs, y=y, staterror=err, bkg=bkg, bkg_scale=bkg_scale)
         else:
-            if xerr is None and yerr is None:
-                if zerr is None:
+            if xbinsize is None and ybinsize is None:
+                if err is None:
                     if bkg is None:
                         data = Data2D("wrapped_data", x0=x, x1=y, y=z)
                     else:
                         data = Data2DBkg("wrapped_data", x0=x, x1=y, y=z, bkg=bkg, bkg_scale=bkg_scale)
                 else:
                     if bkg is None:
-                        data = Data2D("wrapped_data", x0=x, x1=y, y=z, staterror=zerr)
+                        data = Data2D("wrapped_data", x0=x, x1=y, y=z, staterror=err)
                     else:
-                        data = Data2DBkg("wrapped_data", x0=x, x1=y, y=z, staterror=zerr, bkg=bkg, bkg_scale=bkg_scale)
-            elif xerr is not None and yerr is not None:
-                if zerr is None:
+                        data = Data2DBkg("wrapped_data", x0=x, x1=y, y=z, staterror=err, bkg=bkg, bkg_scale=bkg_scale)
+            elif xbinsize is not None and ybinsize is not None:
+                ys = ybinsize / 2.0
+                if err is None:
                     if bkg is None:
-                        data = Data2DInt("wrapped_data", x0lo=x - xerr, x0hi=x + xerr, x1lo=y - yerr, x1hi=y + yerr, y=z)
+                        data = Data2DInt("wrapped_data", x0lo=x - bs, x0hi=x + bs, x1lo=y - ys, x1hi=y + ys, y=z)
                     else:
-                        data = Data2DIntBkg("wrapped_data", x0lo=x - xerr, x0hi=x + xerr, x1lo=y - yerr, x1hi=y + yerr, y=z, bkg=bkg, bkg_scale=bkg_scale)
+                        data = Data2DIntBkg("wrapped_data", x0lo=x - bs, x0hi=x + bs, x1lo=y - ys, x1hi=y + ys, y=z, bkg=bkg, bkg_scale=bkg_scale)
                 else:
                     if bkg is None:
-                        data = Data2DInt("wrapped_data", x0lo=x - xerr, x0hi=x + xerr, x1lo=y - yerr, x1hi=y + yerr, y=z, staterror=zerr)
+                        data = Data2DInt("wrapped_data", x0lo=x - bs, x0hi=x + bs, x1lo=y - ys, x1hi=y + ys, y=z, staterror=err)
                     else:
-                        data = Data2DIntBkg("wrapped_data", x0lo=x - xerr, x0hi=x + xerr, x1lo=y - yerr, x1hi=y + yerr, y=z, staterror=zerr, bkg=bkg, bkg_scale=bkg_scale)
+                        data = Data2DIntBkg("wrapped_data", x0lo=x - bs, x0hi=x + bs, x1lo=y - ys, x1hi=y + ys, y=z, staterror=err, bkg=bkg, bkg_scale=bkg_scale)
             else:
-                raise ValueError("Set xerr and yerr, or set neither!")
+                raise ValueError("Set xbinsize and ybinsize, or set neither!")
 
         return data
 
