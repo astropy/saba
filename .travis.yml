@@ -99,7 +99,7 @@ install:
     - git checkout sherpa_bridge_v2
     - python setup.py install
     - conda install -c sherpa sherpa
-
+    - cd ../
 script:
    - python setup.py $SETUP_CMD
 
