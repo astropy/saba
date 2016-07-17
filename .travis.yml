@@ -32,7 +32,7 @@ env:
         # For this package-template, we include examples of Cython modules,
         # so Cython is required for testing. If your package does not include
         # Cython code, you can set CONDA_DEPENDENCIES=''
-        - CONDA_DEPENDENCIES='Cython numpy jinja2'
+        - CONDA_DEPENDENCIES='Cython jinja2'
 
         # If there are matplotlib or other GUI tests, uncomment the following
         # line to use the X virtual framebuffer.
@@ -53,12 +53,12 @@ matrix:
 
         # Check for sphinx doc build warnings - we do this first because it
         # may run for a long time
-        - python: 2.7
-          env: SETUP_CMD='build_sphinx -w'
+        #- python: 2.7
+        #  env: SETUP_CMD='build_sphinx -w'
 
         # Try Astropy development version
-        - python: 2.7
-          env: ASTROPY_VERSION=development
+        #- python: 2.7
+        #  env: ASTROPY_VERSION=development
 
         # Python 2.6 doesn't have numpy 1.10 in conda, they can be put
         # back into the main matrix once the numpy build is available in the
