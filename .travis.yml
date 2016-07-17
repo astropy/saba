@@ -105,6 +105,7 @@ install:
     # section if they are needed before setting up conda) to install any
     # other dependencies.
     - git clone git://github.com/nocturnalastro/astropy.git
+    - cd astropy
     - git checkout sherpa_bridge_v2
     - python setup.py install
 
