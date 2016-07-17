@@ -1,0 +1,8 @@
+numpy 
+cython 
+jinja2 
+sherpa
+Sphinx 
+Graphviz 
+Pillow
+-e git+https://github.com/nocturnalastro/astropy.git@astrosherpa_bridge#egg=astropy
