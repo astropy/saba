@@ -27,12 +27,12 @@ env:
         - NUMPY_VERSION=stable
         - ASTROPY_VERSION=stable
         - SETUP_CMD='test'
-        - PIP_DEPENDENCIES=''
+        - PIP_DEPENDENCIES='jinja2'
 
         # For this package-template, we include examples of Cython modules,
         # so Cython is required for testing. If your package does not include
         # Cython code, you can set CONDA_DEPENDENCIES=''
-        - CONDA_DEPENDENCIES='Cython jinja2'
+        - CONDA_DEPENDENCIES='Cython'
 
         # If there are matplotlib or other GUI tests, uncomment the following
         # line to use the X virtual framebuffer.
@@ -100,6 +100,7 @@ install:
     - python setup.py install
     - conda install -c sherpa sherpa
     - cd ../
+
 script:
    - python setup.py $SETUP_CMD
 
@@ -108,7 +109,6 @@ after_success:
     # below and replace "packagename" with the name of your package.
     # The coveragerc file may be customized as needed for your package.
     # - if [[ $SETUP_CMD == 'test --coverage' ]]; then coveralls --rcfile='packagename/tests/coveragerc'; fi
-
 
 notifications:
   email: false
