@@ -1,0 +1,31 @@
+[run]
+source = astrosherpa_bridge
+omit =
+   astrosherpa_bridge/_astropy_init*
+   astrosherpa_bridge/conftest*
+   astrosherpa_bridge/cython_version*
+   astrosherpa_bridge/setup_package*
+   astrosherpa_bridge/*/setup_package*
+   astrosherpa_bridge/*/*/setup_package*
+   astrosherpa_bridge/tests/*
+   astrosherpa_bridge/*/tests/*
+   astrosherpa_bridge/*/*/tests/*
+   astrosherpa_bridge/version*
+
+[report]
+exclude_lines =
+   # Have to re-enable the standard pragma
+   pragma: no cover
+
+   # Don't complain about packages we have installed
+   except ImportError
+
+   # Don't complain if tests don't hit assertions
+   raise AssertionError
+   raise NotImplementedError
+
+   # Don't complain about script hooks
+   def main\(.*\):
+
+   # Ignore branches that don't pertain to this version of Python
+   pragma: py{ignore_python_version}
