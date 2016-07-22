@@ -273,6 +273,7 @@ class SherpaFitter(Fitter):
                stat=", ".join(Stat._sherpa_values.keys()),
                est=", ".join(EstMethod._sherpa_values.keys()))  # is this evil?
 
+
     def __init__(self, optimizer="levmar", statistic="leastsq", estmethod="covariance"):
         try:
             optimizer = optimizer.value
@@ -296,8 +297,9 @@ class SherpaFitter(Fitter):
         self._fitmodel = None  # a handle for sherpa fit model
         self._data = None  # a handle for sherpa dataset
         self.error_info = {}
-
-    get_sampler = doc_wrapper(SherpaMCMC, "This returns and instance of `SherpaMCMC` with it's self as the fitter:\n")
+        setattr(self.__class__, 'opt_config', property(lambda s: s._opt_config, doc=self._opt_method.__doc__))
+        # sherpa doesn't currently have a docstring for est_method but maybe the future
+        setattr(self.__class__, 'est_config', property(lambda s: s._est_config, doc=self._est_method.__doc__))  
 
 
     def __call__(self, models, x, y, z=None, xbinsize=None, ybinsize=None, err=None, bkg=None, bkg_scale=1, **kwargs):
@@ -393,6 +395,19 @@ class SherpaFitter(Fitter):
         pnames = [p.split(".", 1)[-1] for p in self.error_info.parnames]  # this is to remove the model name
         return pnames, self.error_info.parvals, self.error_info.parmins, self.error_info.parmaxes
 
+    @property
+    def _est_config(self):
+        return self._est_method.config
+
+    @property
+    def _opt_config(self):
+        """
+        This is usefull for stuff like:
+        """
+        return self._opt_method.confi
+
+    # Here is the MCMC wrapper!
+    get_sampler = doc_wrapper(SherpaMCMC, "This returns and instance of `SherpaMCMC` with it's self as the fitter:\n")
 
 class Dataset(SherpaWrapper):
 
@@ -509,7 +524,6 @@ class Dataset(SherpaWrapper):
                 assert y.shape == err.shape, "y's and err's shapes do not match in dataset %i" % n
 
         if xbinsize is not None:
-            
             bs = xbinsize / 2.0
 
         if z is None:
