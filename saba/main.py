@@ -401,9 +401,6 @@ class SherpaFitter(Fitter):
 
     @property
     def _opt_config(self):
-        """
-        This is usefull for stuff like:
-        """
         return self._opt_method.confi
 
     # Here is the MCMC wrapper!
