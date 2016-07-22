@@ -16,6 +16,7 @@
    examples_mcmc
 
 
+.. image:: _static/asb_logo.png
 
 Welcome to AstroSherpaBridge's documentation!
 =============================================
