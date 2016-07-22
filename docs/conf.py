@@ -190,13 +190,10 @@ todo_include_todos = False
 # Define standard header/footers.
 
 rst_prolog = ""
-
 rst_epilog = ""
-
 renamed_rst_epilog = """
-
 .. _AstroPy: http://www.astropy.org/
-... _IPython: http://ipython.org/
+.. _IPython: http://ipython.org/
 .. _matplotlib: http://matplotlib.org/
 .. _Sphinx: http://sphinx.pocoo.org/
 
@@ -214,12 +211,11 @@ renamed_rst_epilog = """
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 if not on_rtd:
-    import sphinx_rtd_theme
-    html_theme = 'sphinx_rtd_theme'
-    # html_theme_options = {}
-    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
-else:
+	import sphinx_rtd_theme
 	html_theme = 'sphinx_rtd_theme'
+	# html_theme_options = {}
+	html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
