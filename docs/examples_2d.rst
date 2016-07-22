@@ -2,7 +2,10 @@
 Fitting 2D data
 ===============
 
-Heres how you fit 2D data!
+Heres how you fit 2d data!
+
+Preamble
+--------
 
 .. code-block:: ipython
 

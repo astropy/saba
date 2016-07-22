@@ -33,8 +33,3 @@ Installation
 
 Conda:
 ------
-
-
-
-Source:
--------

@@ -1,4 +1,5 @@
 .. |asb| replace:: saba
+.. |sherpa| replace:: `~sherpa`
 
 How to use SherpaFitter
 =======================
@@ -28,6 +29,7 @@ To initialize a fitter we simply provide names for ``statistic``, ``optimizer`` 
 	sfitter = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='confidence')
 
 Now we have a fitter instance we need something to fit so lets import an astropy model specifically `~astropy.modeling.functional_models.Gaussian1D`. A full discription astropy's model and capabilities can be found `here<http://docs.astropy.org/en/stable/modeling/index.html>`_
+
 .. code-block:: ipython
 
 	from astropy.modeling.models import Gaussian1D
@@ -50,6 +52,7 @@ We also need some data so lets make some data with some added noise.
 	# please note that binsize is the width of the bin!
 
 	fit_model = true.copy() # ofset fit model from true
+
 	fit_model.amplitude = 2
 	fit_model.mean = 0
 	fit_model.stddev = 0.2
@@ -57,6 +60,7 @@ We also need some data so lets make some data with some added noise.
 For good measure lets plot it and take a look
 
 .. image:: _generated/example_plot_data.png
+
 
 Now we have some data let's fit it and get hopefully we get something similar to "True" back. 
 As ``sfitter`` has already been initialized as with other `astropy.modeling.fitting` fitters we just call it with some data and an astropy model and we get the fitted model returned. 
@@ -124,6 +128,7 @@ The parameters can be changes by
 	 'maxfev': None,
 	 'verbose': 0,
 	 'xtol': 1.1920928955078125e-07}
+
 
 Fitting
 -------
@@ -229,7 +234,7 @@ in returns we get a tuple of (prameter_name, best_fit_value, lower_value, upper_
 
 .. code-block:: ipython
 
-   	('amplitude', 3.0646789274093185, -0.50152026852144349, 0.56964617033348119)
+	('amplitude', 3.0646789274093185, -0.50152026852144349, 0.56964617033348119)
 	('mean', 0.77853851419777986, -0.096264447380365548, 0.10293940565584792)
 	('stddev', 0.50721937454701504, -0.098092469817728456, 0.11585973498734969)
 

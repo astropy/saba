@@ -22,13 +22,12 @@ If you place any of the parameter constaraints on the astropy models then they w
 	double_gaussian = Gaussian1D(amplitude=10, mean=-1.5, stddev=0.5) + Gaussian1D(amplitude=3, mean=0.9, stddev=0.5)
 
 Now we have the compound model lets add tie `amplitude_1` (the amplitude of the right hand side `~astropy.modeling.functional_models.Gaussian1D`) to `1.2*amplitude_0` and while we're at it let generate some data. 
-
 To do this we must first define the `tiedfunc`
 
 .. code-block:: ipython
 
 	def tiedfunc(self): # a function used for tying amplitude_1
-    	return 1.2*self.amplitude_0
+	return 1.2*self.amplitude_0
 
 	double_gaussian.amplitude_1.tied = tiedfunc
 
@@ -111,6 +110,8 @@ The fitter keeps a copy of the converted model we can use it to compare the cons
 	   wrap_.amplitude_1 linked      8.34579 expr: (1.2 * wrap_.amplitude_0)
 	   wrap_.mean_1 thawed     0.785016 -3.40282e+38  3.40282e+38
 	   wrap_.stddev_1 thawed      0.46393 -3.40282e+38  3.40282e+38
+
+
 
 Multiple models or multiple datasets
 ------------------------------------
