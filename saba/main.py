@@ -401,7 +401,7 @@ class SherpaFitter(Fitter):
 
     @property
     def _opt_config(self):
-        return self._opt_method.confi
+        return self._opt_method.config
 
     # Here is the MCMC wrapper!
     get_sampler = doc_wrapper(SherpaMCMC, "This returns and instance of `SherpaMCMC` with it's self as the fitter:\n")
