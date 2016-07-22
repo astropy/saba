@@ -12,6 +12,8 @@ from sherpa.stats import CStat, WStat, Cash
 from sherpa.optmethods import GridSearch, LevMar, MonCar, NelderMead
 from sherpa.estmethods import Confidence, Covariance, Projection
 from sherpa.sim import MCMC
+import inspect
+import types
 # from astropy.modeling
 
 __all__ = ('SherpaFitter', 'SherpaMCMC')
@@ -27,15 +29,17 @@ class SherpaWrapper(object):
     def set(self, value):
         try:
             self.value = self._sherpa_values[value.lower()]
-        except Keybinsizeor:
+        except KeyError:
             UserWarning("Value not found")  # todo handle
+
 
 class Stat(SherpaWrapper):
 
     """
     A wrapper for the fit statistics of sherpa
 
-    Parameter:
+    Parameters
+    ----------
         value: String
             the name of a sherpa statistics.
     """
@@ -54,7 +58,8 @@ class OptMethod(SherpaWrapper):
     """
     A wrapper for the optimization methods of sherpa
 
-    Parameter:
+    Parameters
+    ----------
         value: String
             the name of a sherpa optimization method.
     """
@@ -67,7 +72,8 @@ class EstMethod(SherpaWrapper):
     """
     A wrapper for the error estimation methods of sherpa
 
-    Parameter:
+        Parameters
+        ----------
         value: String
             the name of a sherpa statistics.
     """
@@ -76,12 +82,181 @@ class EstMethod(SherpaWrapper):
                       'projection': Projection}
 
 
+
+
+class SherpaMCMC(object):
+    """
+        An interface which makes use of sherpa's MCMC(pyBLoCXS) functionality.
+
+        Parameters
+        ----------
+        fitter: a `SherpaFitter` instance:
+                used to caluate the fit statstics, must have been fit as
+                the covariance matrix is used.
+        smapler: string
+                the name of a valid sherpa sampler
+
+        walker: string
+                the name of a valid sherpa walker
+
+    """
+
+    def __init__(self, fitter, sampler='mh', walker='mh'):
+        self._mcmc = MCMC()
+
+        if hasattr(fitter.fit_info, "statval"):
+            self._fitter = fitter._fitter
+
+            if hasattr(fitter.error_info, "extra_output"):
+                fitter.est_errors()
+            self._cmatrix = fitter.errors_info.extra_output
+            pars = fitter._fitmodel.sherpa_model.pars
+            self.parameter_map = OrderedDict(map(lambda x: (x.name, x),
+                                             pars))
+        else:
+            raise AstropyUserWarning("Must have valid fit! "
+                                     "Convariance matrix is not present")
+
+    def __call__(self, niter=200000):
+        draws = self._mcmc.get_draws(self._fitter, self._cmatrix,
+                                     niter=niter)
+        self._stat_vals, self._accepted, self._parameter_vals = draws
+        self.acception_rate = (self._accepted.sum() * 100.0 /
+                               self._accepted.size)
+        self.parameters = OrderedDict()
+        for n, parameter_set in enumerate(self._parameter_vals):
+            pname = self.parameter_map.keys()[n]
+            self.parameters[pname] = self._parameter_vals[n, :]
+        return draws
+
+    def set_sampler_options(self, opt, value):
+        """
+        Set an option for the current MCMC sampler.
+
+        Parameters
+        ----------
+        opt : str
+           The option to change. Use `get_sampler` to view the
+           available options for the current sampler.
+        value
+           The value for the option.
+
+        Notes
+        -----
+        The options depend on the sampler. The options include:
+
+        defaultprior
+           Set to ``False`` when the default prior (flat, between the
+           parameter's soft limits) should not be used. Use
+           `set_prior` to set the form of the prior for each
+           parameter.
+
+        inv
+           A bool, or array of bools, to indicate which parameter is
+           on the inverse scale.
+
+        log
+           A bool, or array of bools, to indicate which parameter is
+           on the logarithm (natural log) scale.
+
+        original
+           A bool, or array of bools, to indicate which parameter is
+           on the original scale.
+
+        p_M
+           The proportion of jumps generatd by the Metropolis
+           jumping rule.
+
+        priorshape
+           An array of bools indicating which parameters have a
+           user-defined prior functions set with `set_prior`.
+
+        scale
+           Multiply the output of `covar` by this factor and
+           use the result as the scale of the t-distribution.
+
+        Examples
+        --------
+        >> mcmc = SherpaMCMC(sfit)
+        >> mcmc.set_sampler_opt('scale', 3)
+        """
+        self._mcmc.set_sampler_opt(opt, value)
+
+    def get_sampler(self,):
+        return self._mcmc.get_sampler()
+
+    def set_prior(self, parameter, prior):
+        """
+        Set the prior function to use with a parameter.
+
+        The default prior used by ``get_draws`` for each parameter
+        is flat, varying between the hard minimum and maximum
+        values of the parameter (as given by the ``hard_min`` and
+        ``hard_max`` attributes of the parameter object). The ``set_prior``
+        function is used to change the form of the prior for a
+        parameter.
+
+        Parameters
+        ----------
+        par : sherpa.models.parameter.Parameter instance
+           A parameter of a model instance.
+        prior : function or sherpa.models.model.Model instance
+           The function to use for a prior. It must accept a
+           single argument and return a value of the same size
+           as the input.
+
+        Examples
+        --------
+
+        Create a function (``lognorm``) and use it as the prior the
+        ``nH`` parameter:
+            >> def lognorm(x):
+               # center on 10^20 cm^2 with a sigma of 0.5
+               sigma = 0.5
+               x0 = 20
+               # nH is in units of 10^-22 so convert
+               dx = np.log10(x) + 22 - x0
+               norm = sigma / np.sqrt(2 * np.pi)
+               return norm * np.exp(-0.5*dx*dx/(sigma*sigma))
+
+            >> mcmc.set_prior('nH', lognorm)
+        """
+        if parameter in self.parameter_map:
+            self._mcmc.set_prior(self.parameter_map[parameter], prior)
+        else:
+            raise AstropyUserWarning("Parmater {name} not found in parameter"
+                                     "map".format(name=parameter))
+
+
+class doc_wrapper(object):
+
+    def __init__(self, f, pre="", post=""):
+        self._f = f
+        self._pre = pre
+        self._post = post
+
+    @property
+    def __doc__(self,):
+        return "".join([self._pre, self._f.__doc__, self._post])
+
+    def __call__(self, instance, *args, **kwargs):
+        return self._f(instance, *args, **kwargs)
+
+    def __get__(self, instance, cls=None):
+        ''' This implements the descriptor protocol and allows this
+        callable class to be used as a bound method.
+        See:
+        https://docs.python.org/2/howto/descriptor.html#functions-and-methods
+        '''
+        return types.MethodType(self, instance, cls)
+
+
 class SherpaFitter(Fitter):
     __doc__ = """
     Sherpa Fitter for astropy models. Yay :)
 
     Parameters
-        ----------
+    ----------
         optimizer : string
             the name of a sherpa optimizer.
             posible options include:
@@ -120,6 +295,10 @@ class SherpaFitter(Fitter):
         self._fitter = None  # a handle for sherpa fit function
         self._fitmodel = None  # a handle for sherpa fit model
         self._data = None  # a handle for sherpa dataset
+        self.error_info = {}
+
+    get_sampler = doc_wrapper(SherpaMCMC, "This returns and instance of `SherpaMCMC` with it's self as the fitter:\n")
+
 
     def __call__(self, models, x, y, z=None, xbinsize=None, ybinsize=None, err=None, bkg=None, bkg_scale=1, **kwargs):
         """
@@ -127,32 +306,37 @@ class SherpaFitter(Fitter):
 
         Parameters
         ----------
-        models : `~astropy.modeling.FittableModel` or list of `~astropy.modeling.FittableModel`
-            model to fit to x, y, z
-        x : array or list of arrays
-            input coordinates
-        y : array or list of arrays
-            input coordinates
-        z : array or list of arrays (optional)
-            input coordinates
-        xbinsize : array or list of arrays (optional)
-            an array of xbinsizes in x  - this will be x -/+ (binsize  / 2.0)
-        ybinsize : array or list of arrays (optional)
-            an array of xbinsizes in y  - this will be y -/+ (ybinsize / 2.0)
-        err : array or list of arrays (optional)
-            an array of errors in dependant variable
-        **kwargs:
-            keyword arguments will be passed on to sherpa fit routine
+            models : `astropy.modeling.FittableModel` or list of `astropy.modeling.FittableModel`
+                model to fit to x, y, z
+            x : array or list of arrays
+                input coordinates
+            y : array or list of arrays
+                input coordinates
+            z : array or list of arrays (optional)
+                input coordinates
+            xbinsize : array or list of arrays (optional)
+                an array of xbinsizes in x  - this will be x -/+ (binsize  / 2.0)
+            ybinsize : array or list of arrays (optional)
+                an array of xbinsizes in y  - this will be y -/+ (ybinsize / 2.0)
+            err : array or list of arrays (optional)
+                an array of errors in dependant variable
+            bkg : array or list of arrays (optional)
+                this will act as background data
+            bkg_sale : float or list of floats (optional)
+                the scaling factor for the dataset if a single value
+                is supplied it will be copied for eash dataset
+            **kwargs:
+                keyword arguments will be passed on to sherpa fit routine
 
         Returns
         -------
-        model_copy : `~astropy.modeling.FittableModel` or a list of models.
-            a copy of the input model with parameters set by the fitter
+            model_copy : `astropy.modeling.FittableModel` or a list of models.
+                a copy of the input model with parameters set by the fitter
         """
 
         tie_list = []
         try:
-           n_inputs = models[0].n_inputs
+            n_inputs = models[0].n_inputs
         except TypeError:
             n_inputs = models.n_inputs
 
@@ -183,7 +367,8 @@ class SherpaFitter(Fitter):
         """
         Use sherpa error estimators based on the last fit.
 
-        Parameters:
+        Parameters
+        ----------
             sigma: float
                 this will be set as the confidance interval for which the errors are found too.
             maxiters: int
@@ -204,14 +389,16 @@ class SherpaFitter(Fitter):
             if not numcores == self._fitter.estmethod.config['numcores']:
                 self._fitter.estmethod.config['numcores'] = numcores
 
-        return self._fitter.est_errors(methoddict=methoddict, parlist=parlist)
+        self.error_info = self._fitter.est_errors(methoddict=methoddict, parlist=parlist)
+        pnames = [p.split(".", 1)[-1] for p in self.error_info.parnames]  # this is to remove the model name
+        return pnames, self.error_info.parvals, self.error_info.parmins, self.error_info.parmaxes
 
 
 class Dataset(SherpaWrapper):
 
     """
     Parameters
-        ----------
+    ----------
         n_dim: int
             Used to veirfy required number of dimentions.
         x : array (or list of arrays)
@@ -226,7 +413,11 @@ class Dataset(SherpaWrapper):
             an array of errors in y
         err : array (or list of arrays) (optional)
             an array of errors in z
-
+        bkg : array or list of arrays (optional)
+                this will act as background data
+        bkg_sale : float or list of floats (optional)
+                the scaling factor for the dataset if a single value
+                is supplied it will be copied for eash dataset
     returns:
         _data: a sherpa dataset
     """
@@ -269,7 +460,7 @@ class Dataset(SherpaWrapper):
     def _make_dataset(n_dim, x, y, z=None, xbinsize=None, ybinsize=None, err=None, bkg=None, bkg_scale=1, n=0):
         """
         Parameters
-            ----------
+        ----------
             n_dim: int
                 Used to veirfy required number of dimentions.
             x : array
@@ -378,10 +569,10 @@ class Dataset(SherpaWrapper):
         """
         This makes a single datasets into a simdatafit at allow fitting of multiple models by copying the single dataset!
 
-        Parameter:
-
-        numdata: int
-            the number of times you want to copy the dataset i.e if you want 2 datasets total you put 1!
+        Parameters
+        ----------
+            numdata: int
+                the number of times you want to copy the dataset i.e if you want 2 datasets total you put 1!
         """
 
         self.data = DataSimulFit("wrapped_data", [self.data for _ in xrange(numdata)])
@@ -393,8 +584,9 @@ class ConvertedModel(object):
     """
     This  wraps the model convertion to sherpa models and from astropy models and back!
 
-    Parameters:
-        models: model : `~astropy.modeling.FittableModel` (or list of)
+    Parameters
+        ----------
+        models: model : `astropy.modeling.FittableModel` (or list of)
 
         tie_list: list (optional)
             a list of parameter pairs which will be tied accross models
@@ -477,30 +669,31 @@ class ConvertedModel(object):
 class Data1DIntBkg(Data1DInt):
     """
        Data1DInt which tricks sherpa into using the background object without using DataPHA
+       Parameters
+       ----------
+            name: string
+                dataset name
 
-        name: string
-            dataset name
+            xlo: array
+               the array which represents the lower x value for the x bins
 
-        xlo: array
-           the array which represents the lower x value for the x bins
+            xhi: array
+               the array which represents the upper x value for the x bins
 
-        xhi: array
-           the array which represents the upper x value for the x bins
+            y: array
+               the array which represents y data
 
-        y: array
-           the array which represents y data
+            bkg: array
+               the array which represents bkgdata
 
-        bkg: array
-           the array which represents bkgdata
+            staterror: array (optional)
+                the array which represents the errors on z
 
-        staterror: array (optional)
-            the array which represents the errors on z
+            bkg_scale: float
+                the scaling factor for background data
 
-        bkg_scale: float
-            the scaling factor for background data
-
-        src_scale: float
-            the scaling factor for source data
+            src_scale: float
+                the scaling factor for source data
     """
 
     _response_ids = [0]
@@ -540,27 +733,28 @@ class Data1DIntBkg(Data1DInt):
 class Data1DBkg(Data1D):
     """
        Data1D which tricks sherpa into using the background object without using DataPHA
+        Parameters
+        ----------
+            name: string
+                dataset name
 
-        name: string
-            dataset name
+            x: array
+               the array which represents the x values
 
-        x: array
-           the array which represents the x values
+            y: array
+               the array which represents y data
 
-        y: array
-           the array which represents y data
+            bkg: array
+               the array which represents background data
 
-        bkg: array
-           the array which represents background data
+            staterror: array (optional)
+                the array which represents the errors on z
 
-        staterror: array (optional)
-            the array which represents the errors on z
+            bkg_scale: float
+                the scaling factor for background data
 
-        bkg_scale: float
-            the scaling factor for background data
-
-        src_scale: float
-            the scaling factor for source data
+            src_scale: float
+                the scaling factor for source data
     """
 
     _response_ids = [0]
@@ -598,37 +792,38 @@ class Data1DBkg(Data1D):
 class Data2DIntBkg(Data2DInt):
     """
        Data2DInt which tricks sherpa into using the background object without using DataPHA
+        Parameters
+        ----------
+            name: string
+                dataset name
 
-        name: string
-            dataset name
+            xlo: array
+               the array which represents the lower x value for the x bins
 
-        xlo: array
-           the array which represents the lower x value for the x bins
+            xhi: array
+               the array which represents the upper x value for the x bins
 
-        xhi: array
-           the array which represents the upper x value for the x bins
+            ylo: array
+               the array which represents the lower y value for the y bins
 
-        ylo: array
-           the array which represents the lower y value for the y bins
-
-        yhi: array
-           the array which represents the upper y value for the y bins
+            yhi: array
+               the array which represents the upper y value for the y bins
 
 
-        z: array
-           the array which represents z data
+            z: array
+               the array which represents z data
 
-        bkg: array
-           the array which represents bkgdata
+            bkg: array
+               the array which represents bkgdata
 
-        staterror: array (optional)
-            the array which represents the errors on z
+            staterror: array (optional)
+                the array which represents the errors on z
 
-        bkg_scale: float
-            the scaling factor for background data
+            bkg_scale: float
+                the scaling factor for background data
 
-        src_scale: float
-            the scaling factor for source data
+            src_scale: float
+                the scaling factor for source data
     """
 
     _response_ids = [0]
@@ -671,30 +866,31 @@ class Data2DBkg(Data2D):
     """
        Data2D which tricks sherpa into using the background object without
        using DataPHA
+       Parameters
+       ----------
+           name: string
+                dataset name
 
-       name: string
-            dataset name
+            x: array
+               the array which represents x data
 
-        x: array
-           the array which represents x data
+            y: array
+               the array which represents y data
 
-        y: array
-           the array which represents y data
+            z: array
+               the array which represents z data
 
-        z: array
-           the array which represents z data
+            bkg: array
+               the array which represents bkgdata
 
-        bkg: array
-           the array which represents bkgdata
+            staterror: array (optional)
+                the array which represents the errors on z
 
-        staterror: array (optional)
-            the array which represents the errors on z
+            bkg_scale: float
+                the scaling factor for background data
 
-        bkg_scale: float
-            the scaling factor for background data
-
-        src_scale: float
-            the scaling factor for source data
+            src_scale: float
+                the scaling factor for source data
     """
 
     _response_ids = [0]
@@ -734,11 +930,12 @@ class BkgDataset(object):
     """
         The background object which is used to caclulate fit
         stat's which require it.
-
-        bkg: array
-            the background data
-        bkg_scale: float
-            the ratio of src/bkg
+        Parameters
+        ----------
+            bkg: array
+                the background data
+            bkg_scale: float
+                the ratio of src/bkg
     """
 
     def __init__(self, bkg, bkg_scale):
@@ -752,142 +949,3 @@ class BkgDataset(object):
     @property
     def backscal(self):
         return self._bkg_scale
-
-
-class SherpaMCMC(object):
-    """
-        An interface which makes use of sherpa's MCMC(pyBLoCXS) functionality.
-
-        fitter: a SherpaFitter instance:
-                used to caluate the fit statstics, must have been fit as t
-                he covariance matrix is used.
-        smapler: string
-                the name of a valid sherpa sampler
-
-        walker: string
-                the name of a valid sherpa walker
-
-    """
-
-    def __init__(self, fitter, sampler='mh', walker='mh'):
-        self._mcmc = MCMC()
-
-        if hasattr(fitter.fit_info, "extra_output"):
-            self._fitter = fitter._fitter
-            self._cmatrix = fitter.est_errors().extra_output
-            pars = fitter._fitmodel.sherpa_model.pars
-            self.parameter_map = OrderedDict(map(lambda x: (x.name, x),
-                                             pars))
-        else:
-            raise AstropyUserWarning("Must have valid fit! "
-                                     "Convariance matrix is not present")
-
-    def __call__(self, niter=200000):
-        draws = self._mcmc.get_draws(self._fitter, self._cmatrix,
-                                     niter=niter)
-        self._stat_vals, self._accepted, self._parameter_vals = draws
-        self.acception_rate = (self._accepted.sum() * 100.0 /
-                               self._accepted.size)
-        self.parameters = OrderedDict()
-        for n, parameter_set in enumerate(self._parameter_vals):
-            pname = self.parameter_map.keys()[n]
-            self.parameters[pname] = self._parameter_vals[n, :]
-        return draws
-
-    def set_sampler_options(self, opt, value):
-        """
-        Set an option for the current MCMC sampler.
-
-        Parameters
-        ----------
-        opt : str
-           The option to change. Use `get_sampler` to view the
-           available options for the current sampler.
-        value
-           The value for the option.
-
-        Notes
-        -----
-        The options depend on the sampler. The options include:
-
-        defaultprior
-           Set to ``False`` when the default prior (flat, between the
-           parameter's soft limits) should not be used. Use
-           `set_prior` to set the form of the prior for each
-           parameter.
-
-        inv
-           A bool, or array of bools, to indicate which parameter is
-           on the inverse scale.
-
-        log
-           A bool, or array of bools, to indicate which parameter is
-           on the logarithm (natural log) scale.
-
-        original
-           A bool, or array of bools, to indicate which parameter is
-           on the original scale.
-
-        p_M
-           The proportion of jumps generatd by the Metropolis
-           jumping rule.
-
-        priorshape
-           An array of bools indicating which parameters have a
-           user-defined prior functions set with `set_prior`.
-
-        scale
-           Multiply the output of `covar` by this factor and
-           use the result as the scale of the t-distribution.
-
-        Examples
-        --------
-        >> mcmc = SherpaMCMC(sfit) # doctest: +SKIP
-        >> mcmc.set_sampler_opt('scale', 3)
-        """
-        self._mcmc.set_sampler_opt(opt, value)
-
-    def get_sampler(self,):
-        return self._mcmc.get_sampler()
-
-    def set_prior(self, parameter, prior):
-        """
-        Set the prior function to use with a parameter.
-
-        The default prior used by ``get_draws`` for each parameter
-        is flat, varying between the hard minimum and maximum
-        values of the parameter (as given by the ``hard_min`` and
-        ``hard_max`` attributes of the parameter object). The ``set_prior``
-        function is used to change the form of the prior for a
-        parameter.
-
-        Parameters
-        ----------
-        par : sherpa.models.parameter.Parameter instance
-           A parameter of a model instance.
-        prior : function or sherpa.models.model.Model instance
-           The function to use for a prior. It must accept a
-           single argument and return a value of the same size
-           as the input.
-
-        Examples
-        --------
-
-        Create a function (``lognorm``) and use it as the prior the
-        ``nH`` parameter:
-            >> def lognorm(x):
-               # center on 10^20 cm^2 with a sigma of 0.5
-               sigma = 0.5
-               x0 = 20
-               # nH is in units of 10^-22 so convert
-               dx = np.log10(x) + 22 - x0
-               norm = sigma / np.sqrt(2 * np.pi)
-               return norm * np.exp(-0.5*dx*dx/(sigma*sigma))
-
-            >> mcmc.set_prior('nH', lognorm)
-        """
-        if parameter in self.parameter_map:
-            self._mcmc.set_prior(self.parameter_map[parameter], prior)
-        else:
-            raise AstropyUserWarning("Parmater {name} not found in parameter"
-                                     "map".format(name=parameter))

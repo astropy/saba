@@ -24,6 +24,3 @@ I would like to introduce you to the Google Summer of Code project, a brigde bet
 
 
 
-How to install!
-
-Enrty points means you have to use astropy master from github
