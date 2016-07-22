@@ -395,4 +395,3 @@ intersphinx_mapping = {
     'astropy': ('http://docs.astropy.org/en/stable/', None),
     'sherpa': ('http://hea-www.harvard.edu/~dburke/playground/sherpa/', None)
     }
-
