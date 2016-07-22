@@ -17,13 +17,13 @@ or
 
 .. code-block:: ipython
 
-	from `astropy.modeling.fitting` import SherpaFitter
+	from astropy.modeling.fitting import SherpaFitter
 
 
 Initialization
 --------------
 
-To initialize a fitter we simply provide names for `statistic`, `optimizer` and `estmethod` this available value for those can be found in the docstring of `SherpaFitter <sherpafitter.html#astrosherpa_bridge.SherpaFitter>`_ these relate to objects withing sherpa.stats, sherpa.opt_methods and sherpa.est_methods
+To initialize a fitter we simply provide names for `statistic`, `optimizer` and `estmethod` this available value for those can be found in the docstring of `SherpaFitter <sherpafitter.html#astrosherpa_bridge.SherpaFitter>`_ these relate to objects withing `sherpa.stats`, `sherpa.opt_methods` and `sherpa.est_methods`
 
 .. code-block:: ipython
 
@@ -69,7 +69,7 @@ Fitting
 
 .. code-block:: ipython
 
-	fitted_model = sfitter(fit_model,x, y, xbinsize=binsize, err=yerrs)
+	fitted_model = sfitter(fit_model, x, y, xbinsize=binsize, err=yerrs)
 
 Once again lets take a look
 
@@ -104,7 +104,7 @@ Now we have a fit lets look at the at the fits outputs:
 Uncertainty estimation
 ----------------------
 
-One of the main driving forces behind this that using ~sherpa gives access to the uncertainty estimation methods, they are accessed through `est_errors <../sherpafitter.html#astrosherpa_bridge.SherpaFitter.est_errors>`_ method.
+One of the main driving forces behind this that using ~sherpa gives access to the uncertainty estimation methods, they are accessed through `est_errors <sherpafitter.html#astrosherpa_bridge.SherpaFitter.est_errors>`_ method.
 
 .. code-block:: ipython
 
