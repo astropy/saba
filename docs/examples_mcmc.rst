@@ -69,37 +69,40 @@ Secondly we define a fucntion for plotting a historgram from the accepted parame
 
 .. code-block:: ipython
 
-	def plot_hist(mcmc,pname,nbins,c="b"):
-	    yy, xx = np.histogram(mcmc.parameters[pname][samplers.accepted],nbins)
-	    plotter(xx,yy,c)
-	    plt.axvline(mcmc.parameter_map[pname].val,c=c)
+	def plot_hist(mcmc, pname, nbins, c="b"):
+	    yy, xx = np.histogram(mcmc.parameters[pname][mcmc.accepted], nbins)
+	    plotter(xx, yy, c)
+	    plt.axvline(mcmc.parameter_map[pname].val, c=c)
 	    plt.xlabel("Value")
 
 And finally we plot the cumulative density function from the accepted parameter values. And some very rough errorbars!
 
 .. code-block:: ipython
 
-	def plot_cdf(pname,nbins,c="b",sigfrac=0.682689):
-	    y, xx = np.histogram(mcmc.parameters[pname][samplers.accepted],nbins)
-	    cdf=[y[0]]
+	def plot_cdf(mcmc, pname,nbins, c="b", sigfrac=0.682689):
+	    y, xx = np.histogram(mcmc.parameters[pname][mcmc.accepted], nbins)
+	    
+	    cdf = [y[0]]
 	    for yy in y[1:]:
-	        cdf.append(cdf[-1]+yy)
-	    cdf=np.array(cdf)
+	        cdf.append(cdf[-1] + yy)
+	    cdf = np.array(cdf)
 	    cdf = cdf / float(cdf[-1])
 	    
 	    plotter(xx,cdf,c)
 	    plt.axvline(mcmc.parameter_map[pname].val,c=c) #fit value 
 	    
 	    #this is inaccurate but gives you and idea
-	    med_ind=np.argmin(abs(cdf-0.5))
-	    siglo=(1-sigfrac)/2.0
-	    sighi=(1+sigfrac)/2.0
-	    lo_ind=np.argmin(abs(cdf-siglo))
-	    hi_ind=np.argmin(abs(cdf-sighi))
+	    siglo = (1 - sigfrac) / 2.0
+	    sighi = (1 + sigfrac) / 2.0
 	    
-	    plt.axvline((xx[med_ind]+xx[med_ind+1])/2, ls="--",c=c)
-	    plt.axvline((xx[lo_ind]+xx[lo_ind+1])/2, ls="--",c=c)
-	    plt.axvline((xx[hi_ind]+xx[hi_ind+1])/2, ls="--",c=c)
+	    med_ind = np.argmin(abs(cdf-0.5))
+	    lo_ind = np.argmin(abs(cdf - siglo))
+	    hi_ind = np.argmin(abs(cdf - sighi))
+	    
+	    plt.axvline((xx[med_ind] + xx[med_ind + 1]) / 2, ls="--", c=c)
+	    plt.axvline((xx[lo_ind] + xx[lo_ind + 1]) / 2, ls="--", c=c)
+	    plt.axvline((xx[hi_ind] + xx[hi_ind + 1]) / 2, ls="--", c=c)
+	    
 	    plt.xlabel("Interation")
 
 
@@ -107,9 +110,9 @@ We can first plot the histogram of the aceepted draws for each parameter value a
 
 .. code-block:: ipython
 
-	plot_hist('c0',100,'k')
-	plot_hist('c1',100,'r')
-	plot_hist('c2',100,'b')
+	plot_hist(sampler, 'c0', 100, 'k')
+	plot_hist(sampler, 'c1', 100, 'r')
+	plot_hist(sampler, 'c2', 100, 'b')
 	
 .. image:: _generated/example_plot_mcmc_hist.png
 
@@ -117,10 +120,10 @@ Then a quick cdf.
 
 .. code-block:: ipython
 
-	plot_cdf('c0',100,'k')
-	plot_cdf('c1',100,'r')
-	plot_cdf('c2',100,'b')
+	plot_cdf(sampler, 'c0', 100, 'k')
+	plot_cdf(sampler, 'c1', 100, 'r')
+	plot_cdf(sampler, 'c2', 100, 'b')
 
 .. image:: _generated/example_plot_mcmc_cdf.png
 
-Both the fit values and the Draws middle points are about 2, 0.5 and 3 for c0, c1 and c2 repectively which are the true values. 
+Both the fit values and the Draws middle points are about 2, 0.5 and 3 for c0, c1 and c2 repectively which are the true values.

@@ -93,7 +93,7 @@ class SherpaMCMC(object):
         fitter: a `SherpaFitter` instance:
                 used to caluate the fit statstics, must have been fit as
                 the covariance matrix is used.
-        smapler: string
+        sampler: string
                 the name of a valid sherpa sampler
 
         walker: string
@@ -152,10 +152,11 @@ class SherpaMCMC(object):
 
         Parameters
         ----------
+
         opt : str
            The option to change. Use `get_sampler` to view the
            available options for the current sampler.
-        value
+        value :
            The value for the option.
 
         Notes
@@ -168,32 +169,33 @@ class SherpaMCMC(object):
            `set_prior` to set the form of the prior for each
            parameter.
 
-        inv
+        inv:
            A bool, or array of bools, to indicate which parameter is
            on the inverse scale.
 
-        log
+        log:
            A bool, or array of bools, to indicate which parameter is
            on the logarithm (natural log) scale.
 
-        original
+        original:
            A bool, or array of bools, to indicate which parameter is
            on the original scale.
 
-        p_M
+        p_M:
            The proportion of jumps generatd by the Metropolis
            jumping rule.
 
-        priorshape
+        priorshape:
            An array of bools indicating which parameters have a
            user-defined prior functions set with `set_prior`.
 
-        scale
+        scale:
            Multiply the output of `covar` by this factor and
            use the result as the scale of the t-distribution.
 
         Examples
         --------
+
         >> mcmc = SherpaMCMC(sfit)
         >> mcmc.set_sampler_opt('scale', 3)
         """
@@ -206,18 +208,17 @@ class SherpaMCMC(object):
         """
         Set the prior function to use with a parameter.
 
-        The default prior used by ``get_draws`` for each parameter
+        The default prior used by the `SherpaMCMC` function call for each parameter
         is flat, varying between the hard minimum and maximum
-        values of the parameter (as given by the ``hard_min`` and
-        ``hard_max`` attributes of the parameter object). The ``set_prior``
-        function is used to change the form of the prior for a
-        parameter.
+        values of the parameter (as given by the ``min`` and
+        ``max`` attributes of the parameter object).
 
         Parameters
         ----------
+
         par : sherpa.models.parameter.Parameter instance
            A parameter of a model instance.
-        prior : function or sherpa.models.model.Model instance
+        prior : function or `sherpa.models.model.Model` instance
            The function to use for a prior. It must accept a
            single argument and return a value of the same size
            as the input.
@@ -227,13 +228,13 @@ class SherpaMCMC(object):
 
         Create a function (``lognorm``) and use it as the prior the
         ``nH`` parameter:
+
             >> def lognorm(x):
                sigma = 0.5
                x0 = 20
                dx = np.log10(x) - x0
                norm = sigma / np.sqrt(2 * np.pi)
                return norm * np.exp(-0.5*dx*dx/(sigma*sigma))
-
             >> mcmc.set_prior('nH', lognorm)
         """
         if parameter in self.parameter_map:
@@ -286,6 +287,7 @@ class SherpaFitter(Fitter):
 
     Parameters
     ----------
+
         optimizer : string
             the name of a sherpa optimizer.
             posible options include:
