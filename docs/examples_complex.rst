@@ -19,7 +19,7 @@ If you place any of the parameter constaraints on the astropy models then they w
 
 .. code-block:: ipython
 
-	double_gaussian = Gaussian1D(amplitude=7, mean=-1.5, stddev=0.5) + Gaussian1D(amplitude=3, mean=0.9, stddev=0.5)
+	double_gaussian = Gaussian1D(amplitude=10, mean=-1.5, stddev=0.5) + Gaussian1D(amplitude=3, mean=0.9, stddev=0.5)
 
 Now we have the compound model lets add tie `amplitude_1` (the amplitude of the right hand side `astropy.modeling.models.Gaussian1D`) to `1.2*amplitude_0` and while we're at it let generate some data.
 
@@ -188,4 +188,9 @@ This is required for many of the fit statistics as they are defined using the ba
 All we have to do is supply a background array using the `bkg` keyword if there is a scalling between the background and source spectra then you can use the `bkg_scale` keyword - the source scale is set to 1!
 
 .. code-block:: ipython
-	 sfitter(fit_gg, x=x, y=y, xbinsize=binsize, err=yerrs, bkg=y)
+
+	y[y<0]=0
+	cfitter = SherpaFitter(statistic='cstat', optimizer='levmar', estmethod='covariance')
+	cfitter(fit_gg, x=x, y=y, xbinsize=binsize, err=yerrs, bkg=y, bkg_scale=0.3)
+
+.. image:: _generated/example_plot_bkg.png

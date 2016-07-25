@@ -68,7 +68,7 @@ plt.close('all')
 
 
 double_gaussian = Gaussian1D(
-    amplitude=7, mean=-1.5, stddev=0.5) + Gaussian1D(amplitude=1, mean=0.9,
+    amplitude=10, mean=-1.5, stddev=0.5) + Gaussian1D(amplitude=1, mean=0.9,
                                                      stddev=0.5)
 
 
@@ -201,22 +201,15 @@ plt.savefig("_generated/example_plot_simul2.png")
 plt.close("all")
 
 
-wfitter = SherpaFitter(
-    statistic='chi2', optimizer='levmar', estmethod='covariance')
+cy=y.copy()
+cy[cy<0]=0
+cfitter = SherpaFitter(statistic='cstat', optimizer='levmar', estmethod='covariance')
+cmo=cfitter(fit_gg, x=x, y=cy, xbinsize=binsize, err=yerrs, bkg=y, bkg_scale=0.3)
 
-
-mo=wfitter(fit_gg, x=x, y=y+20, xbinsize=binsize, err=yerrs, bkg=(y+20)*0.1, bkg_scale=200.0)
-mo2=wfitter(fit_gg, x=x, y=y+20, xbinsize=binsize, err=yerrs, bkg=(y+20)*0.1, bkg_scale=.01)
-
-
-plt.errorbar(x, y+20,yerr=yerrs,xerr=binsize)
-plt.plot(x, mo(x))
-plt.plot(x, mo2(x),ls="--")
-
-
+plt.errorbar(x, cy, yerr=yerrs, xerr=binsize)
+plt.plot(x, cmo(x))
 plt.savefig("_generated/example_plot_bkg.png")
 plt.close("all")
-
 
 
 np.random.seed(123456789)
@@ -228,25 +221,24 @@ shape = x0.shape
 x0, x1 = x0.flatten(), x1.flatten()
 
 
-
-plt.rcParams['figure.figsize']=(15,5)
+plt.rcParams['figure.figsize'] = (15, 5)
 
 truth = Gaussian2D(x_mean=3512, y_mean=4418, x_stddev=150, y_stddev=150,
                    theta=20, amplitude=100)
 mexp = truth(x0, x1).reshape(shape)
 merr = abs(np.random.poisson(mexp) - mexp)
 
-plt.subplot(1,3,1)
+plt.subplot(1, 3, 1)
 plt.imshow(mexp, origin='lower', cmap='viridis',
            extent=(x0low, x0high, x1low, x1high),
            interpolation='nearest', aspect='auto')
 plt.title("True")
-plt.subplot(1,3,2)
+plt.subplot(1, 3, 2)
 plt.imshow(merr, origin='lower', cmap='viridis',
            extent=(x0low, x0high, x1low, x1high),
            interpolation='nearest', aspect='auto')
 plt.title("Noise")
-plt.subplot(1,3,3)
+plt.subplot(1, 3, 3)
 plt.imshow((mexp + merr), origin='lower', cmap='viridis',
            extent=(x0low, x0high, x1low, x1high),
            interpolation='nearest', aspect='auto')
@@ -265,17 +257,17 @@ fitmo.y_stddev = 100
 fitmo.theta = 10
 fitmo.amplitude = 50
 
-fitmo = sfit(fitmo, x0.flatten(), x1.flatten(), mexp.flatten()+merr.flatten(), xbinsize=np.ones(x0.size)*dx, ybinsize=np.ones(x1.size)*dx, err=merr.flatten()+np.random.uniform(-0.5,0.5,x0.size))
+fitmo = sfit(fitmo, x0.flatten(), x1.flatten(), mexp.flatten()+merr.flatten(), xbinsize=np.ones(x0.size)*dx, ybinsize=np.ones(x1.size)*dx, err=merr.flatten()+np.random.uniform(-0.5, 0.5, x0.size))
 
 
-plt.subplot(1,2,1)
-plt.imshow(fitmo(x0,x1).reshape(shape), origin='lower', cmap='viridis',
+plt.subplot(1, 2, 1)
+plt.imshow(fitmo(x0, x1).reshape(shape), origin='lower', cmap='viridis',
            extent=(x0low, x0high, x1low, x1high),
            interpolation='nearest', aspect='auto')
 plt.title("Fit Model")
 
 res = (mexp + merr) - fitmo(x0, x1).reshape(shape)
-plt.subplot(1,2,2)
+plt.subplot(1, 2, 2)
 plt.imshow(res, origin='lower', cmap='viridis',
            extent=(x0low, x0high, x1low, x1high),
            interpolation='nearest', aspect='auto')
@@ -285,7 +277,99 @@ plt.title("Residuals")
 plt.savefig("_generated/example_plot_2d_fit.png")
 plt.close("all")
 
+from astropy.modeling.models import Polynomial1D
 
+x = np.arange(0, 10, 0.1)
+y = 2+3*x**2+0.5*x
+sfit = SherpaFitter(statistic="Cash")
+print sfit(Polynomial1D(2), x, y)
+
+sampler = sfit.get_sampler()
+
+
+def lognorm(x):
+    # center on 10^20 cm^2 with a sigma of 0.5
+    sigma = 0.5
+    x0 = 1
+    # nH is in units of 10^-22 so convert
+    dx = np.log10(x) - x0
+    norm = sigma / np.sqrt(2 * np.pi)
+    return norm * np.exp(-0.5*dx*dx/(sigma*sigma))
+
+sampler.set_prior("c0", lognorm)
+_ = sampler(20000)
+
+
+def plotter(xx, yy, c):
+    px = []
+    py = []
+    for (xlo, xhi), y in zip(zip(xx[:-1], xx[1:]), yy):
+
+        px.extend([xlo, xhi])
+        py.extend([y, y])
+    plt.plot(px, py, c=c)
+
+
+def plot_hist(sampler, pname, nbins, c="b"):
+    yy, xx = np.histogram(sampler.parameters[pname][sampler.accepted], nbins)
+    plotter(xx, yy, c)
+    plt.axvline(sampler.parameter_map[pname].val, c=c)
+
+plt.figure(figsize=(3.2, 6))
+
+
+plt.subplot(311)
+plot_hist(sampler, 'c0', 100, 'k')
+plt.text(0.1, 350, "c0")
+plt.subplot(312)
+plot_hist(sampler, 'c1', 100, 'r')
+plt.text(-2.9, 350, "c2")
+plt.ylabel("Number of accepted fits")
+plt.subplot(313)
+plot_hist(sampler, 'c2', 100, 'b')
+plt.text(2.61, 300, "c3")
+plt.xlabel("Parameter value")
+plt.subplots_adjust(left=0.2)
+plt.savefig("_generated/example_plot_mcmc_hist.png")
+plt.close("all")
+
+
+def plot_cdf(sampler, pname, nbins, c="b", sigfrac=0.682689):
+    y, xx = np.histogram(sampler.parameters[pname][sampler.accepted], nbins)
+    cdf = [y[0]]
+    for yy in y[1:]:
+        cdf.append(cdf[-1]+yy)
+    cdf = np.array(cdf)
+    cdf = cdf / float(cdf[-1])
+
+    plotter(xx, cdf, c)
+    plt.axvline(sampler.parameter_map[pname].val, c=c)
+    med_ind = np.argmin(abs(cdf-0.5))
+    plt.axvline((xx[med_ind]+xx[med_ind+1])/2, ls="--", c=c)
+    siglo = (1-sigfrac)/2.0
+    sighi = (1+sigfrac)/2.0
+    lo_ind = np.argmin(abs(cdf-siglo))
+    hi_ind = np.argmin(abs(cdf-sighi))
+    plt.axvline((xx[lo_ind]+xx[lo_ind+1])/2, ls="--", c=c)
+    plt.axvline((xx[hi_ind]+xx[hi_ind+1])/2, ls="--", c=c)
+
+plt.figure(figsize=(3, 6))
+
+plt.subplot(311)
+plot_cdf(sampler, 'c0', 100, 'k')
+plt.text(0.1, 0.89, "c0")
+plt.subplot(312)
+plot_cdf(sampler, 'c1', 100, 'r')
+plt.text(-2.9, 0.89, "c1")
+plt.ylabel("CDF")
+plt.subplot(313)
+plot_cdf(sampler, 'c2', 100, 'b')
+plt.text(2.61, 0.89, "c2")
+plt.xlabel("Parameter value")
+
+plt.subplots_adjust(left=0.2)
+plt.savefig("_generated/example_plot_mcmc_cdf.png")
+plt.close("all")
 
 
 print("Done")
