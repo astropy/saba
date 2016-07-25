@@ -107,9 +107,9 @@ class SherpaMCMC(object):
         if hasattr(fitter.fit_info, "statval"):
             self._fitter = fitter._fitter
 
-            if hasattr(fitter.error_info, "extra_output"):
+            if not hasattr(fitter.error_info, "extra_output"):
                 fitter.est_errors()
-            self._cmatrix = fitter.errors_info.extra_output
+            self._cmatrix = fitter.error_info.extra_output
             pars = fitter._fitmodel.sherpa_model.pars
             self.parameter_map = OrderedDict(map(lambda x: (x.name, x),
                                              pars))
@@ -118,6 +118,23 @@ class SherpaMCMC(object):
                                      "Convariance matrix is not present")
 
     def __call__(self, niter=200000):
+        '''
+        based on the `sherpa.sim.get_draws`
+
+        Parameters:
+        -----------
+            niter: int
+                the number of samples you wish to draw.
+
+        Returns:
+        --------
+            stat_values: array(float)
+                the fit statistic of the draw
+            accepted: array(bool)
+                if the fit was accepted
+            parameters: dict
+                the parameter values for each draw
+        '''
         draws = self._mcmc.get_draws(self._fitter, self._cmatrix,
                                      niter=niter)
         self._stat_vals, self._accepted, self._parameter_vals = draws
@@ -211,11 +228,9 @@ class SherpaMCMC(object):
         Create a function (``lognorm``) and use it as the prior the
         ``nH`` parameter:
             >> def lognorm(x):
-               # center on 10^20 cm^2 with a sigma of 0.5
                sigma = 0.5
                x0 = 20
-               # nH is in units of 10^-22 so convert
-               dx = np.log10(x) + 22 - x0
+               dx = np.log10(x) - x0
                norm = sigma / np.sqrt(2 * np.pi)
                return norm * np.exp(-0.5*dx*dx/(sigma*sigma))
 
@@ -226,6 +241,20 @@ class SherpaMCMC(object):
         else:
             raise AstropyUserWarning("Parmater {name} not found in parameter"
                                      "map".format(name=parameter))
+
+    @property
+    def accepted(self):
+        """
+        The stored list of bools if each draw was accepted or not.
+        """
+        return self._accepted
+
+    @property
+    def stat_values(self):
+        """
+        The stored values for the fit statistic of each run.
+        """
+        return self._stat_values
 
 
 class doc_wrapper(object):
