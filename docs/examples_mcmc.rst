@@ -2,8 +2,7 @@
 Using sherpa's MCMC sampler
 ===========================
 
-This is just a very quick example of what can be done with the SherpaMCMC object, which is available from the `~saba.SherpaFitter.get_sampler` method.
-
+This is just a very quick example of what can be done with the SherpaMCMC object. Sherpa's MCMC object is available from the `~astrosherpa_bridge.SherpaFitter.get_sampler` method. 
 Let's quickly define some data and a model. 
 
 .. code-block:: ipython
@@ -43,7 +42,6 @@ Now before we get the draws from the sampler we can define prior distributions b
 
 	sampler.set_prior("c0",lognorm)
 
-
 Getting Draws
 -------------
 
@@ -60,7 +58,6 @@ To use the sampler we simply use a function call, passing in the number of draws
 		wrap_.c0: <function lognorm at 0x7fb9fe95ab18>
 		wrap_.c1: <function flat at 0x7fb9fe9cc410>
 		wrap_.c2: <function flat at 0x7fb9fe9cc410>
-
 
 To look at the results we can define some simple helper functions. Firstly a simple function for ploting the bins on a line plot. 
 

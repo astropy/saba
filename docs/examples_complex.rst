@@ -111,8 +111,6 @@ The fitter keeps a copy of the converted model we can use it to compare the cons
 	   wrap_.mean_1 thawed     0.785016 -3.40282e+38  3.40282e+38
 	   wrap_.stddev_1 thawed      0.46393 -3.40282e+38  3.40282e+38
 
-
-
 Multiple models or multiple datasets
 ------------------------------------
 

@@ -50,7 +50,6 @@ We also need some data so lets make some data with some added noise.
 	yerrs = err * np.random.uniform(0.2, 1, size=len(x))
 	binsize = step * np.ones(x.shape)
 	# please note that binsize is the width of the bin!
-
 	fit_model = true.copy() # ofset fit model from true
 
 	fit_model.amplitude = 2
@@ -60,7 +59,6 @@ We also need some data so lets make some data with some added noise.
 For good measure lets plot it and take a look
 
 .. image:: _generated/example_plot_data.png
-
 
 Now we have some data let's fit it and get hopefully we get something similar to "True" back. 
 As ``sfitter`` has already been initialized as with other `astropy.modeling.fitting` fitters we just call it with some data and an astropy model and we get the fitted model returned. 
@@ -175,6 +173,8 @@ One of the main driving forces behind this that using `sherpa` gives access to t
 
 As with the `~sherpa.optmethods` before we are able to adjust the configuration of the `~sherpa.estmethods`. Some of the properties can be passed through `~saba.SherpaFitter.est_errors` as keyword arguments such as the `sigma` however for access to all options we have the `est_config` property.
 
+
+One of the main driving forces behind this that using `sherpa` gives access to the uncertainty estimation methods, they are accessed through  `~astrosherpa_bridge.SherpaFitter.est_errors` method which uses the sherpa's  `~sherpa.fit.Fit.est_errors` method. 
 
 .. code-block:: ipython
 	
