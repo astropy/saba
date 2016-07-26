@@ -20,7 +20,7 @@
 Welcome to AstroSherpaBridge's documentation!
 =============================================
 
-I would like to introduce you to the Google Summer of Code project, a brigde between `sherpa` and `astropy.modelling` this project is to allow astropy users to take advantage of the `sherpa` package, giving them acess to the fitting routines and uncertainties estimation.
+I would like to introduce you to the Google Summer of Code project, a brigde between `sherpa` and `astropy.modeling` to allow astropy users to take advantage of the `sherpa` package, giving them acess to the fit statistics, fitting routines and uncertainties estimation.
 
 Installation
 ------------
