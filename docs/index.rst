@@ -17,10 +17,10 @@
 
 
 
-Welcome to AstroSherpaBridge's documentation!
+Welcome to astrosherpa_bridge's documentation!
 =============================================
 
-I would like to introduce you to the Google Summer of Code project, a brigde between `sherpa` and `astropy.modeling` to allow astropy users to take advantage of the `sherpa` package, giving them acess to the fit statistics, fitting routines and uncertainties estimation.
+I would like to introduce you to the Google Summer of Code project astrosherpa_bridge, a interface between `astropy.modeling` and `sherpa` to allow astropy users to take advantage of the `sherpa` package, giving them access to the statistics, fitting routines and uncertainties estimation.
 
 Installation
 ------------
@@ -30,3 +30,10 @@ Installation
 
 
 
+Conda:
+-----
+
+
+
+Source:
+-------
