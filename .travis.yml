@@ -94,7 +94,7 @@ install:
     # well as at the start of the install section or in the before_install
     # section if they are needed before setting up conda) to install any
     # other dependencies.
-    - if [[ $SETUP_CMD == "egg_info" ]]; then conda install jinja2; fi
+    - if [[ $SETUP_CMD == "egg_info" ]]; then conda install $CONDA_DEPENDENCIES; fi
     - source ./travis_astropy.sh
     - conda install -c sherpa sherpa
 script:
