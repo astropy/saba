@@ -41,7 +41,7 @@ To do this we must first define the `tiedfunc`
 
 
 .. note :: without astropy PR #5129 we need to do this! 
-	double_gaussian.amplitude_1.value = \\
+	double_gaussian.amplitude_1.value = \
 	double_gaussian.amplitude_1.tied(double_gaussian)
 
 .. image:: _generated/example_plot_data2.png
@@ -54,8 +54,7 @@ We can print the sherpa models to check things are doing what they should.
 	fit_gg = double_gaussian.copy()
 	fit_gg.mean_0.value = -0.5
 	# sets the lower bound so we can force the parameter against it
-	fit_gg.mean_0.min = -1.25 
-	
+	fit_gg.mean_0.min = -1.25
 	fit_gg.mean_1.value = 0.8
 	fit_gg.stddev_0.value = 0.9
 	fit_gg.stddev_0.fixed = True
@@ -73,50 +72,44 @@ fitting this model is the same as earlier, we can also fit an unconstrained mode
 
 .. image:: _generated/example_plot_fitted2.png
 
-the fitter keeps a copy of the converted model lets compare the constrained and unconstrained model setups
+The fitter keeps a copy of the converted model we can use it to compare the constrained and unconstrained model setups.
 
 .. note ::
-	wrap\_.amplitude_1  should be `linked`, sherpa notation of astropy's `tied`
-	wrap\_.stddev_0 should be `frozen` sherpa notation for `fixed`
+	wrap\_.amplitude_1  should be `linked`, sherpa notation of astropy's `tied`.
+	wrap\_.stddev_0 should be `frozen` sherpa notation for `fixed`.
 	and finally wrap\_.mean_0 should's value should have moved to its minimum while fitting!
-	
-	"wrap\_" is just prepended to the model name (we didn't set one so it's blank) on conversion to the sherpa model 
+	"wrap\_" is just prepended to the model name (we didn't set one so it's blank) on conversion to the sherpa model
 
 .. code-block:: ipython
 
-	print("##Fit with contraints")
+	print("##Fit with constraints")
 	print(sfitter._fitmodel.sherpa_model)
-	print()
-	print("##Fit without contraints")
+	print("##Fit without constraints")
 	print(sfitter2._fitmodel.sherpa_model)
 
-
 .. code-block:: ipython
 
-	##Fit with contraints
+	##Fit with constraints
 
 	   Param        Type          Value          Min          Max      Units
 	   -----        ----          -----          ---          ---      -----
-	   wrap_.amplitude_0 thawed      5.58947 -3.40282e+38  3.40282e+38           
-	   wrap_.mean_0 thawed        -1.25        -1.25  3.40282e+38           
-	   wrap_.stddev_0 frozen          0.9 -3.40282e+38  3.40282e+38           
-	   wrap_.amplitude_1 linked      6.70736 expr: (1.2 * wrap_.amplitude_0)           
-	   wrap_.mean_1 thawed     0.869273 -3.40282e+38  3.40282e+38           
-	   wrap_.stddev_1 thawed     0.447021 -3.40282e+38  3.40282e+38           
+	   wrap_.amplitude_0 thawed      5.58947 -3.40282e+38  3.40282e+38
+	   wrap_.mean_0 thawed        -1.25        -1.25  3.40282e+38
+	   wrap_.stddev_0 frozen          0.9 -3.40282e+38  3.40282e+38
+	   wrap_.amplitude_1 linked      6.70736 expr: (1.2 * wrap_.amplitude_0)
+	   wrap_.mean_1 thawed     0.869273 -3.40282e+38  3.40282e+38
+	   wrap_.stddev_1 thawed     0.447021 -3.40282e+38  3.40282e+38
 
-	##Fit without contraints
+	##Fit without constraints
 
 	   Param        Type          Value          Min          Max      Units
 	   -----        ----          -----          ---          ---      -----
-	   wrap_.amplitude_0 thawed      6.95483 -3.40282e+38  3.40282e+38           
-	   wrap_.mean_0 thawed     -1.59091 -3.40282e+38  3.40282e+38           
-	   wrap_.stddev_0 thawed     0.545582 -3.40282e+38  3.40282e+38           
-	   wrap_.amplitude_1 linked      8.34579 expr: (1.2 * wrap_.amplitude_0)           
-	   wrap_.mean_1 thawed     0.785016 -3.40282e+38  3.40282e+38           
-	   wrap_.stddev_1 thawed      0.46393 -3.40282e+38  3.40282e+38 
-
-
-
+	   wrap_.amplitude_0 thawed      6.95483 -3.40282e+38  3.40282e+38
+	   wrap_.mean_0 thawed     -1.59091 -3.40282e+38  3.40282e+38
+	   wrap_.stddev_0 thawed     0.545582 -3.40282e+38  3.40282e+38
+	   wrap_.amplitude_1 linked      8.34579 expr: (1.2 * wrap_.amplitude_0)
+	   wrap_.mean_1 thawed     0.785016 -3.40282e+38  3.40282e+38
+	   wrap_.stddev_1 thawed      0.46393 -3.40282e+38  3.40282e+38
 
 Multiple models or multiple datasets
 ------------------------------------
@@ -126,9 +119,8 @@ We have three scenarios we can handle:
 - fitting a single dataset with n models 
 - or fitting n datasets with a single model
 
-If n>1 for any of the scenarios we return a list of models. Firstly well look at a single dataset with the two models as above. 
-We quickly copy the two models above and supply them to the fitter as a list - hopefully we get the same result
-
+If n>1 for any of the scenarios we return a list of models. Firstly well look at a single dataset with the two models as above.
+We quickly copy the two models above and supply them to the fitter as a list - hopefully we get the same result.
 
 .. code-block:: ipython
 	
@@ -141,9 +133,7 @@ We quickly copy the two models above and supply them to the fitter as a list - h
 
 	fm1,fm2 = sfitter([fit_gg, double_gaussian.copy()], x, y, xbinsize=binsize, err=yerrs)
 
-
 .. image:: _generated/example_plot_simul.png
-
 
 We also can fit multiple datasets with a single model so lets make a second datset. Lets generate a second dataset.
 
@@ -160,7 +150,7 @@ We also can fit multiple datasets with a single model so lets make a second dats
 	y2 = second_gg(x) + err * np.random.uniform(-1, 1, size=len(x))
 	y2errs = err * np.random.uniform(0.2, 1, size=len(x))
 	
-We simiply supply lists for each of the data parameters. You can also use `None` for when you dont have something like a missing binsizes - a lack of binsizes is a contrived example but a lack of y errors is not sutible for a chi2 fit and I don't want to make a new fitter.
+We simply supply lists for each of the data parameters. You can also use `None` for when you don't have something like a missing binsizes - a lack of binsizes is a contrived example but a lack of y errors is not suitable for a chi:sup:2 fit and I don't want to make a new fitter.
 
 .. code-block:: ipython
 	
@@ -172,20 +162,17 @@ We simiply supply lists for each of the data parameters. You can also use `None`
 	fit_gg.stddev_0 = 0.3
 	fit_gg.stddev_1 = 0.5
 
-
 	fm1,fm2 = sfitter(fit_gg, x=[x, x], y=[y, y2], xbinsize=[binsize, None], err=[yerrs, y2errs])
 
 .. image:: _generated/example_plot_simul2.png
 
-
-
 Background Data
 ---------------
 
-We have error estimation and simulatinious fits but wait there's more you can also use background data!
+We have error estimation and simultaneous fits but wait there's more you can also use background data!
 This is required for many of the fit statistics as they are defined using the background data.
 
-All we have to do is supply a background array using the `bkg` keyword if there is a scalling between the background and source spectra then you can use the `bkg_scale` keyword - the source scale is set to 1!
+All we have to do is supply a background array using the `bkg` keyword if there is a scaling of the background relative to the source spectra then you can use the `bkg_scale` keyword.
 
 .. code-block:: ipython
 

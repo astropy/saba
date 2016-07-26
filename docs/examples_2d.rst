@@ -2,11 +2,7 @@
 Fitting 2D data
 ===============
 
-Heres how you fit 2d data!
-
-Preamble
---------
-
+Heres how you fit 2D data!
 
 .. code-block:: ipython
 
@@ -28,13 +24,14 @@ So lets define some data based on `astropy.modeling.models.Gaussian2D`
 
 	truth = Gaussian2D(x_mean=3512, y_mean=4418, x_stddev=150, y_stddev=150,
                    theta=20, amplitude=100)
+
 	mexp = truth(x0, x1).reshape(shape)
 	merr = abs(np.random.poisson(mexp) - mexp)
 
 .. image:: _generated/example_plot_2d_data.png
 
 Now we have some data lets fit a model after the parameters have been offset.
-We simply flatten the arrays. We will also adjust the errorbars for the fit.
+We simply flatten the arrays. We will also adjust the error bars for the fit.
 
 .. code-block:: ipython
 	
