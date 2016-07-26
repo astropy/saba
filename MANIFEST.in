@@ -38,3 +38,5 @@ prune astropy_helpers/astropy_helpers/tests
 
 
 global-exclude *.pyc *.o
+
+include astrosherpa_bridge/tests/coveragerc
