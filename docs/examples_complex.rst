@@ -1,7 +1,7 @@
 More complex useage
 ===================
 
-Now that you have the basics lets move on to some more complex useage of the fitter interface.
+Now that you have the basics lets move on to some more complex useage of the fitter interface. 
 Some quick Preamble
 
 .. code-block::ipython
@@ -15,13 +15,13 @@ Some quick Preamble
 Parameter constraints
 ---------------------
 
-If you place any of the parameter constaraints on the astropy models then they will be respected by the fitter. Lets take a quick look at that. Firstly lets make a compound model by adding two `astropy.modeling.models.Gaussian1D` instances.
+If you place any of the parameter constaraints on the astropy models then they will be respected by the fitter. Lets take a quick look at that. Firstly lets make a compound model by adding two `~astropy.modeling.functional_models.Gaussian1D` instances. 
 
 .. code-block:: ipython
 
 	double_gaussian = Gaussian1D(amplitude=10, mean=-1.5, stddev=0.5) + Gaussian1D(amplitude=3, mean=0.9, stddev=0.5)
 
-Now we have the compound model lets add tie `amplitude_1` (the amplitude of the right hand side `astropy.modeling.models.Gaussian1D`) to `1.2*amplitude_0` and while we're at it let generate some data.
+Now we have the compound model lets add tie `amplitude_1` (the amplitude of the right hand side `~astropy.modeling.functional_models.Gaussian1D`) to `1.2*amplitude_0` and while we're at it let generate some data. 
 
 To do this we must first define the `tiedfunc`
 
@@ -46,8 +46,8 @@ To do this we must first define the `tiedfunc`
 
 .. image:: _generated/example_plot_data2.png
 
-Lets add some more parameter constraints to the model and fit the data.
-We can print the sherpa models to check things are doing what they should.
+Lets add some more parameter constraints to the model and fit the data. 
+We can print the sherpa models to check things are doing what they should. 
  
 .. code-block:: ipython
 
@@ -59,7 +59,7 @@ We can print the sherpa models to check things are doing what they should.
 	fit_gg.stddev_0.value = 0.9
 	fit_gg.stddev_0.fixed = True
 
-fitting this model is the same as earlier, we can also fit an unconstrained model for comparison.
+fitting this model is the same as earlier, we can also fit an unconstrained model for comparison. 
 
 .. code-block:: ipython
 
@@ -72,13 +72,14 @@ fitting this model is the same as earlier, we can also fit an unconstrained mode
 
 .. image:: _generated/example_plot_fitted2.png
 
-The fitter keeps a copy of the converted model we can use it to compare the constrained and unconstrained model setups.
+The fitter keeps a copy of the converted model we can use it to compare the constrained and unconstrained model setups. 
 
 .. note ::
-	wrap\_.amplitude_1  should be `linked`, sherpa notation of astropy's `tied`.
-	wrap\_.stddev_0 should be `frozen` sherpa notation for `fixed`.
+	wrap\_.amplitude_1  should be `linked`, sherpa notation of astropy's `tied`
+	wrap\_.stddev_0 should be `frozen`, sherpa notation for `fixed`
 	and finally wrap\_.mean_0 should's value should have moved to its minimum while fitting!
-	"wrap\_" is just prepended to the model name (we didn't set one so it's blank) on conversion to the sherpa model
+	
+	"wrap\_" is just prepended to the model name (we didn't set one so it's blank) on conversion to the sherpa model.
 
 .. code-block:: ipython
 
@@ -119,8 +120,8 @@ We have three scenarios we can handle:
 - fitting a single dataset with n models 
 - or fitting n datasets with a single model
 
-If n>1 for any of the scenarios we return a list of models. Firstly well look at a single dataset with the two models as above.
-We quickly copy the two models above and supply them to the fitter as a list - hopefully we get the same result.
+If n>1 for any of the scenarios we return a list of models. Firstly well look at a single dataset with the two models as above. 
+We quickly copy the two models above and supply them to the fitter as a list - hopefully we get the same result. 
 
 .. code-block:: ipython
 	
@@ -135,7 +136,7 @@ We quickly copy the two models above and supply them to the fitter as a list - h
 
 .. image:: _generated/example_plot_simul.png
 
-We also can fit multiple datasets with a single model so lets make a second datset. Lets generate a second dataset.
+We also can fit multiple datasets with a single model so lets make a second datset. Lets generate a second dataset. 
 
 .. code-block:: ipython
 
@@ -150,7 +151,7 @@ We also can fit multiple datasets with a single model so lets make a second dats
 	y2 = second_gg(x) + err * np.random.uniform(-1, 1, size=len(x))
 	y2errs = err * np.random.uniform(0.2, 1, size=len(x))
 	
-We simply supply lists for each of the data parameters. You can also use `None` for when you don't have something like a missing binsizes - a lack of binsizes is a contrived example but a lack of y errors is not suitable for a chi:sup:2 fit and I don't want to make a new fitter.
+We simply supply lists for each of the data parameters. You can also use `None` for when you don't have something like a missing binsizes - a lack of binsizes is a contrived example but a lack of y errors is not suitable for a chi:sup:2 fit and I don't want to make a new fitter. 
 
 .. code-block:: ipython
 	
@@ -170,9 +171,9 @@ Background Data
 ---------------
 
 We have error estimation and simultaneous fits but wait there's more you can also use background data!
-This is required for many of the fit statistics as they are defined using the background data.
+This is required for many of the fit statistics as they are defined using the background data. 
 
-All we have to do is supply a background array using the `bkg` keyword if there is a scaling of the background relative to the source spectra then you can use the `bkg_scale` keyword.
+All we have to do is supply a background array using the `bkg` keyword if there is a scaling of the background relative to the source spectra then you can use the `bkg_scale` keyword. 
 
 .. code-block:: ipython
 

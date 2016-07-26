@@ -3,9 +3,9 @@
 How to use SherpaFitter
 =======================
 
-I'll show you our API for the bridge.
-Firstly lets import the `SherpaFitter <sherpafitter.html#astrosherpa_bridge.SherpaFitter>`_ class which is the interface with `sherpa`'s fitting routines.
-`SherpaFitter` is available through `astropy.modeling.fitting` so it can be imported by:
+I'll show you our API for the bridge. 
+Firstly lets import the `~astrosherpa_bridge.SherpaFitter` class which is the interface with `sherpa`'s fitting routines. 
+`~astrosherpa_bridge.SherpaFitter` is available through `astropy.modeling.fitting` so it can be imported by:
 
 .. code-block:: ipython
 
@@ -21,19 +21,19 @@ or
 Initialization
 --------------
 
-To initialize a fitter we simply provide names for `statistic`, `optimizer` and `estmethod` this available value for those can be found in the docstring of `SherpaFitter <sherpafitter.html#astrosherpa_bridge.SherpaFitter>`_ these relate to objects withing `sherpa.stats`, `sherpa.opt_methods` and `sherpa.est_methods`.
+To initialize a fitter we simply provide names for ``statistic``, ``optimizer`` and ``estmethod`` this available value for those can be found in the docstring of  `~astrosherpa_bridge.SherpaFitter` these relate to objects withing `sherpa.stats`, `sherpa.optmethods` and `sherpa.estmethods`. 
 
 .. code-block:: ipython
 
 	sfitter = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='covariance')
 
-Now we have a fitter instance we need something to fit so lets import an astropy model specifically `astropy.modeling.models.Gaussian1D`.
+Now we have a fitter instance we need something to fit so lets import an astropy model specifically `~astropy.modeling.functional_models.Gaussian1D`. 
 
 .. code-block:: ipython
 
 	from astropy.modeling.models import Gaussian1D
 
-We also need some data so lets make some data with some added noise.
+We also need some data so lets make some data with some added noise. 
 
 .. code-block:: ipython
 
@@ -59,8 +59,8 @@ For good measure lets plot it and take a look
 
 .. image:: _generated/example_plot_data.png
 
-Now we have some data let's fit it and get hopefully we get something similar to "True" back.
-As `sfitter` has already been initialized it at similarly to other astropy fitters we just call it with some data and an astropy model and  we get a fitted model returned.
+Now we have some data let's fit it and get hopefully we get something similar to "True" back. 
+As ``sfitter`` has already been initialized as with other `astropy.modeling.fitting` fitters we just call it with some data and an astropy model and we get the fitted model returned. 
 
 Fitting
 -------
@@ -102,13 +102,13 @@ Now we have a fit lets look at the at the fits outputs:
 Uncertainty estimation
 ----------------------
 
-One of the main driving forces behind this that using `sherpa` gives access to the uncertainty estimation methods, they are accessed through `est_errors <sherpafitter.html#astrosherpa_bridge.SherpaFitter.est_errors>`_ method.
+One of the main driving forces behind this that using `sherpa` gives access to the uncertainty estimation methods, they are accessed through  `~astrosherpa_bridge.SherpaFitter.est_errors` method which uses the sherpa's  `~sherpa.fit.Fit.est_errors` method. 
 
 .. code-block:: ipython
 
 	param_errors = sfitter.est_errors(sigma=3)
 
-in returns we get a tuple of (prameter_name, best_fit_value, lower_value, upper_value) for the sake of plotting them we make models for the upper and lower values, lets output the values while we're at it.
+in returns we get a tuple of (prameter_name, best_fit_value, lower_value, upper_value) for the sake of plotting them we make models for the upper and lower values, lets output the values while we're at it. 
 
 .. code-block:: ipython
 
