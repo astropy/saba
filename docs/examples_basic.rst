@@ -1,13 +1,11 @@
 .. |asb| replace:: astropysherpa_bridge
-.. |sherpa| replace:: `~sherpa`
 
 How to use SherpaFitter
 =======================
 
-I'll show you our API for the bridge. 
-Firstly lets import the `SherpaFitter <../sherpafitter.html#astrosherpa_bridge.SherpaFitter>`_ class which is the interface with |sherpa|'s fitting routines.
-`SherpaFitter` is available through astropy
-So it can be imported by: 
+I'll show you our API for the bridge.
+Firstly lets import the `SherpaFitter <sherpafitter.html#astrosherpa_bridge.SherpaFitter>`_ class which is the interface with `sherpa`'s fitting routines.
+`SherpaFitter` is available through `astropy.modeling.fitting` so it can be imported by:
 
 .. code-block:: ipython
 
@@ -23,19 +21,19 @@ or
 Initialization
 --------------
 
-To initialize a fitter we simply provide names for `statistic`, `optimizer` and `estmethod` this available value for those can be found in the docstring of `SherpaFitter <sherpafitter.html#astrosherpa_bridge.SherpaFitter>`_ these relate to objects withing `sherpa.stats`, `sherpa.opt_methods` and `sherpa.est_methods`
+To initialize a fitter we simply provide names for `statistic`, `optimizer` and `estmethod` this available value for those can be found in the docstring of `SherpaFitter <sherpafitter.html#astrosherpa_bridge.SherpaFitter>`_ these relate to objects withing `sherpa.stats`, `sherpa.opt_methods` and `sherpa.est_methods`.
 
 .. code-block:: ipython
 
 	sfitter = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='covariance')
 
-Now we have a fitter instance we need something to fit so lets import an astropy model specifcally :py:class:`Gaussian1D <astropy.modeling.models.Gaussian1D>`
+Now we have a fitter instance we need something to fit so lets import an astropy model specifically `astropy.modeling.models.Gaussian1D`.
 
 .. code-block:: ipython
 
 	from astropy.modeling.models import Gaussian1D
 
-We also need some data so lets make some data with some added noise
+We also need some data so lets make some data with some added noise.
 
 .. code-block:: ipython
 
@@ -48,11 +46,11 @@ We also need some data so lets make some data with some added noise
 	x = np.arange(-3, 3, step)
 	y = true(x) + err * np.random.uniform(-1, 1, size=len(x))
 
-	yerrs=err * np.random.uniform(0.2, 1, size=len(x))
-	binsize=(step / 2) * np.ones(x.shape)  
-	# please note that the width of the bin will be 2*binsize!
+	yerrs = err * np.random.uniform(0.2, 1, size=len(x))
+	binsize = step * np.ones(x.shape)
+	# please note that binsize is the width of the bin!
 
-	fit_model = true.copy() # ofset fit model from true 
+	fit_model = true.copy() # ofset fit model from true
 	fit_model.amplitude = 2
 	fit_model.mean = 0
 	fit_model.stddev = 0.2
@@ -62,7 +60,7 @@ For good measure lets plot it and take a look
 .. image:: _generated/example_plot_data.png
 
 Now we have some data let's fit it and get hopefully we get something similar to "True" back.
-As `sfitter` has already been initialized it at similarly to other astropy fitters we just call it with some data and an astropy model and  we get a fitted model returned 
+As `sfitter` has already been initialized it at similarly to other astropy fitters we just call it with some data and an astropy model and  we get a fitted model returned.
 
 Fitting
 -------
@@ -104,14 +102,13 @@ Now we have a fit lets look at the at the fits outputs:
 Uncertainty estimation
 ----------------------
 
-One of the main driving forces behind this that using ~sherpa gives access to the uncertainty estimation methods, they are accessed through `est_errors <sherpafitter.html#astrosherpa_bridge.SherpaFitter.est_errors>`_ method.
+One of the main driving forces behind this that using `sherpa` gives access to the uncertainty estimation methods, they are accessed through `est_errors <sherpafitter.html#astrosherpa_bridge.SherpaFitter.est_errors>`_ method.
 
 .. code-block:: ipython
 
 	param_errors = sfitter.est_errors(sigma=3)
 
-
-in returns we get a tuple of (prameter_name, best_fit_value, lower_value, upper_value) for the sake of plotting them we make models for the upper and lower values, lets output the values while we're at it. 
+in returns we get a tuple of (prameter_name, best_fit_value, lower_value, upper_value) for the sake of plotting them we make models for the upper and lower values, lets output the values while we're at it.
 
 .. code-block:: ipython
 

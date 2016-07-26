@@ -209,7 +209,7 @@ class SherpaMCMC(object):
         Set the prior function to use with a parameter.
 
         The default prior used by the `SherpaMCMC` function call for each parameter
-        is flat, varying between the hard minimum and maximum
+        is flat, varying between the minimum and maximum
         values of the parameter (as given by the ``min`` and
         ``max`` attributes of the parameter object).
 

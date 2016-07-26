@@ -1,16 +1,16 @@
 
 Using sherpa's MCMC sampler
 ===========================
-This is just a very quick example of what can be done with the SherpaMCMC object. Sherpa's MCMC object is aviable from the `get_sampler <sherpafitter.html#astrosherpa_bridge.SherpaFitter.get_sampler>`_ method. 
+
+This is just a very quick example of what can be done with the SherpaMCMC object. Sherpa's MCMC object is available from the `get_sampler <sherpafitter.html#astrosherpa_bridge.SherpaFitter.get_sampler>`_ method.
 
 Let's quickly define some data and a model.
 
-.. code-block:: ipython 
+.. code-block:: ipython
 
 	x = np.arange(0, 10, 0.1)
 	y = 2+3*x**2+0.5*x
  	fit_model = Polynomial1D(2)
-
 
 Now all we have to is define a fitter, find the minima by fitting the model to the data.
 
@@ -19,13 +19,19 @@ Now all we have to is define a fitter, find the minima by fitting the model to t
 	sfitter = SherpaFitter(statistic='cash', optimizer='levmar', estmethod='covariance')
 	fitted_model = sfitter(fit_model,x, y, xbinsize=binsize, err=yerrs)
 
-To get the sampler all we have to is this initalised a `astrosherpa_bridge.SherpaMCMC` object with the fitter isntance and returns it.
+Getting the sampler object
+--------------------------
 
-.. code-block:: ipython 
+To get the sampler all we have to is this initialized a `astrosherpa_bridge.SherpaMCMC` object with the fitter instance and returns it.
+
+.. code-block:: ipython
 
 	sampler = sfitter.get_sampler()
 
-Now before we get the draws from the sampler we can define prior distributions by simply defining the function and using the `set_prior` method we can assign it to a parameter
+Defining Priors
+---------------
+
+Now before we get the draws from the sampler we can define prior distributions by simply defining the function and using the `set_prior` method we can assign it to a parameter.
 
 .. code-block:: ipython 
 
@@ -33,19 +39,19 @@ Now before we get the draws from the sampler we can define prior distributions b
 	   sigma = 0.5
 	   x0 = 1
 	   dx = np.log10(x) - x0
-	   norm = sigma / np.sqrt(2 * np.pi)
-	   return norm * np.exp(-0.5*dx*dx/(sigma*sigma))
+	   norm = sigma / np.sqrt(2 * sx*dx/(sigma*sigma))
 
 	sampler.set_prior("c0",lognorm)
 
 To use the sampler we simply use a function call, passing in the number of draws you wish to make from the sampler.
 
-.. code-block:: ipython	
-		
+
+.. code-block:: ipython
+
 		stat_vals, param_vals, accepted = sampler(niter=20000)
 
 .. code-block:: ipython	
-		
+
 		Using Priors:
 		wrap_.c0: <function lognorm at 0x7fb9fe95ab18>
 		wrap_.c1: <function flat at 0x7fb9fe9cc410>
@@ -53,19 +59,19 @@ To use the sampler we simply use a function call, passing in the number of draws
 
 To look at the results we can define some simple helper functions. Firstly a simple function for ploting the bins on a line plot.
 
-.. code-block:: ipython 
+.. code-block:: ipython
 
 	def plotter(xx,yy,c):
 	    px=[]
 	    py=[]
 	    for (xlo,xhi),y in zip(zip(xx[:-1],xx[1:]),yy):
-	        px.extend([xlo,xhi]) 
+	        px.extend([xlo,xhi])
 	        py.extend([y,y])
 	    plt.figure()
 	    plt.plot(px,py,c=c)
 	    plt.ylabel("Number")
 
-Secondly we define a fucntion for plotting a historgram from the accepted parameter values.
+Secondly we define a fucntion for plotting a histogram from the accepted parameter values.
 
 .. code-block:: ipython
 
@@ -75,7 +81,7 @@ Secondly we define a fucntion for plotting a historgram from the accepted parame
 	    plt.axvline(mcmc.parameter_map[pname].val, c=c)
 	    plt.xlabel("Value")
 
-And finally we plot the cumulative density function from the accepted parameter values. And some very rough errorbars!
+And finally we plot the cumulative density function from the accepted parameter values. And some very rough error bars!
 
 .. code-block:: ipython
 
@@ -106,17 +112,17 @@ And finally we plot the cumulative density function from the accepted parameter 
 	    plt.xlabel("Interation")
 
 
-We can first plot the histogram of the aceepted draws for each parameter value along with a line for the value from the fit. 
+We can first plot the histogram of the accepted draws for each parameter value along with a line for the value from the fit.
 
 .. code-block:: ipython
 
 	plot_hist(sampler, 'c0', 100, 'k')
 	plot_hist(sampler, 'c1', 100, 'r')
 	plot_hist(sampler, 'c2', 100, 'b')
-	
+
 .. image:: _generated/example_plot_mcmc_hist.png
 
-Then a quick cdf. 
+Then a quick cdf.
 
 .. code-block:: ipython
 
