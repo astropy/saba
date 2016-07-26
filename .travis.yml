@@ -97,6 +97,7 @@ install:
     - if [[ $SETUP_CMD == "egg_info" ]]; then conda install $CONDA_DEPENDENCIES; fi
     - source ./travis_astropy.sh
     - conda install -c sherpa sherpa
+
 script:
    - python setup.py $SETUP_CMD
 
