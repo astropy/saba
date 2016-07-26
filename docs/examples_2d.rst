@@ -11,7 +11,7 @@ Heres how you fit 2D data!
 	from sherpa.stats import Chi2
 	import numpy as np
 
-So lets define some data based on `astropy.modeling.models.Gaussian2D`
+So lets define some data based on `~astropy.modeling.functional_models.Gaussian2D`
 
 .. code-block:: ipython
 
@@ -30,8 +30,8 @@ So lets define some data based on `astropy.modeling.models.Gaussian2D`
 
 .. image:: _generated/example_plot_2d_data.png
 
-Now we have some data lets fit a model after the parameters have been offset.
-We simply flatten the arrays. We will also adjust the error bars for the fit.
+Now we have some data lets fit a model after the parameters have been offset. 
+We simply flatten the arrays. We will also adjust the error bars for the fit. 
 
 .. code-block:: ipython
 	
