@@ -25,10 +25,9 @@ To initialize a fitter we simply provide names for ``statistic``, ``optimizer`` 
 
 .. code-block:: ipython
 
-	sfitter = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='covariance')
+	sfitter = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='confidence')
 
-Now we have a fitter instance we need something to fit so lets import an astropy model specifically `~astropy.modeling.functional_models.Gaussian1D`. 
-
+Now we have a fitter instance we need something to fit so lets import an astropy model specifically `~astropy.modeling.functional_models.Gaussian1D`. A full discription astropy's model and capabilities can be found `here<http://docs.astropy.org/en/stable/modeling/index.html>`_
 .. code-block:: ipython
 
 	from astropy.modeling.models import Gaussian1D
@@ -61,6 +60,70 @@ For good measure lets plot it and take a look
 
 Now we have some data let's fit it and get hopefully we get something similar to "True" back. 
 As ``sfitter`` has already been initialized as with other `astropy.modeling.fitting` fitters we just call it with some data and an astropy model and we get the fitted model returned. 
+
+Fitting Config
+--------------
+
+A initialized SherpaFitter object has the `opt_config` property this holds the configuration details for the optimization routine. It's docstring contains the information about the the properties of the optimizer.
+
+.. code-block:: ipython
+
+	print(sfitter.opt_config)
+	print(sfitter.opt_config.__doc__)  # as help returns the help for the returned object
+
+.. code-block:: ipython
+	
+	{'epsfcn': 1.1920928955078125e-07,
+	 'factor': 100.0,
+ 	'ftol': 1.1920928955078125e-07,
+ 	'gtol': 1.1920928955078125e-07,
+ 	'maxfev': None,
+ 	'verbose': 0,
+ 	'xtol': 1.1920928955078125e-07}
+
+	
+	Levenberg-Marquardt optimization method.
+
+	The Levenberg-Marquardt method is an interface to the MINPACK
+	subroutine lmdif to find the local minimum of nonlinear least
+	squares functions of several variables by a modification of the
+	Levenberg-Marquardt algorithm [1]_.
+
+	Attributes
+	----------
+	ftol : number
+	   The function tolerance to terminate the search for the minimum;
+	   the default is sqrt(DBL_EPSILON) ~ 1.19209289551e-07, where
+	   DBL_EPSILON is the smallest number x such that `1.0 != 1.0 +
+	   x`. The conditions are satisfied when both the actual and
+	   predicted relative reductions in the sum of squares are, at
+	   most, ftol.
+
+	xtol : number
+	   The relative error desired in the approximate solution; default
+	   is sqrt( DBL_EPSILON ) ~ 1.19209289551e-07, where DBL_EPSILON
+	   is the smallest number x such that `1.0 != 1.0 + x`. The
+	   conditions are satisfied when the relative error between two
+	   consecutive iterates is, at most, `xtol`.
+
+	...
+
+The parameters can be changes by
+
+.. code-block:: ipython
+	
+	sfitter.opt_config['ftol'] = 1e-5
+	print(sfitter.opt_config)
+
+.. code-block:: ipython
+	
+	{'epsfcn': 1.1920928955078125e-07,
+	 'factor': 100.0,
+	 'ftol': 1e-05,
+	 'gtol': 1.1920928955078125e-07,
+	 'maxfev': None,
+	 'verbose': 0,
+	 'xtol': 1.1920928955078125e-07}
 
 Fitting
 -------
@@ -99,10 +162,54 @@ Now we have a fit lets look at the at the fits outputs:
 		nfev           = 84
 
 
-Uncertainty estimation
-----------------------
+Uncertainty estimation and config
+---------------------------------
+
 
 One of the main driving forces behind this that using `sherpa` gives access to the uncertainty estimation methods, they are accessed through  `~astrosherpa_bridge.SherpaFitter.est_errors` method which uses the sherpa's  `~sherpa.fit.Fit.est_errors` method. 
+
+As with the `~sherpa.optmethods` before we are able to adjust the configuration of the `~sherpa.estmethods`. Some of the properties can be passed through `~astrosherpa_bridge.SherpaFitter.est_errors` as keyword arguments such as the `sigma` however for access to all options we have the `est_config` property.
+
+
+.. code-block:: ipython
+	
+	print(sfitter.est_config)
+	sfitter.est_config['numcores'] = 5
+	sfitter.est_config['max_rstat'] = 4
+	print(sfitter.est_config)
+	
+.. code-block:: ipython
+	
+	{'eps': 0.01,
+	 'fast': False,
+	 'max_rstat': 3,
+	 'maxfits': 5,
+	 'maxiters': 200,
+	 'numcores': 8,
+	 'openinterval': False,
+	 'parallel': True,
+	 'remin': 0.01,
+	 'sigma': 1,
+	 'soft_limits': False,
+	 'tol': 0.2,
+	 'verbose': False}
+
+	{'eps': 0.01,
+	 'fast': False,
+	 'max_rstat': 3,
+	 'maxfits': 5,
+	 'maxiters': 200,
+	 'numcores': 5,
+	 'openinterval': False,
+	 'parallel': True,
+	 'remin': 0.01,
+	 'sigma': 1,
+	 'soft_limits': False,
+	 'tol': 0.2,
+	 'verbose': False}
+
+
+Then to use get the errors we can simply (N.B we can pass `sigma` in as a keyword). 
 
 .. code-block:: ipython
 
@@ -122,8 +229,8 @@ in returns we get a tuple of (prameter_name, best_fit_value, lower_value, upper_
 
 .. code-block:: ipython
 
-   amplitude 3.06467892741 -0.529675180127 0.529675180127
-   mean 0.778538514198 -0.0964139944319 0.0964139944319
-   stddev 0.507219374547 -0.105919629294 0.105919629294
+   	('amplitude', 3.0646789274093185, -0.50152026852144349, 0.56964617033348119)
+	('mean', 0.77853851419777986, -0.096264447380365548, 0.10293940565584792)
+	('stddev', 0.50721937454701504, -0.098092469817728456, 0.11585973498734969)
 
 .. image:: _generated/example_plot_error.png

@@ -32,7 +32,7 @@ Installation
 
 
 Conda:
------
+------
 
 
 

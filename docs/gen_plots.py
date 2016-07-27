@@ -3,9 +3,8 @@ from astropy.modeling.models import Gaussian1D, Gaussian2D
 import numpy as np
 import matplotlib.pyplot as plt
 
-sfitter = SherpaFitter(
-    statistic='chi2', optimizer='levmar', estmethod='covariance')
-
+sfitter = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='confidence')
+sfitter.est_config['max_rstat'] = 4
 np.random.seed(0x1337)
 
 true = Gaussian1D(amplitude=3, mean=0.9, stddev=0.5)
@@ -51,6 +50,7 @@ min_model = fitted_model.copy()
 max_model = fitted_model.copy()
 
 for pname, pval, pmin, pmax in zip(*param_errors):
+    print(pname, pval, pmin, pmax)
     getattr(min_model, pname).value = pval + pmin
     getattr(max_model, pname).value = pval + pmax
 
@@ -66,6 +66,7 @@ _ = plt.xlim((-3, 3))
 plt.savefig("_generated/example_plot_error.png")
 plt.close('all')
 
+sfitter = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='covariance')
 
 double_gaussian = Gaussian1D(
     amplitude=10, mean=-1.5, stddev=0.5) + Gaussian1D(amplitude=1, mean=0.9,
