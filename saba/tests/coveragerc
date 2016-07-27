@@ -1,16 +1,16 @@
 [run]
-source = astrosherpa_bridge
+source = saba
 omit =
-   astrosherpa_bridge/_astropy_init*
-   astrosherpa_bridge/conftest*
-   astrosherpa_bridge/cython_version*
-   astrosherpa_bridge/setup_package*
-   astrosherpa_bridge/*/setup_package*
-   astrosherpa_bridge/*/*/setup_package*
-   astrosherpa_bridge/tests/*
-   astrosherpa_bridge/*/tests/*
-   astrosherpa_bridge/*/*/tests/*
-   astrosherpa_bridge/version*
+   saba/_astropy_init*
+   saba/conftest*
+   saba/cython_version*
+   saba/setup_package*
+   saba/*/setup_package*
+   saba/*/*/setup_package*
+   saba/tests/*
+   saba/*/tests/*
+   saba/*/*/tests/*
+   saba/version*
 
 [report]
 exclude_lines =

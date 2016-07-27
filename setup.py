@@ -86,7 +86,7 @@ for entry_point in entry_point_list:
     entry_points['console_scripts'].append('{0} = {1}'.format(entry_point[0],
                                                               entry_point[1]))
 
-astrosherpa_entry_point_list = conf.items('asb_entry_points')
+astrosherpa_entry_point_list = conf.items('saba_entry_points')
 for astrosherpa_entry_point in astrosherpa_entry_point_list:
     entry_points['astropy.modeling'].append('{0} = {1}'.format(
                                        astrosherpa_entry_point[0],

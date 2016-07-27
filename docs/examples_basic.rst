@@ -1,4 +1,4 @@
-.. |asb| replace:: saba
+.. |saba| replace:: saba
 .. |sherpa| replace:: `~sherpa`
 
 How to use SherpaFitter
@@ -28,7 +28,7 @@ To initialize a fitter we simply provide names for ``statistic``, ``optimizer`` 
 
 	sfitter = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='confidence')
 
-Now we have a fitter instance we need something to fit so lets import an astropy model specifically `~astropy.modeling.functional_models.Gaussian1D`. A full discription astropy's model and capabilities can be found `here<http://docs.astropy.org/en/stable/modeling/index.html>`_
+Now we have a fitter instance we need something to fit so lets import an astropy model specifically `~astropy.modeling.functional_models.Gaussian1D`. A full discription astropy's model and capabilities can be found `here <http://docs.astropy.org/en/stable/modeling/index.html>`_
 
 .. code-block:: ipython
 
@@ -127,7 +127,6 @@ The parameters can be changes by
 	 'verbose': 0,
 	 'xtol': 1.1920928955078125e-07}
 
-
 Fitting
 -------
 
@@ -168,13 +167,48 @@ Now we have a fit lets look at the at the fits outputs:
 Uncertainty estimation and config
 ---------------------------------
 
-
 One of the main driving forces behind this that using `sherpa` gives access to the uncertainty estimation methods, they are accessed through  `~saba.SherpaFitter.est_errors` method which uses the sherpa's  `~sherpa.fit.Fit.est_errors` method. 
-
 As with the `~sherpa.optmethods` before we are able to adjust the configuration of the `~sherpa.estmethods`. Some of the properties can be passed through `~saba.SherpaFitter.est_errors` as keyword arguments such as the `sigma` however for access to all options we have the `est_config` property.
 
+.. code-block:: ipython
+	
+	print(sfitter.est_config)
+	sfitter.est_config['numcores'] = 5
+	sfitter.est_config['max_rstat'] = 4
+	print(sfitter.est_config)
+	
+.. code-block:: ipython
+	
+	{'eps': 0.01,
+	 'fast': False,
+	 'max_rstat': 3,
+	 'maxfits': 5,
+	 'maxiters': 200,
+	 'numcores': 8,
+	 'openinterval': False,
+	 'parallel': True,
+	 'remin': 0.01,
+	 'sigma': 1,
+	 'soft_limits': False,
+	 'tol': 0.2,
+	 'verbose': False}
 
-One of the main driving forces behind this that using `sherpa` gives access to the uncertainty estimation methods, they are accessed through  `~astrosherpa_bridge.SherpaFitter.est_errors` method which uses the sherpa's  `~sherpa.fit.Fit.est_errors` method. 
+	{'eps': 0.01,
+	 'fast': False,
+	 'max_rstat': 3,
+	 'maxfits': 5,
+	 'maxiters': 200,
+	 'numcores': 5,
+	 'openinterval': False,
+	 'parallel': True,
+	 'remin': 0.01,
+	 'sigma': 1,
+	 'soft_limits': False,
+	 'tol': 0.2,
+	 'verbose': False}
+
+
+Then to use get the errors we can simply (N.B we can pass `sigma` in as a keyword). 
 
 .. code-block:: ipython
 	
