@@ -78,7 +78,7 @@ package_info = get_package_info()
 package_info['package_data'].setdefault(PACKAGENAME, [])
 package_info['package_data'][PACKAGENAME].append('data/*')
 
-# Define entry points for astrosherpa_bridge
+# Define entry points for saba
 entry_points = {'console_scripts': [], 'astropy.modeling':[]}
 
 entry_point_list = conf.items('entry_points')

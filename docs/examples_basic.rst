@@ -1,15 +1,15 @@
-.. |asb| replace:: astropysherpa_bridge
+.. |asb| replace:: saba
 
 How to use SherpaFitter
 =======================
 
 I'll show you our API for the bridge. 
-Firstly lets import the `~astrosherpa_bridge.SherpaFitter` class which is the interface with `sherpa`'s fitting routines. 
-`~astrosherpa_bridge.SherpaFitter` is available through `astropy.modeling.fitting` so it can be imported by:
+Firstly lets import the `~saba.SherpaFitter` class which is the interface with `sherpa`'s fitting routines. 
+`~saba.SherpaFitter` is available through `astropy.modeling.fitting` so it can be imported by:
 
 .. code-block:: ipython
 
-	from astrosherpa_bridge import SherpaFitter
+	from saba import SherpaFitter
 
 or 
 
@@ -21,7 +21,7 @@ or
 Initialization
 --------------
 
-To initialize a fitter we simply provide names for ``statistic``, ``optimizer`` and ``estmethod`` this available value for those can be found in the docstring of  `~astrosherpa_bridge.SherpaFitter` these relate to objects withing `sherpa.stats`, `sherpa.optmethods` and `sherpa.estmethods`. 
+To initialize a fitter we simply provide names for ``statistic``, ``optimizer`` and ``estmethod`` this available value for those can be found in the docstring of  `~saba.SherpaFitter` these relate to objects withing `sherpa.stats`, `sherpa.optmethods` and `sherpa.estmethods`. 
 
 .. code-block:: ipython
 
@@ -166,9 +166,9 @@ Uncertainty estimation and config
 ---------------------------------
 
 
-One of the main driving forces behind this that using `sherpa` gives access to the uncertainty estimation methods, they are accessed through  `~astrosherpa_bridge.SherpaFitter.est_errors` method which uses the sherpa's  `~sherpa.fit.Fit.est_errors` method. 
+One of the main driving forces behind this that using `sherpa` gives access to the uncertainty estimation methods, they are accessed through  `~saba.SherpaFitter.est_errors` method which uses the sherpa's  `~sherpa.fit.Fit.est_errors` method. 
 
-As with the `~sherpa.optmethods` before we are able to adjust the configuration of the `~sherpa.estmethods`. Some of the properties can be passed through `~astrosherpa_bridge.SherpaFitter.est_errors` as keyword arguments such as the `sigma` however for access to all options we have the `est_config` property.
+As with the `~sherpa.optmethods` before we are able to adjust the configuration of the `~sherpa.estmethods`. Some of the properties can be passed through `~saba.SherpaFitter.est_errors` as keyword arguments such as the `sigma` however for access to all options we have the `est_config` property.
 
 
 .. code-block:: ipython

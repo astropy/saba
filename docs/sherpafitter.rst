@@ -2,7 +2,7 @@ SherpaFitter
 =============
 
 
-.. automodule:: astrosherpa_bridge
+.. automodule:: saba
    :members:
 
 .. _sfit:
