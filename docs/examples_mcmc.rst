@@ -2,7 +2,7 @@
 Using sherpa's MCMC sampler
 ===========================
 
-This is just a very quick example of what can be done with the SherpaMCMC object, which is available from the `~astrosherpa_bridge.SherpaFitter.get_sampler` method.
+This is just a very quick example of what can be done with the SherpaMCMC object, which is available from the `~saba.SherpaFitter.get_sampler` method.
 
 Let's quickly define some data and a model. 
 
@@ -22,7 +22,7 @@ Now all we have to is define a fitter, find the minima by fitting the model to t
 Getting the sampler object
 --------------------------
 
-To get the sampler all we have to is this initialized a `~astrosherpa_bridge.SherpaMCMC` object with the fitter instance and returns it. 
+To get the sampler all we have to is this initialized a `~saba.SherpaMCMC` object with the fitter instance and returns it. 
 
 .. code-block:: ipython
 
@@ -31,7 +31,7 @@ To get the sampler all we have to is this initialized a `~astrosherpa_bridge.She
 Defining Priors
 ---------------
 
-Now before we get the draws from the sampler we can define prior distributions by simply defining the function and using the `~astrosherpa_bridge.SherpaMCMC.set_prior` method we can assign it to a parameter. 
+Now before we get the draws from the sampler we can define prior distributions by simply defining the function and using the `~saba.SherpaMCMC.set_prior` method we can assign it to a parameter. 
 
 .. code-block:: ipython 
 

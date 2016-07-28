@@ -27,7 +27,7 @@ from astropy_helpers.sphinx.conf import *
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 # sys.path.insert(0, os.path.abspath('.'))
 
-import astrosherpa_bridge as asb
+import saba as asb
 
 # For now include the '+...' part of the version string
 # and that I can drop the '+...' part.
@@ -124,7 +124,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'astrosherpa_bridge'
+project = u'saba'
 author = u'NocturnalAstro'
 
 # The version info for the project you're documenting, acts as replacement for
