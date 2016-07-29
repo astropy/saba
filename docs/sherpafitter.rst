@@ -17,4 +17,3 @@ SherpaFitter
    :members:
    :special-members: __call__
 
-.. inheritance-diagram:: SherpaMCMC
