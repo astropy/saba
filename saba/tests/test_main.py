@@ -19,7 +19,7 @@ except ImportError:
 
 import warnings
 
-from astrosherpa_bridge import SherpaFitter, Dataset, ConvertedModel
+from saba import SherpaFitter, Dataset, ConvertedModel
 from astropy.modeling.models import Gaussian1D, Gaussian2D
 
 _RANDOM_SEED = 0x1337
@@ -286,6 +286,6 @@ class TestSherpaFitter(object):
         from pkg_resources import iter_entry_points
 
         for entry_point in iter_entry_points(group="astropy.modeling", name=None):
-            if entry_point.module_name == 'astrosherpa_bridge':
+            if entry_point.module_name == 'saba':
                 entry_point.load()
 
