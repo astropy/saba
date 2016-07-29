@@ -1,4 +1,4 @@
-.. |asb| replace:: saba
+.. |saba| replace:: saba
 
 How to use SherpaFitter
 =======================
