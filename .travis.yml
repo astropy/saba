@@ -2,6 +2,7 @@ language: python
 
 python:
     - 2.7
+    - 3.5
 
 # Setting sudo to false opts in to Travis-CI container-based builds.
 sudo: false
@@ -17,6 +18,7 @@ addons:
             - graphviz
             - texlive-latex-extra
             - dvipng
+            - gfortran
 
 env:
     global:
@@ -25,14 +27,14 @@ env:
         # overridden underneath. They are defined here in order to save having
         # to repeat them for all configurations.
         - NUMPY_VERSION=stable
-        - ASTROPY_VERSION=stable
+        #- ASTROPY_VERSION=stable
         - SETUP_CMD='test'
         #- PIP_DEPENDENCIES='jinja2'
 
         # For this package-template, we include examples of Cython modules,
         # so Cython is required for testing. If your package does not include
         # Cython code, you can set CONDA_DEPENDENCIES=''
-        - CONDA_DEPENDENCIES='Cython jinja2'
+        - CONDA_DEPENDENCIES='Cython jinja2 six'
 
         # If there are matplotlib or other GUI tests, uncomment the following
         # line to use the X virtual framebuffer.
@@ -59,7 +61,6 @@ matrix:
         # Try Astropy development version
         #- python: 2.7
         #  env: ASTROPY_VERSION=development
-
         - python: 2.7
           env: NUMPY_VERSION=1.10
         - python: 2.7
@@ -68,7 +69,8 @@ matrix:
           env: NUMPY_VERSION=1.8
         - python: 2.7
           env: NUMPY_VERSION=1.7
-
+        - python: 3.5
+          env: NUMPY_VERSION=1.10
 
 install:
 
@@ -96,7 +98,10 @@ install:
     # other dependencies.
     - if [[ $SETUP_CMD == "egg_info" ]]; then conda install $CONDA_DEPENDENCIES; fi
     - source ./travis_astropy.sh
-    - conda install -c sherpa sherpa
+    - if  [[ $TRAVIS_PYTHON_VERSION  == 3.5 ]]; 
+         then source ./travis_sherpa_py3.sh;
+         else conda install -c sherpa sherpa;
+      fi
 
 script:
    - python setup.py $SETUP_CMD
@@ -105,7 +110,7 @@ after_success:
     # If coveralls.io is set up for this package, uncomment the line
     # below and replace "packagename" with the name of your package.
     # The coveragerc file may be customized as needed for your package.
-    # - if [[ $SETUP_CMD == 'test --coverage' ]]; then coveralls --rcfile='astrosherpa_bridge/tests/coveragerc'; fi
+    - if [[ $SETUP_CMD == 'test --coverage' ]]; then coveralls --rcfile='saba/tests/coveragerc'; fi
 
 notifications:
   email: false
