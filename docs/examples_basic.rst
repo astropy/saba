@@ -27,7 +27,7 @@ To initialize a fitter we simply provide names for ``statistic``, ``optimizer`` 
 
 	sfitter = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='confidence')
 
-Now we have a fitter instance we need something to fit so lets import an astropy model specifically `~astropy.modeling.functional_models.Gaussian1D`. A full discription astropy's model and capabilities can be found `here<http://docs.astropy.org/en/stable/modeling/index.html>`_
+Now we have a fitter instance we need something to fit so lets import an astropy model specifically `~astropy.modeling.functional_models.Gaussian1D`. A full discription astropy's model and capabilities can be found `here <http://docs.astropy.org/en/stable/modeling/index.html>`_
 .. code-block:: ipython
 
 	from astropy.modeling.models import Gaussian1D
