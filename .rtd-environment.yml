@@ -1,0 +1,15 @@
+name: astropy
+
+channels:
+  - astropy
+  - https://conda.binstar.org/sherpa
+
+dependencies:
+  - astropy-helpers
+  - numpy
+  - cython
+  - matplotlib
+  - wcsaxes
+  - scipy
+  - sherpa
+  - ipython
