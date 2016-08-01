@@ -114,7 +114,7 @@ print("##Fit with contraints")
 print(sfitter._fitmodel.sherpa_model)
 
 free_gg = sfitter(double_gaussian.copy(), x, y, xbinsize=binsize, err=yerrs)
-print
+print()
 print("##Fit without contraints")
 print(sfitter._fitmodel.sherpa_model)
 
@@ -283,7 +283,7 @@ from astropy.modeling.models import Polynomial1D
 x = np.arange(0, 10, 0.1)
 y = 2+3*x**2+0.5*x
 sfit = SherpaFitter(statistic="Cash")
-print sfit(Polynomial1D(2), x, y)
+print(sfit(Polynomial1D(2), x, y))
 
 sampler = sfit.get_sampler()
 
