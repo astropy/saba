@@ -2,6 +2,7 @@ language: python
 
 python:
     - 2.7
+    - 3.5
 
 # Setting sudo to false opts in to Travis-CI container-based builds.
 sudo: false
@@ -59,7 +60,8 @@ matrix:
         # Try Astropy development version
         #- python: 2.7
         #  env: ASTROPY_VERSION=development
-
+	-python: 2.7
+          env: NUMPY_VERSION=1.11
         - python: 2.7
           env: NUMPY_VERSION=1.10
         - python: 2.7
@@ -69,6 +71,10 @@ matrix:
         - python: 2.7
           env: NUMPY_VERSION=1.7
 
+	- python 3.5
+	  env: NUMPY_VERSION=1.11
+        - python 3.5
+          env: NUMPY_VERSION=1.10
 
 install:
 
@@ -96,7 +102,10 @@ install:
     # other dependencies.
     - if [[ $SETUP_CMD == "egg_info" ]]; then conda install $CONDA_DEPENDENCIES; fi
     - source ./travis_astropy.sh
-    - conda install -c sherpa sherpa
+    - if  [[ $TRAVIS_PYTHON_VERSION  == 3.5 ]]; 
+	then source ./travis_sherpa_py3.sh;
+	else conda install -c sherpa sherpa;
+      fi
 script:
    - python setup.py $SETUP_CMD
 
