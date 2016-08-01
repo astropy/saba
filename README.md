@@ -1,2 +1,2 @@
-# astrosherpa_bridge
+# Saba
 A GSOC project which allows `astropy.modeling` to interface with sherpa's fitting routines
