@@ -1,6 +1,6 @@
 
 
-.. |asb| replace:: astropysherpa_bridge
+.. |saba| replace:: astropysherpa_bridge
 .. |sherpa| replace:: `~sherpa`
 
 How to use SherpaFitter

@@ -16,12 +16,10 @@
    examples_mcmc
 
 
-.. image:: _static/asb_logo.png
-
-Welcome to saba's documentation!
+Welcome to Saba's documentation!
 =============================================
 
-I would like to introduce you to the Google Summer of Code project saba. Saba the sherpa workd for bridge (Dislamer: Accoring to an online dictonary I found) but also the an Acronym for Sherpa Astropy Bridge API (yeah nested acronyms)
+I would like to introduce you to the Google Summer of Code project saba. Saba the sherpa workd for bridge (Dislamer: Accoring to an online dictonary I found) but also an Acronym for Sherpa Astropy Bridge API.
 Saba is an interface between `astropy.modeling` and `sherpa` to allow astropy users to take advantage of the `sherpa` package, giving them access to the statistics, fitting routines and uncertainties estimation.
 
 Installation
