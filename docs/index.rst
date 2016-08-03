@@ -22,15 +22,7 @@ Installation
 .. note::
 	If you wish to import sherpa's fit routine through astropy you must use astropy's master github (not yet haven't PR'd) as it requires the patch which inserts the entry_points created by `saba` into `astropy.modeling.fitting`.
 
-Conda:
-------
-
-
-
-Source:
--------
-
-Prerequisites:
+Prerequisites
 **************
  * numpy 
  * cython 
@@ -38,14 +30,14 @@ Prerequisites:
  * astropy
  * sherpa
 
-Install:
-********
 
-conda install numpy cython jinja2 astropy
+.. code-block:: bash
 
-To import though astropy:
-*************************
-.. code-block::
+   conda install numpy cython jinja2
+
+To import though astropy (Pre PR):
+
+.. code-block:: bash
 
    git clone https://github.com/nocturnalastro/astropy.git astropy
    cd astropy 
@@ -53,15 +45,22 @@ To import though astropy:
    python setup.py develop
    cd ../
 
+Sherpa currently needs to be built after astropy on Mac OSX. 
+
+.. code-block:: bash
+
    conda install -c sherpa sherpa 
 
-   git clone https://github.com/nocturnalastro/astrosherpa_bridge.git astrosherpa_bridge
-   cd astrosherpa_bridge
+.. code-block:: bash
+
+   git clone https://github.com/nocturnalastro/saba.git saba
+   cd saba
    python setup.py develop
    cd ../
 
 
 The astropy interface
-----------------------
+---------------------
 
-If you are using the dev or astropy>=1.3 you can access the `~saba.SherpaFitter` from `astropy.modeling.fitting`. `saba` creates entry points which are inserted into the  `~astropy.modeling.fitting` namespace. 
+If you are using the dev or astropy>=1.3 you can access the `~saba.SherpaFitter` from `astropy.modeling.fitting`. `saba` creates entry points which are inserted into the  `~astropy.modeling.fitting` namespace.
+

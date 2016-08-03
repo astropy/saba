@@ -5,7 +5,7 @@ Getting started
 ===============
 
 I'll show you our API for the bridge. 
-Firstly lets import the `~saba.SherpaFitter` class which is the interface with `sherpa`'s fitting routines. 
+Firstly lets import the `~saba.SherpaFitter` class which is the interface with sherpa's fitting routines. 
 `~saba.SherpaFitter` is available through `astropy.modeling.fitting` so it can be imported by:
 
 .. code-block:: ipython
@@ -100,7 +100,6 @@ Now we have a fit we can look at the outputs by doing:
 		nfev           = 84
 
 
-<<<<<<< HEAD
 Uncertainty estimation and config
 ---------------------------------
 
@@ -186,13 +185,7 @@ Then to use get the errors we can simply (N.B we can pass `sigma` in as a keywor
 
 
 Then to use get the errors we can simply (N.B we can pass `sigma` in as a keyword). 
-=======
-Uncertainty estimation
-----------------------
-
-
-One of the main driving forces behind this that using `sherpa` gives access to the uncertainty estimation methods, they are accessed through  `~saba.SherpaFitter.est_errors` method which uses the sherpa's  `~sherpa.fit.Fit.est_errors` method. Then to use get the errors we can simply (N.B we can pass `sigma` in as a keyword). 
->>>>>>> 29803ca... Switched to astropy theme because of some strange formatting
+One of the main driving forces behind this that using sherpa gives access to the uncertainty estimation methods, they are accessed through  `~saba.SherpaFitter.est_errors` method which uses the sherpa's  `~sherpa.fit.Fit.est_errors` method. Then to use get the errors we can simply (N.B we can pass `sigma` in as a keyword). 
 
 .. code-block:: ipython
 
