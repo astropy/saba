@@ -107,7 +107,7 @@ script:
    - if [[ $SETUP_CMD != 'test --coverage' ]]; 
 	   then python setup.py $SETUP_CMD;
 	   else coverage run --rcfile=saba/tests/coveragerc saba/tests/test_*.py;
-	if
+	fi
 
 after_success:
     # If coveralls.io is set up for this package, uncomment the line
