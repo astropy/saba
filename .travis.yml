@@ -104,9 +104,9 @@ install:
       fi
 
 script:
-   - if [[ $SETUP_CMD != 'test --coverage']]; 
-	then python setup.py $SETUP_CMD;
-	else coverage run --rcfile=saba/tests/coveragerc saba/tests/test_*.py;
+   - if [[ $SETUP_CMD != 'test --coverage' ]]; 
+	   then python setup.py $SETUP_CMD;
+	   else coverage run --rcfile=saba/tests/coveragerc saba/tests/test_*.py;
 	if
 
 after_success:
