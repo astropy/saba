@@ -32,7 +32,7 @@ Conda:
 Source:
 -------
 
-prerequisites:
+Prerequisites:
 **************
  * numpy 
  * cython 
@@ -40,27 +40,30 @@ prerequisites:
  * astropy
  * sherpa
 
-install:
+Install:
 ********
 
 conda install numpy cython jinja2 astropy
 
 To import though astropy:
 *************************
-git clone https://github.com/nocturnalastro/astropy.git astropy
-cd astropy 
-git checkout sherpa_bridge_v2
-python setup.py develop
-cd ../
+.. code-block::
 
-conda install -c sherpa sherpa 
+   git clone https://github.com/nocturnalastro/astropy.git astropy
+   cd astropy 
+   git checkout sherpa_bridge_v2
+   python setup.py develop
+   cd ../
 
-git clone https://github.com/nocturnalastro/astrosherpa_bridge.git astrosherpa_bridge
-cd astrosherpa_bridge
-python setup.py develop
-cd ../
+   conda install -c sherpa sherpa 
+
+   git clone https://github.com/nocturnalastro/astrosherpa_bridge.git astrosherpa_bridge
+   cd astrosherpa_bridge
+   python setup.py develop
+   cd ../
 
 
 The astropy interface
 ----------------------
-If you are using the dev or astropy>=1.3 you can access the `~saba.SherpaFitter` from `astropy.modeling.fitting`. `saba` creates entry_points which are inserted into the  `~astropy.modeling.fitting` namespace `PR#NNN <pathtopr>`_
+
+If you are using the dev or astropy>=1.3 you can access the `~saba.SherpaFitter` from `astropy.modeling.fitting`. `saba` creates entry points which are inserted into the  `~astropy.modeling.fitting` namespace. 

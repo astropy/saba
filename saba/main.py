@@ -225,14 +225,14 @@ class SherpaMCMC(object):
         Create a function (``lognorm``) and use it as the prior the
         ``nH`` parameter:
 
-            >>> def lognorm(x):
+            >> def lognorm(x):
                     sigma = 0.5
                     x0 = 20
                     dx = np.log10(x) - x0
                     norm = sigma / np.sqrt(2 * np.pi)
                     return norm * np.exp(-0.5*dx*dx/(sigma*sigma))
 
-            >>> mcmc.set_prior('nH', lognorm)
+            >> mcmc.set_prior('nH', lognorm)
 
         """
 
