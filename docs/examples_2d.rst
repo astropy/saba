@@ -1,20 +1,15 @@
 
 Fitting 2D data
 ===============
-
-Heres how you fit 2d data!
-
-Preamble
---------
+We will start by doing some nessisary imports
 
 .. code-block:: ipython
 
 	from astropy.modeling.astro_sherpa import SherpaFitter
 	from astropy.modeling.models import Gaussian2D
-	from sherpa.stats import Chi2
 	import numpy as np
 
-So lets define some data based on `~astropy.modeling.functional_models.Gaussian2D`
+We need to define some data we use the `~astropy.modeling.functional_models.Gaussian2D` model and add some poisson noise.
 
 .. code-block:: ipython
 
@@ -47,6 +42,6 @@ We simply flatten the arrays. We will also adjust the error bars for the fit.
 	fitmo.theta = 10
 	fitmo.amplitude = 50
 
-	fitmo = sfit(fitmo, x0.flatten(), x1.flatten(), mexp.flatten()+merr.flatten(), xbinsize=np.ones(x0.size)*dx, ybinsize=np.ones(x1.size)*dx, err=merr.flatten()+np.random.uniform(-0.5,0.5,x0.size))
+	fitmo = sfit(fitmo, x=x0.flatten(), y=x1.flatten(), z=mexp.flatten()+merr.flatten(), xbinsize=np.ones(x0.size)*dx, ybinsize=np.ones(x1.size)*dx, err=merr.flatten()+np.random.uniform(-0.5,0.5,x0.size))
 
 .. image:: _generated/example_plot_2d_fit.png

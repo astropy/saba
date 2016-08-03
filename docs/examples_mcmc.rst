@@ -15,8 +15,8 @@ Now all we have to is define a fitter, find the minima by fitting the model to t
 
 .. code-block:: ipython 
 
-	sfitter = SherpaFitter(statistic='cash', optimizer='levmar', estmethod='covariance')
-	fitted_model = sfitter(fit_model,x, y, xbinsize=binsize, err=yerrs)
+	sfit = SherpaFitter(statistic='cash', optimizer='levmar', estmethod='covariance')
+	fitted_model = sfit(fit_model,x, y, xbinsize=binsize, err=yerrs)
 
 Getting the sampler object
 --------------------------
@@ -25,7 +25,7 @@ To get the sampler all we have to is this initialized a `~saba.SherpaMCMC` objec
 
 .. code-block:: ipython
 
-	sampler = sfitter.get_sampler()
+	sampler = sfit.get_sampler()
 
 Defining Priors
 ---------------
@@ -84,7 +84,7 @@ Secondly we define a fucntion for plotting a histogram from the accepted paramet
 	    plt.axvline(mcmc.parameter_map[pname].val, c=c)
 	    plt.xlabel("Value")
 
-And finally we plot the cumulative density function from the accepted parameter values. And some very rough error bars!
+And finally we plot the cumulative density function from the accepted parameter values. And some very rough error bars
 
 .. code-block:: ipython
 

@@ -1,8 +1,8 @@
 .. |saba| replace:: saba
 .. |sherpa| replace:: `~sherpa`
 
-How to use SherpaFitter
-=======================
+Getting started
+===============
 
 I'll show you our API for the bridge. 
 Firstly lets import the `~saba.SherpaFitter` class which is the interface with `sherpa`'s fitting routines. 
@@ -26,7 +26,7 @@ To initialize a fitter we simply provide names for ``statistic``, ``optimizer`` 
 
 .. code-block:: ipython
 
-	sfitter = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='confidence')
+	sfit = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='confidence')
 
 Now we have a fitter instance we need something to fit so lets import an astropy model specifically `~astropy.modeling.functional_models.Gaussian1D`. A full discription astropy's model and capabilities can be found `here <http://docs.astropy.org/en/stable/modeling/index.html>`_
 
@@ -61,88 +61,24 @@ For good measure lets plot it and take a look
 .. image:: _generated/example_plot_data.png
 
 Now we have some data let's fit it and get hopefully we get something similar to "True" back. 
-As ``sfitter`` has already been initialized as with other `astropy.modeling.fitting` fitters we just call it with some data and an astropy model and we get the fitted model returned. 
-
-Fitting Config
---------------
-
-A initialized SherpaFitter object has the `opt_config` property this holds the configuration details for the optimization routine. It's docstring contains the information about the the properties of the optimizer.
-
-.. code-block:: ipython
-
-	print(sfitter.opt_config)
-	print(sfitter.opt_config.__doc__)  # as help returns the help for the returned object
-
-.. code-block:: ipython
-	
-	{'epsfcn': 1.1920928955078125e-07,
-	 'factor': 100.0,
- 	'ftol': 1.1920928955078125e-07,
- 	'gtol': 1.1920928955078125e-07,
- 	'maxfev': None,
- 	'verbose': 0,
- 	'xtol': 1.1920928955078125e-07}
-
-	
-	Levenberg-Marquardt optimization method.
-
-	The Levenberg-Marquardt method is an interface to the MINPACK
-	subroutine lmdif to find the local minimum of nonlinear least
-	squares functions of several variables by a modification of the
-	Levenberg-Marquardt algorithm [1]_.
-
-	Attributes
-	----------
-	ftol : number
-	   The function tolerance to terminate the search for the minimum;
-	   the default is sqrt(DBL_EPSILON) ~ 1.19209289551e-07, where
-	   DBL_EPSILON is the smallest number x such that `1.0 != 1.0 +
-	   x`. The conditions are satisfied when both the actual and
-	   predicted relative reductions in the sum of squares are, at
-	   most, ftol.
-
-	xtol : number
-	   The relative error desired in the approximate solution; default
-	   is sqrt( DBL_EPSILON ) ~ 1.19209289551e-07, where DBL_EPSILON
-	   is the smallest number x such that `1.0 != 1.0 + x`. The
-	   conditions are satisfied when the relative error between two
-	   consecutive iterates is, at most, `xtol`.
-
-	...
-
-The parameters can be changes by
-
-.. code-block:: ipython
-	
-	sfitter.opt_config['ftol'] = 1e-5
-	print(sfitter.opt_config)
-
-.. code-block:: ipython
-	
-	{'epsfcn': 1.1920928955078125e-07,
-	 'factor': 100.0,
-	 'ftol': 1e-05,
-	 'gtol': 1.1920928955078125e-07,
-	 'maxfev': None,
-	 'verbose': 0,
-	 'xtol': 1.1920928955078125e-07}
+As ``sfit`` has already been initialized as with other `astropy.modeling.fitting` fitters we just call it with some data and an astropy model and we get the fitted model returned. 
 
 Fitting
 -------
 
 .. code-block:: ipython
 
-	fitted_model = sfitter(fit_model, x, y, xbinsize=binsize, err=yerrs)
+	fitted_model = sfit(fit_model, x, y, xbinsize=binsize, err=yerrs)
 
-Once again lets take a look
+Once again plotting the data.
 
 .. image:: _generated/example_plot_fitted.png
 
-Now we have a fit lets look at the at the fits outputs:
+Now we have a fit we can look at the outputs by doing:
 	
 .. code-block:: ipython
 	
-	print(sfitter.fit_info)
+	print(sfit.fit_info)
 
 .. code-block:: ipython
 	
@@ -164,6 +100,7 @@ Now we have a fit lets look at the at the fits outputs:
 		nfev           = 84
 
 
+<<<<<<< HEAD
 Uncertainty estimation and config
 ---------------------------------
 
@@ -249,12 +186,19 @@ Then to use get the errors we can simply (N.B we can pass `sigma` in as a keywor
 
 
 Then to use get the errors we can simply (N.B we can pass `sigma` in as a keyword). 
+=======
+Uncertainty estimation
+----------------------
+
+
+One of the main driving forces behind this that using `sherpa` gives access to the uncertainty estimation methods, they are accessed through  `~saba.SherpaFitter.est_errors` method which uses the sherpa's  `~sherpa.fit.Fit.est_errors` method. Then to use get the errors we can simply (N.B we can pass `sigma` in as a keyword). 
+>>>>>>> 29803ca... Switched to astropy theme because of some strange formatting
 
 .. code-block:: ipython
 
-	param_errors = sfitter.est_errors(sigma=3)
+	param_errors = sfit.est_errors(sigma=3)
 
-in returns we get a tuple of (prameter_name, best_fit_value, lower_value, upper_value) for the sake of plotting them we make models for the upper and lower values, lets output the values while we're at it. 
+In return we get a tuple of (prameter_name, best_fit_value, lower_value, upper_value) for the sake of plotting them we make models for the upper and lower values, lets output the values while we're at it. 
 
 .. code-block:: ipython
 
