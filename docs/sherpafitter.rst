@@ -1,4 +1,4 @@
-SherpaFitter
+API/Reference
 =============
 
 

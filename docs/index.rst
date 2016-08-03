@@ -1,26 +1,20 @@
 
 .. toctree::
-   :caption: Classes
-   :name: Sclass
+   :maxdepth: 2
+   :name: TreeOFWoe
 
    sherpafitter
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Examples
-   :name: Sexample
-   
-   examples_basic
+   examples_basic   
    examples_complex
    examples_2d
    examples_mcmc
 
 
-Welcome to Saba's documentation!
-=============================================
+Welcome to Saba's documentation
+===============================
 
 I would like to introduce you to the Google Summer of Code project saba. Saba the sherpa word for bridge - accoring to an online dictonary I found.
-Saba is an interface between `astropy.modeling` and `sherpa` to allow astropy users to take advantage of the `sherpa` package, giving them access to the statistics, fitting routines and uncertainties estimation.
+Saba is an interface between `astropy.modeling` and sherpa to allow astropy users to take advantage of the sherpa package, giving them access to the statistics, fitting routines and uncertainties estimation.
 
 Installation
 ------------
@@ -66,3 +60,7 @@ cd astrosherpa_bridge
 python setup.py develop
 cd ../
 
+
+The astropy interface
+----------------------
+If you are using the dev or astropy>=1.3 you can access the `~saba.SherpaFitter` from `astropy.modeling.fitting`. `saba` creates entry_points which are inserted into the  `~astropy.modeling.fitting` namespace `PR#NNN <pathtopr>`_

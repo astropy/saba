@@ -66,7 +66,7 @@ _ = plt.xlim((-3, 3))
 plt.savefig("_generated/example_plot_error.png")
 plt.close('all')
 
-sfitter = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='covariance')
+sfitter = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='confidence')
 
 double_gaussian = Gaussian1D(
     amplitude=10, mean=-1.5, stddev=0.5) + Gaussian1D(amplitude=1, mean=0.9,
