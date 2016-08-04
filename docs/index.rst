@@ -47,7 +47,8 @@ conda install numpy cython jinja2 astropy
 
 To import though astropy:
 *************************
-.. code-block::
+
+.. code-block:: bash
 
    git clone https://github.com/nocturnalastro/astropy.git astropy
    cd astropy 
@@ -56,9 +57,10 @@ To import though astropy:
    cd ../
 
    conda install -c sherpa sherpa 
+   
 
-   git clone https://github.com/nocturnalastro/astrosherpa_bridge.git astrosherpa_bridge
-   cd astrosherpa_bridge
+   git clone https://github.com/nocturnalastro/saba.git saba
+   cd saba
    python setup.py develop
    cd ../
 
