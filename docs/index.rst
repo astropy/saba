@@ -43,10 +43,10 @@ Prerequisites:
 Install:
 ********
 
-conda install numpy cython jinja2 astropy
+.. code-block:: bash
+   conda install numpy cython jinja2 astropy
 
 To import though astropy:
-*************************
 
 .. code-block:: bash
 
@@ -56,8 +56,9 @@ To import though astropy:
    python setup.py develop
    cd ../
 
+.. code-block:: bash
+
    conda install -c sherpa sherpa 
-   
 
    git clone https://github.com/nocturnalastro/saba.git saba
    cd saba
