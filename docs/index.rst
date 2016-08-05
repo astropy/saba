@@ -24,15 +24,7 @@ Installation
 
 
 
-Conda:
-------
-
-
-
-Source:
--------
-
-Prerequisites:
+Prerequisites
 **************
  * numpy 
  * cython 
@@ -40,13 +32,12 @@ Prerequisites:
  * astropy
  * sherpa
 
-Install:
-********
 
 .. code-block:: bash
-   conda install numpy cython jinja2 astropy
 
-To import though astropy:
+   conda install numpy cython jinja2
+
+To import though astropy (Pre PR):
 
 .. code-block:: bash
 
@@ -56,9 +47,13 @@ To import though astropy:
    python setup.py develop
    cd ../
 
+Sherpa currently needs to be built after astropy on Mac OSX. 
+
 .. code-block:: bash
 
    conda install -c sherpa sherpa 
+
+.. code-block:: bash
 
    git clone https://github.com/nocturnalastro/saba.git saba
    cd saba
@@ -67,6 +62,7 @@ To import though astropy:
 
 
 The astropy interface
-----------------------
+---------------------
 
-If you are using the dev or astropy>=1.3 you can access the `~saba.SherpaFitter` from `astropy.modeling.fitting`. `saba` creates entry points which are inserted into the  `~astropy.modeling.fitting` namespace. 
+If you are using the dev or astropy>=1.3 you can access the `~saba.SherpaFitter` from `astropy.modeling.fitting`. `saba` creates entry points which are inserted into the  `~astropy.modeling.fitting` namespace.
+

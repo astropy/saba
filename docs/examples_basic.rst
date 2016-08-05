@@ -4,7 +4,7 @@ Getting started
 ===============
 
 I'll show you our API for the bridge. 
-Firstly lets import the `~saba.SherpaFitter` class which is the interface with `sherpa`'s fitting routines. 
+Firstly lets import the `~saba.SherpaFitter` class which is the interface with sherpa's fitting routines. 
 `~saba.SherpaFitter` is available through `astropy.modeling.fitting` so it can be imported by:
 
 .. code-block:: ipython
@@ -103,7 +103,7 @@ Uncertainty estimation
 ----------------------
 
 
-One of the main driving forces behind this that using `sherpa` gives access to the uncertainty estimation methods, they are accessed through  `~saba.SherpaFitter.est_errors` method which uses the sherpa's  `~sherpa.fit.Fit.est_errors` method. Then to use get the errors we can simply (N.B we can pass `sigma` in as a keyword). 
+One of the main driving forces behind this that using sherpa gives access to the uncertainty estimation methods, they are accessed through  `~saba.SherpaFitter.est_errors` method which uses the sherpa's  `~sherpa.fit.Fit.est_errors` method. Then to use get the errors we can simply (N.B we can pass `sigma` in as a keyword). 
 
 .. code-block:: ipython
 
