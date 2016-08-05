@@ -1,7 +1,7 @@
 # Licensed under a 3-clause BSD style license - see LICENSE.rst
 
 """
-This is an Astropy affiliated package.
+Bridge between Sherpa and Astropy modeling.
 """
 
 from .main import SherpaFitter, SherpaMCMC, Stat, OptMethod, EstMethod, Dataset, ConvertedModel
