@@ -1,0 +1,2 @@
+.. |SherpaFitter| replace:: `~saba.SherpaFitter`
+.. _Sherpa: http://cxc.harvard.edu/sherpa/
