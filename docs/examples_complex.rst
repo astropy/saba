@@ -1,13 +1,13 @@
-More complex useage
-===================
+Usage details
+==============
 
-Now that you have the basics lets move on to some more complex useage of the fitter interface. 
-Some quick Preamble
+Now that you have the basics let's move on to some more complex usage of the fitter interface.
+First a quick preamble to do some imports and create our |SherpaFitter| object:
 
 .. code-block::ipython
     from astropy.modeling.fitting import SherpaFitter
     sfit = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='confidence')
-    
+
     from astropy.modeling.models import Gaussian1D
     import numpy as np
     np.random.seed(0x1337)
@@ -15,15 +15,17 @@ Some quick Preamble
 Parameter constraints
 ---------------------
 
-If you place any of the parameter constaraints on the astropy models then they will be respected by the fitter. Lets take a quick look at that. Firstly lets make a compound model by adding two `~astropy.modeling.functional_models.Gaussian1D` instances. 
+If you place any of the parameter constraints on the astropy models then they will be respected by the fitter. Let's take a quick look at that. Firstly let's make a compound model by adding two `~astropy.modeling.functional_models.Gaussian1D` instances:
 
 .. code-block:: ipython
 
-    double_gaussian = Gaussian1D(amplitude=10, mean=-1.5, stddev=0.5) + Gaussian1D(amplitude=3, mean=0.9, stddev=0.5)
+    double_gaussian = (Gaussian1D(amplitude=10, mean=-1.5, stddev=0.5) +
+                       Gaussian1D(amplitude=3, mean=0.9, stddev=0.5))
 
-Now we have the compound model lets add tie `amplitude_1` (the amplitude of the right hand side `~astropy.modeling.functional_models.Gaussian1D`) to `1.2*amplitude_0` and while we're at it let generate some data. 
+Now we have the compound model let's tie ``amplitude_1`` (the amplitude of the
+right hand side `~astropy.modeling.functional_models.Gaussian1D`) to ``1.2 * amplitude_0`` and while we're at it let generate some data.
 
-To do this we must first define the `tiedfunc`
+To do this we must first define the ``tiedfunc``:
 
 .. code-block:: ipython
 
@@ -44,10 +46,11 @@ To do this we must first define the `tiedfunc`
     double_gaussian.amplitude_1.tied(double_gaussian)
 
 .. image:: _generated/example_plot_data2.png
+   :width: 500px
 
-Lets add some more parameter constraints to the model and fit the data. 
-We can print the sherpa models to check things are doing what they should. 
- 
+Let's add some more parameter constraints to the model and fit the data.
+We can print the sherpa models to check things are doing what they should.
+
 .. code-block:: ipython
 
     fit_gg = double_gaussian.copy()
@@ -61,7 +64,7 @@ We can print the sherpa models to check things are doing what they should.
 Fitting Config
 --------------
 
-A initialized `~saba.SherpaFitter` object has the `opt_config` property this holds the configuration details for the optimization routine. It's docstring contains the information about the the properties of the optimizer.
+An initialized `~saba.SherpaFitter` object has the `opt_config` property which holds the configuration details for the optimization routine. It's docstring contains information about the the properties of the optimizer.
 
 .. code-block:: ipython
 
@@ -69,7 +72,7 @@ A initialized `~saba.SherpaFitter` object has the `opt_config` property this hol
     print(sfit.opt_config.__doc__)  # as help returns the help for the returned object
 
 .. code-block:: ipython
-    
+
     {'epsfcn': 1.1920928955078125e-07,
      'factor': 100.0,
     'ftol': 1.1920928955078125e-07,
@@ -78,7 +81,7 @@ A initialized `~saba.SherpaFitter` object has the `opt_config` property this hol
     'verbose': 0,
     'xtol': 1.1920928955078125e-07}
 
-    
+
     Levenberg-Marquardt optimization method.
 
     The Levenberg-Marquardt method is an interface to the MINPACK
@@ -108,12 +111,12 @@ A initialized `~saba.SherpaFitter` object has the `opt_config` property this hol
 The parameters can be changed by
 
 .. code-block:: ipython
-    
+
     sfit.opt_config['ftol'] = 1e-5
     print(sfit.opt_config)
 
 .. code-block:: ipython
-    
+
     {'epsfcn': 1.1920928955078125e-07,
      'factor': 100.0,
      'ftol': 1e-05,
@@ -123,26 +126,27 @@ The parameters can be changed by
      'xtol': 1.1920928955078125e-07}
 
 
-fitting this model is the same as earlier, we can also fit an unconstrained model for comparison. 
+Fitting this model is the same as earlier and we can also fit an unconstrained model for comparison:
 
 .. code-block:: ipython
 
     fitted_gg = sfit(fit_gg,x, y, xbinsize=binsize, err=yerrs)
 
     sfit2 = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='covariance')
-    
+
     free_gg = sfit2(double_gaussian.copy(), x, y, xbinsize=binsize, err=yerrs)
 
 
 .. image:: _generated/example_plot_fitted2.png
+   :width: 500px
 
-The fitter keeps a copy of the converted model we can use it to compare the constrained and unconstrained model setups. 
+The fitter keeps a copy of the converted model so we can use it to compare the constrained and unconstrained model setups:
 
 .. note ::
     wrap\_.amplitude_1  should be `linked`, sherpa notation of astropy's `tied`
     wrap\_.stddev_0 should be `frozen`, sherpa notation for `fixed`
     and finally wrap\_.mean_0's value should have moved to its minimum while fitting
-    
+
     "wrap\_" is just perpended to the model name (we didn't set one so it's blank) on conversion to the sherpa `~sherpa.models.model.Model`.
 
 .. code-block:: ipython
@@ -176,21 +180,21 @@ The fitter keeps a copy of the converted model we can use it to compare the cons
        wrap_.mean_1 thawed     0.785016 -3.40282e+38  3.40282e+38
        wrap_.stddev_1 thawed      0.46393 -3.40282e+38  3.40282e+38
 
-Error Estimation Config
------------------------
+Error Estimation Configuration
+------------------------------
 
 As with the `~sherpa.optmethods` before we are able to adjust the configuration of the `~sherpa.estmethods`. Some of the properties can be passed through `~saba.SherpaFitter.est_errors` as keyword arguments such as the `sigma` however for access to all options we have the `est_config` property.
 
 
 .. code-block:: ipython
-    
+
     print(sfit.est_config)
     sfit.est_config['numcores'] = 5
     sfit.est_config['max_rstat'] = 4
     print(sfit.est_config)
-    
+
 .. code-block:: ipython
-    
+
     {'eps': 0.01,
      'fast': False,
      'max_rstat': 3,
@@ -224,15 +228,15 @@ Multiple models or multiple datasets
 ------------------------------------
 
 We have three scenarios we can handle:
-- fitting n datasets with n models
-- fitting a single dataset with n models 
-- or fitting n datasets with a single model
+- Fitting ``N`` datasets with ``N`` models
+- Fitting a single dataset with ``N`` models
+- Fitting ``N`` datasets with a single model
 
-If n>1 for any of the scenarios we return a list of models. Firstly well look at a single dataset with the two models as above. 
-We quickly copy the two models above and supply them to the fitter as a list - hopefully we get the same result. 
+If ``N > 1`` for any of the scenarios then calling the fitter will return a list of models. Firstly we look at a single dataset with the two models as above.
+We quickly copy the two models above and supply them to the fitter as a list - hopefully we get the same result.
 
 .. code-block:: ipython
-    
+
     fit_gg = double_gaussian.copy()
     fit_gg.mean_0.value = -0.5
     fit_gg.mean_0.min = -1.25
@@ -240,11 +244,12 @@ We quickly copy the two models above and supply them to the fitter as a list - h
     fit_gg.stddev_0.value = 0.9
     fit_gg.stddev_0.fixed = True
 
-    fm1,fm2 = sfit([fit_gg, double_gaussian.copy()], x, y, xbinsize=binsize, err=yerrs)
+    fm1, fm2 = sfit([fit_gg, double_gaussian.copy()], x, y, xbinsize=binsize, err=yerrs)
 
 .. image:: _generated/example_plot_simul.png
+   :width: 500px
 
-We also can fit multiple datasets with a single model so lets make a second datset. Lets generate a second dataset. 
+We also can fit multiple datasets with a single model so let's make a second dataset:
 
 .. code-block:: ipython
 
@@ -258,12 +263,12 @@ We also can fit multiple datasets with a single model so lets make a second dats
 
     y2 = second_gg(x) + err * np.random.uniform(-1, 1, size=len(x))
     y2errs = err * np.random.uniform(0.2, 1, size=len(x))
-    
-We simply supply lists for each of the data parameters. You can also use `None` for when you don't have something like a missing binsizes - a lack of binsizes is a contrived example but a lack of y errors is not suitable for a chi:sup:2 fit and I don't want to make a new fitter. 
+
+Here we supply lists for each of the data parameters. You can also use ``None`` for when you don't have something like a missing binsizes - a lack of binsizes is a contrived example but a lack of ``y`` errors is not suitable for a chi:sup:2 fit and you don't want to make a new fitter.
 
 .. code-block:: ipython
-    
-    fit_gg=double_gaussian.copy()
+
+    fit_gg = double_gaussian.copy()
     fit_gg.mean_0 = -2.3
     fit_gg.mean_1 = 0.7
     fit_gg.amplitude_0 = 2
@@ -271,17 +276,17 @@ We simply supply lists for each of the data parameters. You can also use `None` 
     fit_gg.stddev_0 = 0.3
     fit_gg.stddev_1 = 0.5
 
-    fm1,fm2 = sfit(fit_gg, x=[x, x], y=[y, y2], xbinsize=[binsize, None], err=[yerrs, y2errs])
+    fm1, fm2 = sfit(fit_gg, x=[x, x], y=[y, y2], xbinsize=[binsize, None], err=[yerrs, y2errs])
 
 .. image:: _generated/example_plot_simul2.png
+   :width: 500px
 
 Background Data
 ---------------
 
-We have error estimation and simultaneous fits but wait there's more you can also use background data.
-This is required for many of the fit statistics as they are defined using the background data. 
+It is also possible specify background data which is required for several of the fit statistics.
 
-All we have to do is supply a background array using the `bkg` keyword if there is a scaling of the background relative to the source spectra then you can use the `bkg_scale` keyword
+This is done by supplying a background array using the `bkg` keyword.  If there is a scaling of the background relative to the source data then you can use the `bkg_scale` keyword
 
 .. code-block:: ipython
 
@@ -290,3 +295,4 @@ All we have to do is supply a background array using the `bkg` keyword if there 
     cfit(fit_gg, x=x, y=y, xbinsize=binsize, err=yerrs, bkg=y, bkg_scale=0.3)
 
 .. image:: _generated/example_plot_bkg.png
+   :width: 500px
