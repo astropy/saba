@@ -38,7 +38,7 @@ Prerequisites
  * astropy
  * sherpa
 
-.. code-block:: bash
+::
 
    conda install numpy cython jinja2
 
@@ -46,7 +46,7 @@ To make use of the entry points plugin registry which automatically makes the
 |SherpaFitter| class available within `astropy.modeling.fitting`, do the
 following:
 
-.. code-block:: bash
+::
 
    git clone https://github.com/nocturnalastro/astropy.git astropy
    cd astropy
@@ -59,11 +59,10 @@ Otherwise one can just use the latest stable ``astropy`` via ``conda install ast
 Next install Sherpa_ using the conda ``sherpa`` channel.  Note that Sherpa
 currently needs to be installed after astropy on Mac OSX.
 
-.. code-block:: bash
+::
 
    conda install -c sherpa sherpa
 
-.. code-block:: bash
 
 Finally install ``saba`` in developer mode::
 
