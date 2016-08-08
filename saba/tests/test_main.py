@@ -20,12 +20,14 @@ except ImportError:
 import warnings
 
 from saba import SherpaFitter, Dataset, ConvertedModel
-from astropy.modeling.models import Gaussian1D, Gaussian2D
+from astropy.modeling.models import Gaussian1D, Gaussian2D, Polynomial1D
 
 _RANDOM_SEED = 0x1337
 np.random.seed(_RANDOM_SEED)
 
+
 class TestSherpaFitter(object):
+
     def setup_class(self):
         # make data and models to use later!
         err = 0.1
@@ -158,7 +160,7 @@ class TestSherpaFitter(object):
         map(lambda x, y: assert_allclose(x, y), map(lambda x: x.get_x(), data_xyerr.datasets), [self.x1, self.x2])
         map(lambda x, y: assert_allclose(x, y), map(lambda x: x.get_y(), data_xyerr.datasets), [self.y1, self.y2])
         map(lambda x, y: assert_allclose(x, y), map(lambda x: x.get_yerr(), data_xyerr.datasets), [self.dy1, self.dy2])
-        map(lambda x, y: assert_allclose(x, y), map(lambda x: x.get_xerr(), data_xyerr.datasets), [ self.dx1, self.dx2])
+        map(lambda x, y: assert_allclose(x, y), map(lambda x: x.get_xerr(), data_xyerr.datasets), [self.dx1, self.dx2])
 
     def test_convert_model_1d(self):
         """
@@ -263,18 +265,11 @@ class TestSherpaFitter(object):
             fmod.stddev.value, 1) == 0.5
         assert fmod.mean.value == fmod.stddev.value
 
-    def test_error_methods(self):
-        pass
-
-    def test_opt_methods(self):
-        pass
-
     def test_bkg_doesnt_explode(self):
-        from astropy.modeling.models import Polynomial1D
         m = Polynomial1D(2)
 
         x = np.arange(0, 10, 0.1)
-        y = 2 + 3 * x**2 + 0.5 * x
+        y = 2 + 0.5 * x + 3 * x**2
         bkg = x
 
         sfit = SherpaFitter(statistic="cash", estmethod='covariance')
@@ -285,7 +280,53 @@ class TestSherpaFitter(object):
         # a little to test that entry points can be loaded!
         from pkg_resources import iter_entry_points
 
-        for entry_point in iter_entry_points(group="astropy.modeling", name=None):
+        for entry_point in iter_entry_points(group="astropy.modeling",
+                                             name=None):
             if entry_point.module_name == 'saba':
                 entry_point.load()
 
+
+class TestMCMC(object):
+
+    def setup_class(self):
+        self.model = Polynomial1D(2)
+        self.x = np.arange(0, 10, 0.1)
+
+        self.params = (2, 0.5, 3)
+        # a simple polynomial
+        self.y = self.params[0]
+        self.y += self.params[1] * self.x
+        self.y += self.params[2] * self.x ** 2
+
+        self.y += np.random.uniform(-0.1, 0.1, self.x.size)
+
+        sfit = SherpaFitter(statistic="cash", estmethod='covariance')
+        sfit(self.model, self.x, self.y)
+        self.sampler = sfit.get_sampler()
+
+    def test_run_samples(self, n=1000):
+        """
+        check to see sampler runs and
+        returns the correct number of samples
+        """
+        stat_vals, param_vals, accepted = self.sampler(niter=n)
+        assert len(stat_vals) == len(param_vals) == len(accepted[0]) == (n + 1)
+
+    def test_check_fit(self, nbins=100):
+        """
+        Check that the parameters values found are reasonable
+        """
+        parameters = self.sampler.parameters
+        for nn, pname in enumerate(('c0', 'c1', 'c2')):
+            y, xx = np.histogram(parameters[pname][self.sampler.accepted],
+                                 nbins)
+            cdf = [y[0]]
+            for yy in y[1:]:
+                cdf.append(cdf[-1] + yy)
+            cdf = np.array(cdf)
+            cdf = cdf / float(cdf[-1])
+
+            med_ind = np.argmin(abs(cdf - 0.5))
+            x_med = (xx[med_ind] + xx[med_ind + 1]) / 2.0
+
+            assert_allclose(self.params[nn], x_med, atol=0.1)
