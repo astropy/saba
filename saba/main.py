@@ -1,3 +1,6 @@
+from __future__ import (absolute_import, unicode_literals, division,
+                        print_function)
+
 import numpy as np
 from collections import OrderedDict
 from sherpa.fit import Fit
@@ -282,6 +285,18 @@ class doc_wrapper(object):
         return types.MethodType(self, instance, cls)
 
 
+def wrap_rsp(rsp):
+    """
+        Take array and 
+    """
+    if np.array().ndim == 1:
+        _data = Dataset(1,x=np.arange(rsp.size),y=rsp)
+    else:
+        _data = x=Dataset(1,x=np.arange(rsp.shape[0]),y=np.arange(rsp.shape[1]),z=rsp)
+
+    return PSFModel("user_rsp",_data.data)
+
+
 class SherpaFitter(Fitter):
     __doc__ = """
     Sherpa Fitter for astropy models. Yay :)
@@ -334,7 +349,7 @@ class SherpaFitter(Fitter):
         setattr(self.__class__, 'est_config', property(lambda s: s._est_config, doc=self._est_method.__doc__))  
 
 
-    def __call__(self, models, x, y, z=None, xbinsize=None, ybinsize=None, err=None, bkg=None, bkg_scale=1, **kwargs):
+    def __call__(self, models, x, y, z=None, xbinsize=None, ybinsize=None, err=None, bkg=None, bkg_scale=1, rsp=None, **kwargs):
         """
         Fit the astropy model with a the sherpa fit routines.
 
@@ -360,6 +375,9 @@ class SherpaFitter(Fitter):
         bkg_sale : float or list of floats (optional)
             the scaling factor for the dataset if a single value
             is supplied it will be copied for each dataset
+        rsp :
+            an array which defines a psf-like repsonce which is convolved with
+            the model
         **kwargs:
             keyword arguments will be passed on to sherpa fit routine
 
@@ -392,6 +410,9 @@ class SherpaFitter(Fitter):
                 self._fitmodel = ConvertedModel(models, tie_list)
             else:
                 self._fitmodel = ConvertedModel(models)
+
+        if rsp is not None:
+            self._fitmodel = wrap_rsp(rsp)(self._fitmodel)
 
         self._fitter = Fit(self._data.data, self._fitmodel.sherpa_model, self._stat_method, self._opt_method, self._est_method, **kwargs)
         self.fit_info = self._fitter.fit()
