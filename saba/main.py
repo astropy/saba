@@ -17,6 +17,7 @@ from sherpa.estmethods import Confidence, Covariance, Projection
 from sherpa.sim import MCMC
 from sherpa.instrument import PSFModel
 import types
+import copy
 # from astropy.modeling
 
 __all__ = ('SherpaFitter', 'SherpaMCMC')
@@ -285,22 +286,43 @@ class doc_wrapper(object):
         return types.MethodType(self, instance, cls)
 
 
-def wrap_rsp(rsp):
+def make_rsp(data, rsp):
     """
-    Take an array as a response which is then convolved with the model output.
+    This takes the data and the rsp arrays and makes convolution kernel
     """
+    def wrap_rsp(_data, _rsp):
+        """
+        Take an array as a response which is then
+        convolved with the model output.
+
+        data: a sherpa dataset
+        rsp : an array which represets rsp
+        """
+        _rsp = np.asarray(_rsp)
+        _rdata = copy.deepcopy(_data)
+        _rdata.y= _rsp
+        _psf = PSFModel("user_rsp", _rdata)
+        _psf.fold(_data)
+        return _psf
+
     rsp = np.asarray(rsp)
-    if rsp.ndim == 1:
-        _data = Dataset(1, x=np.arange(rsp.size), y=rsp)
-    elif rsp.ndim == 2:
-        _data = Dataset(1, x=np.arange(rsp.shape[0]),
-                        y=np.arange(rsp.shape[1]), z=rsp)
+
+    if data.ndata > 1:
+        if rsp.ndim > 1 or rsp.dtype == np.object:
+            if rsp.shape[0] == data.ndata:
+                zipped = zip(data.data.datasets, rsp)
+            else:
+                raise AstropyUserWarning("There is more than 1 but not ndata"
+                                         "responses")
+        else:
+            zipped = zip(data.data.datasets,
+                         [rsp for _ in xrange(data.ndata)])
+
+        rsp = []
+        for da, rr in zipped:
+            rsp.append(wrap_rsp(da, rr))
     else:
-        raise AstropyUserWarning("response (rsp) should have 1 or 2"
-                                 "dimentions not %i" % rsp.ndim)
-    _psf = PSFModel("user_rsp", _data.data)
-    _psf.fold(_data.data)
-    return _psf
+        return wrap_rsp(data.data, rsp)
 
 
 class SherpaFitter(Fitter):
@@ -402,16 +424,17 @@ class SherpaFitter(Fitter):
         self._data = Dataset(n_inputs, x, y, z, xbinsize, ybinsize, err, bkg, bkg_scale)
 
         if rsp is not None:
-            self._rsp = wrap_rsp(rsp)
+            self._rsp = make_rsp(self._data, rsp)
         else:
             self._rsp = None
 
         if self._data.ndata > 1:
+
             if len(models) == 1:
                 self._fitmodel = ConvertedModel([models.copy() for _ in xrange(self._data.ndata)], tie_list, rsp=self._rsp)
                 # Copy the model so each data set has the same model!
             elif len(models) == self._data.ndata:
-                self._fitmodel = ConvertedModel(models, tie_list)
+                self._fitmodel = ConvertedModel(models, tie_list, rsp=self._rsp)
             else:
                 raise Exception("Don't know how to handle multiple models "
                                 "unless there is one foreach dataset")
@@ -685,7 +708,7 @@ class ConvertedModel(object):
                 zipped = zip(models, rsp)
 
             except TypeError:
-                zipped = zip(models, [rsp for _ in range()])
+                zipped = zip(models, [rsp for _ in range(len(models))])
 
             for mod, rsp in zipped:
                 self.model_dict[mod] = self._astropy_to_sherpa_model(mod)

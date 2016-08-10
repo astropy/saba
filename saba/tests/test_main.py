@@ -59,7 +59,7 @@ class TestSherpaFitter(object):
         self.model1d_2.amplitude = 10
         self.model1d_2.stddev = 0.3
 
-        self.xx2, self.xx1 = np.mgrid[1:10:.1, 1:10:.05]
+        self.xx2, self.xx1 = np.mgrid[1:12:1, 1:12:1]
         self.shape = self.xx2.shape
         self.xx1 = self.xx1.flatten()
         self.xx2 = self.xx2.flatten()
@@ -85,6 +85,15 @@ class TestSherpaFitter(object):
         self.model2d.x_stddev.min = 1e-99
         self.model2d.y_stddev.min = 1e-99
 
+        #Lets define some tophats
+        self.rsp1 = np.zeros_like(self.x1)
+        self.rsp1[(self.x1 > 4) & (self.x1 < 6)] = 1
+        self.rsp2 = np.zeros_like(self.x2)
+        self.rsp2[(self.x2 > 4) & (self.x2 < 6)] = 1
+
+        self.rsp2d = np.zeros_like(self.xx1)
+        self.rsp2d[(self.xx1 > 4) & (self.xx1 < 6) & (self.xx2 > 4) & (self.xx2 < 6)] = 1
+        self.rsp2d.flatten()
         self.fitter = SherpaFitter(statistic="Chi2")
 
     def test_make_datasets_single(self):
@@ -266,6 +275,10 @@ class TestSherpaFitter(object):
         assert fmod.mean.value == fmod.stddev.value
 
     def test_bkg_doesnt_explode(self):
+        """
+        Check this goes through the motions
+        """
+
         m = Polynomial1D(2)
 
         x = np.arange(0, 10, 0.1)
@@ -276,6 +289,28 @@ class TestSherpaFitter(object):
         sfit(m, x, y, bkg=bkg)
         # TODO: Make this better!
 
+
+    def test_rsp1d_doesnt_explode(self):
+        """
+        Check this goes through the motions
+        """
+
+        self.fitter(self.model1d.copy(), self.x1, self.y1, err=self.dy1, rsp=self.rsp1)
+
+    def test_rsp1d_multi_doesnt_explode(self):
+        """
+        Check this goes through the motions
+        """
+
+        self.fitter([self.model1d.copy(), self.model1d_2.copy()], [self.x1, self.x2], [self.y1, self.y2], err=[self.dy1, self.dy2], rsp=[self.rsp1, self.rsp2])
+
+    def test_rsp2d_doesnt_explode(self):
+        """
+        Check this goes through the motions
+        """
+        # this seg faults
+        self.fitter(self.model2d.copy(), self.xx1, self.xx2, self.yy, err=self.dyy, rsp=self.rsp2d)
+
     def test_entry_points(self):
         # a little to test that entry points can be loaded!
         from pkg_resources import iter_entry_points
@@ -284,7 +319,6 @@ class TestSherpaFitter(object):
                                              name=None):
             if entry_point.module_name == 'saba':
                 entry_point.load()
-
 
 class TestMCMC(object):
 
@@ -316,6 +350,7 @@ class TestMCMC(object):
         """
         Check that the parameters values found are reasonable
         """
+        print("hello")
         parameters = self.sampler.parameters
         for nn, pname in enumerate(('c0', 'c1', 'c2')):
             y, xx = np.histogram(parameters[pname][self.sampler.accepted],
