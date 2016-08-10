@@ -224,8 +224,7 @@ else:
 html_theme_options = {
     'logotext1': 'saba',  # white,  semi-bold
     'logotext2': ':docs',  # orange, light
-    'logotext3': ''   # white,  light
-
+    'logotext3': '',   # white,  light
 
 }
 
@@ -403,3 +402,6 @@ intersphinx_mapping = {
     'sherpa': ('http://hea-www.harvard.edu/~dburke/playground/sherpa/', None)
     }
 
+html_context = {
+    'css_files': ['_static/saba.css'],
+}
