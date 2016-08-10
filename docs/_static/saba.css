@@ -1,0 +1,17 @@
+@import url("bootstrap-astropy.css");
+
+div.topbar a.brand {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 26px;
+  color: #ffffff;
+  font-weight: 600;
+  text-decoration: none;
+  float: left;
+  display: block;
+  height: 32px;
+  padding: 8px 12px 0px 45px;
+  margin-left: -10px;
+  background: transparent url("saba_logo_32.png") no-repeat 10px 4px;
+  background-image: url("saba_logo.png"), none;
+  background-size: 32px 32px;
+}
