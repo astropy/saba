@@ -106,7 +106,7 @@ install:
 script:
    - if [[ $SETUP_CMD != 'test --coverage' ]]; 
        then python setup.py $SETUP_CMD;
-       else python setup.py test;python setup.py test; coverage run --rcfile=saba/tests/coveragerc saba/tests/test_*.py;
+       else python setup.py develop;python setup.py test;python setup.py test; coverage run --rcfile=saba/tests/coveragerc saba/tests/test_*.py;
     fi
 
 after_success:
