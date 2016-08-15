@@ -286,6 +286,7 @@ def make_rsp(data, rsp):
     """
     This takes the data and the rsp arrays and makes convolution kernel
     """
+
     def wrap_rsp(_data, _rsp):
         """
         Take an array as a response which is then
@@ -296,29 +297,37 @@ def make_rsp(data, rsp):
         """
         _rsp = np.asarray(_rsp)
         _rdata = copy.deepcopy(_data)
-        _rdata.y= _rsp
+        _rdata.y = _rsp
         _psf = PSFModel("user_rsp", _rdata)
         _psf.fold(_data)
         return _psf
 
-    rsp = np.asarray(rsp)
+    try:
+        ndims = len(data.data.datasets[0].get_dims())
+    except AttributeError:
+        ndims = len(data.data.get_dims())
 
-    if data.ndata > 1:
-        if rsp.ndim > 1 or rsp.dtype == np.object:
-            if rsp.shape[0] == data.ndata:
-                zipped = zip(data.data.datasets, rsp)
+    if ndims == 1:
+        rsp = np.asarray(rsp)
+
+        if data.ndata > 1:
+            if rsp.ndim > 1 or rsp.dtype == np.object:
+                if rsp.shape[0] == data.ndata:
+                    zipped = zip(data.data.datasets, rsp)
+                else:
+                    raise AstropyUserWarning("There is more than 1 but not"
+                                             " ndata responses")
             else:
-                raise AstropyUserWarning("There is more than 1 but not ndata"
-                                         "responses")
-        else:
-            zipped = zip(data.data.datasets,
-                         [rsp for _ in xrange(data.ndata)])
+                zipped = zip(data.data.datasets,
+                             [rsp for _ in xrange(data.ndata)])
 
-        rsp = []
-        for da, rr in zipped:
-            rsp.append(wrap_rsp(da, rr))
+            rsp = []
+            for da, rr in zipped:
+                rsp.append(wrap_rsp(da, rr))
+        else:
+            return wrap_rsp(data.data, rsp)
     else:
-        return wrap_rsp(data.data, rsp)
+        return None
 
 
 class SherpaFitter(Fitter):
