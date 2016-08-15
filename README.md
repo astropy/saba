@@ -4,3 +4,5 @@
 [![Coverage Status](https://coveralls.io/repos/github/nocturnalastro/saba/badge.svg)](https://coveralls.io/github/nocturnalastro/saba)
 
 A GSOC project which allows `astropy.modeling` to interface with sherpa's fitting routines
+
+The documentation can be found [here.](saba.readthedocs.io/en/latest/)
