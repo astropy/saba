@@ -46,6 +46,7 @@ env:
         # Try all python versions with the latest numpy
         - SETUP_CMD='test'
 
+          
 matrix:
     include:
 
@@ -71,6 +72,11 @@ matrix:
           env: NUMPY_VERSION=1.7
         - python: 3.5
           env: NUMPY_VERSION=1.10
+
+    allow_failures:
+        - env: $TRAVIS_PYTHON_VERSION=3.5
+
+
 
 install:
 

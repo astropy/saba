@@ -16,8 +16,8 @@ from sherpa.optmethods import GridSearch, LevMar, MonCar, NelderMead
 from sherpa.estmethods import Confidence, Covariance, Projection
 from sherpa.sim import MCMC
 from sherpa.instrument import PSFModel
-import types
 import copy
+from astropy.utils import format_doc
 # from astropy.modeling
 
 __all__ = ('SherpaFitter', 'SherpaMCMC')
@@ -259,31 +259,6 @@ class SherpaMCMC(object):
         return self._stat_values
 
 
-class doc_wrapper(object):
-
-    def __init__(self, f, pre="", post=""):
-        self._f = f
-        self._pre = pre
-        self._post = post
-
-    @property
-    def __doc__(self,):
-        return "".join([self._pre, self._f.__doc__, self._post])
-
-    def __call__(self, instance, *args, **kwargs):
-        return self._f(instance, *args, **kwargs)
-
-    def __get__(self, instance, cls=None):
-        ''' This implements the descriptor protocol and allows this
-        callable class to be used as a bound method.
-        See:
-        https://docs.python.org/2/howto/descriptor.html#functions-and-methods
-        '''
-        return types.MethodType(self, instance, cls)
-
-
-
-
 class SherpaFitter(Fitter):
     __doc__ = """
     Sherpa Fitter for astropy models.
@@ -331,6 +306,7 @@ class SherpaFitter(Fitter):
         self._fitmodel = None  # a handle for sherpa fit model
         self._data = None  # a handle for sherpa dataset
         self.error_info = {}
+
         setattr(self.__class__, 'opt_config', property(lambda s: s._opt_config, doc=self._opt_method.__doc__))
         # sherpa doesn't currently have a docstring for est_method but maybe the future
         setattr(self.__class__, 'est_config', property(lambda s: s._est_config, doc=self._est_method.__doc__))  
@@ -433,14 +409,22 @@ class SherpaFitter(Fitter):
 
     @property
     def _est_config(self):
+        """This returns the est.config property"""
         return self._est_method.config
 
     @property
     def _opt_config(self):
+        """This returns the opt.config property"""
         return self._opt_method.config
 
     # Here is the MCMC wrapper!
-    get_sampler = doc_wrapper(SherpaMCMC, "    This returns and instance of `SherpaMCMC` with it's self as the fitter\n")
+    @format_doc("{__doc__}\n{mcmc_doc}",mcmc_doc=SherpaMCMC.__doc__)
+    def get_sampler(self, *args, **kwargs):
+        """
+        This returns and instance of `SherpaMCMC` with it's self as the fitter
+        """
+        return SherpaMCMC(self, *args, **kwargs)
+
 
 class Dataset(SherpaWrapper):
 
