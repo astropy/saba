@@ -24,7 +24,7 @@ with catch_warnings(AstropyUserWarning) as warns:
     from astropy.modeling.fitting import Fitter
 
 for w in warns:
-    if "SherpaFitter" not in w.args[0]:
+    if "SherpaFitter" not in w.message.message:
         warnings.warn(w)
 
 # from astropy.modeling
