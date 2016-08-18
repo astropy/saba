@@ -1,23 +1,32 @@
 from __future__ import (absolute_import, unicode_literals, division,
                         print_function)
-
 import numpy as np
 from collections import OrderedDict
 from sherpa.fit import Fit
 from sherpa.data import Data1D, Data1DInt, Data2D, Data2DInt, DataSimulFit
 from sherpa.data import BaseData
 from sherpa.models import UserModel, Parameter, SimulFitModel
-from astropy.modeling.fitting import Fitter
-from astropy.utils.exceptions import AstropyUserWarning
 from sherpa.stats import Chi2, Chi2ConstVar, Chi2DataVar, Chi2Gehrels
 from sherpa.stats import Chi2ModVar, Chi2XspecVar, LeastSq
 from sherpa.stats import CStat, WStat, Cash
 from sherpa.optmethods import GridSearch, LevMar, MonCar, NelderMead
 from sherpa.estmethods import Confidence, Covariance, Projection
 from sherpa.sim import MCMC
-from sherpa.instrument import PSFModel
-import copy
+import warnings
+
 from astropy.utils import format_doc
+from astropy.utils.exceptions import AstropyUserWarning
+from astropy.tests.helper import catch_warnings
+
+with catch_warnings(AstropyUserWarning) as warns:
+    """this is to stop the import warning
+    occuring when we import into saba"""
+    from astropy.modeling.fitting import Fitter
+
+for w in warns:
+    if "SherpaFitter" not in w.args[0]:
+        warnings.warn(w)
+
 # from astropy.modeling
 
 __all__ = ('SherpaFitter', 'SherpaMCMC')
