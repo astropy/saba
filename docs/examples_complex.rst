@@ -7,6 +7,7 @@ Now that you have the basics let's move on to some more complex usage of the fit
 First a quick preamble to do some imports and create our |SherpaFitter| object:
 
 .. code-block::ipython
+
     from astropy.modeling.fitting import SherpaFitter
     sfit = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='confidence')
 
