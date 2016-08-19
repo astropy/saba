@@ -25,8 +25,8 @@ If you place any of the parameter constraints on the astropy models then they wi
     double_gaussian = (Gaussian1D(amplitude=10, mean=-1.5, stddev=0.5) +
                        Gaussian1D(amplitude=3, mean=0.9, stddev=0.5))
 
-Now we have the compound model lets add tie `amplitude_1` (the amplitude of the right hand side `~astropy.modeling.functional_models.Gaussian1D`) to `1.2*amplitude_0` and while we're at it let generate some data. 
-To do this we must first define the `tiedfunc`
+Now we have the compound model lets add tie `amplitude_1` (the amplitude of the right hand side `~astropy.modeling.functional_models.Gaussian1D`) to `1.2*amplitude_0` and while we're at it let us generate some data, too.
+To do this we must first define the `tiedfunc`:
 
 .. code-block:: ipython
 
@@ -43,8 +43,7 @@ To do this we must first define the `tiedfunc`
     binsize=(step/2) * np.ones(x.shape)
 
 .. note :: without astropy PR #5129 we need to do this
-    double_gaussian.amplitude_1.value = \
-    double_gaussian.amplitude_1.tied(double_gaussian)
+    ``double_gaussian.amplitude_1.value = double_gaussian.amplitude_1.tied(double_gaussian)``
 
 .. image:: _generated/example_plot_data2.png
    :width: 500px
@@ -144,9 +143,9 @@ Fitting this model is the same as earlier and we can also fit an unconstrained m
 The fitter keeps a copy of the converted model so we can use it to compare the constrained and unconstrained model setups:
 
 .. note ::
-    wrap\_.amplitude_1  should be `linked`, sherpa notation of astropy's `tied`
-    wrap\_.stddev_0 should be `frozen`, sherpa notation for `fixed`
-    and finally wrap\_.mean_0's value should have moved to its minimum while fitting
+    ``wrap\_.amplitude_1``  should be `linked`, sherpa notation of astropy's `tied`
+    ``wrap\_.stddev_0`` should be `frozen`, sherpa notation for `fixed`
+    and finally ``wrap\_.mean_0``'s value should have moved to its minimum while fitting
 
     "wrap\_" is just perpended to the model name (we didn't set one so it's blank) on conversion to the sherpa `~sherpa.models.model.Model`.
 
@@ -229,6 +228,7 @@ Multiple models or multiple datasets
 ------------------------------------
 
 We have three scenarios we can handle:
+
 - Fitting ``N`` datasets with ``N`` models
 - Fitting a single dataset with ``N`` models
 - Fitting ``N`` datasets with a single model
