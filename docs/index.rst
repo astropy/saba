@@ -33,28 +33,17 @@ Prerequisites
 
  * Python 2.7 (support for Python 3.5+ is in work)
  * numpy
- * cython
- * jinja2
  * astropy
  * sherpa
 
 ::
 
-   conda install numpy cython jinja2
+   conda install numpy 
 
-To make use of the entry points plugin registry which automatically makes the
-|SherpaFitter| class available within `astropy.modeling.fitting`, do the
-following:
+To make use of the entry points plugin registry which automatically makes the |SherpaFitter| class available within `astropy.modeling.fitting` install `astropy` version >= 1.33.
 
-::
-
-   git clone https://github.com/nocturnalastro/astropy.git astropy
-   cd astropy
-   git checkout sherpa_bridge_v2
-   python setup.py develop
-   cd ../
-
-Otherwise one can just use the latest stable ``astropy`` via ``conda install astropy``.
+Otherwise one can just use the latest stable ``astropy`` via::  
+   conda install astropy
 
 Next install Sherpa_ using the conda ``sherpa`` channel.  Note that Sherpa
 currently needs to be installed after astropy on Mac OSX.
@@ -64,12 +53,10 @@ currently needs to be installed after astropy on Mac OSX.
    conda install -c sherpa sherpa
 
 
-Finally install ``saba`` in developer mode::
+Finally install ``saba`` using pip::
 
-   git clone https://github.com/nocturnalastro/saba.git saba
-   cd saba
-   python setup.py develop
-   cd ../
+   pip install saba
+
 
 
 Getting started
@@ -249,7 +236,4 @@ API/Reference
 Credit
 ------
 
-The development of this package was made possible by the generous support of
-the `Google Summer of Code <https://summerofcode.withgoogle.com/>`_ program in
-2016 under the `OpenAstronomy <http://openastronomy.org/>`_ mentoring
-organization.
+The development of this package was made possible by the generous support of the `Google Summer of Code <https://summerofcode.withgoogle.com/>`_ program in 2016 under the `OpenAstronomy <http://openastronomy.org/>`_ by `Michele Costa <https://github.com/nocturnalastro>`_ with the support and advice of mentors `Tom Aldcroft <https://github.com/taldcroft>`_, `Omar Laurino <https://github.com/olaurino>`_, `Moritz Guenther <https://github.com/hamogu>`_, and `Doug Burke <https://github.com/DougBurke>`_. 
