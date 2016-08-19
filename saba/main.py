@@ -366,7 +366,7 @@ class SherpaFitter(Fitter):
         setattr(self.__class__, 'est_config', property(lambda s: s._est_config, doc=self._est_method.__doc__))  
 
 
-    def __call__(self, models, x, y, z=None, xbinsize=None, ybinsize=None, err=None, bkg=None, bkg_scale=1, **kwargs):
+    def __call__(self, models, x, y, z=None, xbinsize=None, ybinsize=None, err=None, bkg=None, bkg_scale=1, rsp=None, **kwargs):
         """
         Fit the astropy model with a the sherpa fit routines.
 
@@ -392,6 +392,9 @@ class SherpaFitter(Fitter):
         bkg_sale : float or list of floats (optional)
             the scaling factor for the dataset if a single value
             is supplied it will be copied for each dataset
+        rsp: array or list of arrays
+	    this is convolved with the model output when fitting the model
+            N.B only 1D is currently supported.
         **kwargs :
             keyword arguments will be passed on to sherpa fit routine
 
