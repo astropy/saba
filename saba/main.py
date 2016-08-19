@@ -290,27 +290,24 @@ def make_rsp(data,rsp):
     except AttributeError:
         ndims = len(data.data.get_dims())
 
-    if ndims > 1:
-        return None
-    else:
-        rsp = np.asarray(rsp)
+    rsp = np.asarray(rsp)
 
-        if data.ndata > 1:
-            if rsp.ndim > 1 or rsp.dtype == np.object:
-                if rsp.shape[0] == data.ndata:
-                    zipped = zip(data.data.datasets, rsp)
-                else:
-                    raise AstropyUserWarning("There is more than 1 but not"
-                                             " ndata responses")
+    if data.ndata > 1:
+        if rsp.ndim > 1 or rsp.dtype == np.object:
+            if rsp.shape[0] == data.ndata:
+                zipped = zip(data.data.datasets, rsp)
             else:
-                zipped = zip(data.data.datasets,
-                             [rsp for _ in xrange(data.ndata)])
-
-            rsp = []
-            for da, rr in zipped:
-                rsp.append(wrap_rsp(da, rr))
+                raise AstropyUserWarning("There is more than 1 but not"
+                                         " ndata responses")
         else:
-            return wrap_rsp(data.data, rsp)
+            zipped = zip(data.data.datasets,
+                         [rsp for _ in xrange(data.ndata)])
+
+        rsp = []
+        for da, rr in zipped:
+            rsp.append(wrap_rsp(da, rr))
+    else:
+        return wrap_rsp(data.data, rsp)
 
 
 class SherpaFitter(Fitter):
