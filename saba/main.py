@@ -1,18 +1,21 @@
 from __future__ import (absolute_import, unicode_literals, division,
                         print_function)
-import numpy as np
 from collections import OrderedDict
+import numpy as np
+import warnings
+import copy
+
 from sherpa.fit import Fit
 from sherpa.data import Data1D, Data1DInt, Data2D, Data2DInt, DataSimulFit
 from sherpa.data import BaseData
 from sherpa.models import UserModel, Parameter, SimulFitModel
+from sherpa.instrument import PSFModel
 from sherpa.stats import Chi2, Chi2ConstVar, Chi2DataVar, Chi2Gehrels
 from sherpa.stats import Chi2ModVar, Chi2XspecVar, LeastSq
 from sherpa.stats import CStat, WStat, Cash
 from sherpa.optmethods import GridSearch, LevMar, MonCar, NelderMead
 from sherpa.estmethods import Confidence, Covariance, Projection
 from sherpa.sim import MCMC
-import warnings
 
 from astropy.utils import format_doc
 from astropy.utils.exceptions import AstropyUserWarning
@@ -266,24 +269,21 @@ class SherpaMCMC(object):
         return self._stat_values
 
 
-def make_rsp(rsp):
+def make_rsp(data,rsp):
     """
     Take an array as a response which is then convolved with the model output.
+    Parameters
+    ----------
+    data: a sherpa dataset
+    rsp : an array which represets rsp
     """
-    def wrap_rsp(_data, _rsp):
-        """
-        Take an array as a response which is then
-        convolved with the model output.
-
-        data: a sherpa dataset
-        rsp : an array which represets rsp
-        """
-        _rsp = np.asarray(_rsp)
-        _rdata = copy.deepcopy(_data)
-        _rdata.y = _rsp
-        _psf = PSFModel("user_rsp", _rdata)
-        _psf.fold(_data)
-        return _psf
+    def wrap_rsp(data, rsp):
+        rsp = np.asarray(rsp)
+        rdata = copy.deepcopy(data)
+        rdata.y = rsp
+        psf = PSFModel("user_rsp", rdata)
+        psf.fold(data)
+        return psf
 
     try:
         ndims = len(data.data.datasets[0].get_dims())
@@ -413,7 +413,7 @@ class SherpaFitter(Fitter):
         self._data = Dataset(n_inputs, x, y, z, xbinsize, ybinsize, err, bkg, bkg_scale)
 
         if rsp is not None:
-            self._rsp = make_rsp(rsp)
+            self._rsp = make_rsp(self._data, rsp)
         else:
             self._rsp = None
 
@@ -704,7 +704,7 @@ class ConvertedModel(object):
                 zipped = zip(models, rsp)
 
             except TypeError:
-                zipped = zip(models, [rsp for _ in range()])
+                zipped = zip(models, [rsp for _ in range(len(models))])
 
             for mod, rsp in zipped:
                 self.model_dict[mod] = self._astropy_to_sherpa_model(mod)
