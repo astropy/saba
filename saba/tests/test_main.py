@@ -289,6 +289,21 @@ class TestSherpaFitter(object):
         sfit(m, x, y, bkg=bkg)
         # TODO: Make this better!
 
+
+    def test_rsp1d_doesnt_explode(self):
+        """
+        Check this goes through the motions
+        """
+
+        self.fitter(self.model1d.copy(), self.x1, self.y1, err=self.dy1, rsp=self.rsp1)
+
+    def test_rsp1d_multi_doesnt_explode(self):
+        """
+        Check this goes through the motions
+        """
+
+        self.fitter([self.model1d.copy(), self.model1d_2.copy()], [self.x1, self.x2], [self.y1, self.y2], err=[self.dy1, self.dy2], rsp=[self.rsp1, self.rsp2])
+
     def test_entry_points(self):
         # a little to test that entry points can be loaded!
         from pkg_resources import iter_entry_points
