@@ -43,6 +43,7 @@ Prerequisites
 To make use of the entry points plugin registry which automatically makes the |SherpaFitter| class available within `astropy.modeling.fitting` install `astropy` version >= 1.33.
 
 Otherwise one can just use the latest stable ``astropy`` via::  
+   
    conda install astropy
 
 Next install Sherpa_ using the conda ``sherpa`` channel.  Note that Sherpa
