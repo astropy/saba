@@ -34,7 +34,7 @@ env:
         # For this package-template, we include examples of Cython modules,
         # so Cython is required for testing. If your package does not include
         # Cython code, you can set CONDA_DEPENDENCIES=''
-        - CONDA_DEPENDENCIES='Cython jinja2 six coverage'
+        - CONDA_DEPENDENCIES='Cython jinja2 six coverage pytest pytest-cov'
 
         # If there are matplotlib or other GUI tests, uncomment the following
         # line to use the X virtual framebuffer.
@@ -108,7 +108,9 @@ install:
 script:
    - if [[ $SETUP_CMD != 'test --coverage' ]]; 
        then python setup.py $SETUP_CMD;
-       else python setup.py develop;python setup.py test;python setup.py test; coverage run --rcfile=saba/tests/coveragerc saba/tests/test_*.py;
+       else
+         python setup.py develop;
+         py.test --cov=saba --cov-report=xml --cov-config=saba/tests/coveragerc --cov-report=term-missing saba;
     fi
 
 after_success:
