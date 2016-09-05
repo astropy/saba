@@ -24,7 +24,7 @@ class Split(FittableModel):
                               range(len(split_indexes)+1))
         self._split_indexes = split_indexes
         super(Split, self).__init__(name=name, meta=meta)
-    
+
     def _format_expression(self):
         first = "x[:{0}]".format(self._split_indexes[0])
         last = "x[{0}:]".format(self._split_indexes[-1])
@@ -32,14 +32,13 @@ class Split(FittableModel):
             middle = ["x[{0}:{1}]".format(*indexes) for indexes in zip(self._split_indexes[:-1], self._split_indexes[1:])]
             return ", ".join([first] + middle + [last])
         else:
-            
             return ", ".join([first, last])
-        
+
     @property
     def split_indexes(self):
         """Integers representing indices of the inputs."""
         return self._split_indexes
-    
+
     @property
     def inputs(self):
         """
@@ -52,14 +51,13 @@ class Split(FittableModel):
         """The name(s) of the output(s) of the model."""
         return self._outputs
 
-    
+
     def __repr__(self):
-        
         if self.name is None:
             return '<SplitInput1D {0})>'.format(self._format_expression())
         else:
             return '<SplitInput1D({0}, name={1})>'.format(self._format_expression(), self.name)
-    
+
     def evaluate(self, x):
         first = x[:self._split_indexes[0]]
         last = x[self._split_indexes[-1]:]
@@ -68,7 +66,7 @@ class Split(FittableModel):
             return [first] + middle + [last]
         else:
             return [first, last]
-    
+
     def __call__(self, x):
         return self.evaluate(x)
 
@@ -89,12 +87,12 @@ class Join(FittableModel):
         Free-form metadata to associate with this model.
 
     """
-    
+
     def __init__(self, n_inputs, name=None, meta=None):
         self._inputs = tuple('x' + str(idx) for idx in range(n_inputs+1))
         self._outputs=tuple("x")
         super(Join, self).__init__(name=name, meta=meta)
- 
+
     @property
     def inputs(self):
         """
@@ -106,10 +104,10 @@ class Join(FittableModel):
     def outputs(self):
         """The name(s) of the output(s) of the model."""
         return self._outputs
-    
+
     def evaluate(self, *x):
         return np.hstack(x)
-    
+
     def __call__(self, *x):
         return self.__call__(x)
 
@@ -137,6 +135,13 @@ def model_split_join(xvals, models):
         split_indexes = []
         for xx in xvals:
             split_indexes.append(len(xx))
+
+        runnning_total = 0
+	# the xvals should be flattend so.
+        for n,ll in enumerate(split_indexes):
+            running_total += ll
+            split_indexes[n] = running_total
+
         splitin = Split(split_indexes)
         joinout = Join(len(split_indexes))
         mo = model[0]
