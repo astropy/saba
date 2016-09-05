@@ -1,4 +1,5 @@
 from astropy.modeling.core import FittableModel
+import numpy as np
 
 
 class Split(FittableModel):
@@ -8,7 +9,7 @@ class Split(FittableModel):
     Parameters
     ----------
     split_indexes : tuple
-        A tuple of integers representing indices on which the input 
+        A tuple of integers representing indices on which the input
         array will be split
     name : str, optional
         A human-friendly name associated with this model instance
@@ -20,8 +21,7 @@ class Split(FittableModel):
     """
     def __init__(self, split_indexes, name=None, meta=None):
         self._inputs = tuple('x')
-        self._outputs = tuple('x' + str(idx) for idx in \
-                              range(len(split_indexes)+1))
+        self._outputs = tuple('x' + str(idx) for idx in range(len(split_indexes) + 1))
         self._split_indexes = split_indexes
         super(Split, self).__init__(name=name, meta=meta)
 
@@ -50,7 +50,6 @@ class Split(FittableModel):
     def outputs(self):
         """The name(s) of the output(s) of the model."""
         return self._outputs
-
 
     def __repr__(self):
         if self.name is None:
@@ -89,8 +88,8 @@ class Join(FittableModel):
     """
 
     def __init__(self, n_inputs, name=None, meta=None):
-        self._inputs = tuple('x' + str(idx) for idx in range(n_inputs+1))
-        self._outputs=tuple("x")
+        self._inputs = tuple('x' + str(idx) for idx in range(n_inputs + 1))
+        self._outputs = tuple("x")
         super(Join, self).__init__(name=name, meta=meta)
 
     @property
@@ -133,18 +132,37 @@ def model_split_join(xvals, models):
 
     if len(models) > 1:
         split_indexes = []
-        for xx in xvals:
+        for xx in xvals[:-1]:
             split_indexes.append(len(xx))
 
-        runnning_total = 0
-	# the xvals should be flattend so.
-        for n,ll in enumerate(split_indexes):
+        running_total = 0
+        # the xvals should be flattend so.
+        for n, ll in enumerate(split_indexes):
             running_total += ll
             split_indexes[n] = running_total
 
         splitin = Split(split_indexes)
         joinout = Join(len(split_indexes))
-        mo = model[0]
+        mo = models[0]
         for m in models[1:]:
             mo &= m
         return splitin | mo | joinout
+
+
+def split_output(model, x):
+    '''This model takes the output of model
+    and splits it based on thw model which
+    splits the input.
+
+    Parameters
+    ----------
+    model: `astropy.modeling.core.FittableModel`
+        a split| models | join combined_model instance
+    xvals: array
+        a flat array of input values for the model
+
+    Returns
+    -------
+    output: a list of arrays
+    '''
+    return model._submodels[0](model(x))
