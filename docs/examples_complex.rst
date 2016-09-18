@@ -4,9 +4,9 @@ Usage details
 ==============
 
 Now that you have the basics let's move on to some more complex usage of the fitter interface.
-First a quick preamble to do some imports and create our |SherpaFitter| object:
+First a quick preamble to do some imports and create our |SherpaFitter| object.
 
-.. code-block::ipython
+.. code-block:: ipython
 
     from astropy.modeling.fitting import SherpaFitter
     sfit = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='confidence')
@@ -69,18 +69,22 @@ An initialized `~saba.SherpaFitter` object has the `opt_config` property which h
 .. code-block:: ipython
 
     print(sfit.opt_config)
-    print(sfit.opt_config.__doc__)  # as help returns the help for the returned object
 
 .. code-block:: ipython
-
+   
     {'epsfcn': 1.1920928955078125e-07,
-     'factor': 100.0,
+    'factor': 100.0,
     'ftol': 1.1920928955078125e-07,
     'gtol': 1.1920928955078125e-07,
     'maxfev': None,
     'verbose': 0,
     'xtol': 1.1920928955078125e-07}
 
+.. code-block:: ipython
+
+    print(sfit.opt_config.__doc__)  # as help returns the help for the returned object
+
+.. code-block:: ipython
 
     Levenberg-Marquardt optimization method.
 

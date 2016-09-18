@@ -1,10 +1,10 @@
 Fitting 2D data
 ===============
-We will start by doing some necessary imports:
+We will start by doing some necessary imports
 
 .. code-block:: ipython
 
-        from astropy.modeling.astro_sherpa import SherpaFitter
+        from saba import SherpaFitter
         from astropy.modeling.models import Gaussian2D
         import numpy as np
 
@@ -32,7 +32,7 @@ Here we flatten the arrays and then adjust the error bars for the fit:
 
 .. code-block:: ipython
 	
-	sfit = SherpaFitter(statistic=Chi2)
+	sfit = SherpaFitter(statistic="Chi2")
 	fitmo = truth.copy()
 	fitmo.x_mean = 3650
 	fitmo.y_mean = 4250
