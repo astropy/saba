@@ -5,7 +5,8 @@ This is just a very quick example of what can be done with the `~saba.SherpaMCMC
 Let's quickly define some data and a model:
 
 .. code-block:: ipython
-
+	
+        from astropy.modeling.models import Polynomial1D
         x = np.arange(0, 10, 0.1)
         y = 2 + 0.5 * x + 3 * x**2
         fit_model = Polynomial1D(2)
