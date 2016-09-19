@@ -115,8 +115,8 @@ We also need some data so let's make some data with some added noise.
 
         np.random.seed(0x1337)
         true = Gaussian1D(amplitude=3, mean=0.9, stddev=0.5)
-        err = 0.8
-        step = 0.2
+        err = 0.05
+        step = 0.1
         x = np.arange(-3, 3, step)
         y = true(x) + err * np.random.uniform(-1, 1, size=len(x))
 
