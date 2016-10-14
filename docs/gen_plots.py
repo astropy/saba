@@ -1,6 +1,5 @@
 from astropy.modeling.fitting import SherpaFitter
 from astropy.modeling.models import Gaussian1D, Gaussian2D
-
 import numpy as np
 import matplotlib.pyplot as plt
 

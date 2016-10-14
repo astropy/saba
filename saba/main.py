@@ -1,18 +1,21 @@
 from __future__ import (absolute_import, unicode_literals, division,
                         print_function)
-import numpy as np
 from collections import OrderedDict
+import numpy as np
+import warnings
+import copy
+
 from sherpa.fit import Fit
 from sherpa.data import Data1D, Data1DInt, Data2D, Data2DInt, DataSimulFit
 from sherpa.data import BaseData
 from sherpa.models import UserModel, Parameter, SimulFitModel
+from sherpa.instrument import PSFModel
 from sherpa.stats import Chi2, Chi2ConstVar, Chi2DataVar, Chi2Gehrels
 from sherpa.stats import Chi2ModVar, Chi2XspecVar, LeastSq
 from sherpa.stats import CStat, WStat, Cash
 from sherpa.optmethods import GridSearch, LevMar, MonCar, NelderMead
 from sherpa.estmethods import Confidence, Covariance, Projection
 from sherpa.sim import MCMC
-import warnings
 
 from astropy.utils import format_doc
 from astropy.utils.exceptions import AstropyUserWarning
@@ -26,8 +29,6 @@ with catch_warnings(AstropyUserWarning) as warns:
 for w in warns:
     if "SherpaFitter" not in w.message.message:
         warnings.warn(w)
-
-# from astropy.modeling
 
 __all__ = ('SherpaFitter', 'SherpaMCMC')
 
@@ -268,6 +269,50 @@ class SherpaMCMC(object):
         return self._stat_values
 
 
+def make_rsp(data,rsp):
+    """
+    Take an array as a response which is then convolved with the model output.
+    Parameters
+    ----------
+    data: a sherpa dataset
+    rsp : an array which represets rsp
+    """
+    def wrap_rsp(data, rsp):
+        rsp = np.asarray(rsp)
+        rdata = copy.deepcopy(data)
+        rdata.y = rsp
+        psf = PSFModel("user_rsp", rdata)
+        psf.fold(data)
+        return psf
+
+    try:
+        ndims = len(data.data.datasets[0].get_dims())
+    except AttributeError:
+        ndims = len(data.data.get_dims())
+
+    if ndims > 1:
+        return None
+    else:
+        rsp = np.asarray(rsp)
+
+        if data.ndata > 1:
+            if rsp.ndim > 1 or rsp.dtype == np.object:
+                if rsp.shape[0] == data.ndata:
+                    zipped = zip(data.data.datasets, rsp)
+                else:
+                    raise AstropyUserWarning("There is more than 1 but not"
+                                             " ndata responses")
+            else:
+                zipped = zip(data.data.datasets,
+                             [rsp for _ in xrange(data.ndata)])
+
+            rsp = []
+            for da, rr in zipped:
+                rsp.append(wrap_rsp(da, rr))
+        else:
+            return wrap_rsp(data.data, rsp)
+
+
 class SherpaFitter(Fitter):
     __doc__ = """
     Sherpa Fitter for astropy models.
@@ -321,7 +366,7 @@ class SherpaFitter(Fitter):
         setattr(self.__class__, 'est_config', property(lambda s: s._est_config, doc=self._est_method.__doc__))  
 
 
-    def __call__(self, models, x, y, z=None, xbinsize=None, ybinsize=None, err=None, bkg=None, bkg_scale=1, **kwargs):
+    def __call__(self, models, x, y, z=None, xbinsize=None, ybinsize=None, err=None, bkg=None, bkg_scale=1, rsp=None, **kwargs):
         """
         Fit the astropy model with a the sherpa fit routines.
 
@@ -347,6 +392,9 @@ class SherpaFitter(Fitter):
         bkg_sale : float or list of floats (optional)
             the scaling factor for the dataset if a single value
             is supplied it will be copied for each dataset
+        rsp: array or list of arrays
+	    this is convolved with the model output when fitting the model
+            N.B only 1D is currently supported.
         **kwargs :
             keyword arguments will be passed on to sherpa fit routine
 
@@ -364,10 +412,15 @@ class SherpaFitter(Fitter):
 
         self._data = Dataset(n_inputs, x, y, z, xbinsize, ybinsize, err, bkg, bkg_scale)
 
+        if rsp is not None:
+            self._rsp = make_rsp(self._data, rsp)
+        else:
+            self._rsp = None
+
         if self._data.ndata > 1:
 
             if len(models) == 1:
-                self._fitmodel = ConvertedModel([models.copy() for _ in xrange(self._data.ndata)], tie_list)
+                self._fitmodel = ConvertedModel([models.copy() for _ in xrange(self._data.ndata)], tie_list, rsp=self._rsp)
                 # Copy the model so each data set has the same model!
             elif len(models) == self._data.ndata:
                 self._fitmodel = ConvertedModel(models, tie_list)
@@ -377,9 +430,10 @@ class SherpaFitter(Fitter):
         else:
             if len(models) > 1:
                 self._data.make_simfit(len(models))
-                self._fitmodel = ConvertedModel(models, tie_list)
+                self._fitmodel = ConvertedModel(models, tie_list,
+                                                rsp=self._rsp)
             else:
-                self._fitmodel = ConvertedModel(models)
+                self._fitmodel = ConvertedModel(models, rsp=self._rsp)
 
         self._fitter = Fit(self._data.data, self._fitmodel.sherpa_model, self._stat_method, self._opt_method, self._est_method, **kwargs)
         self.fit_info = self._fitter.fit()
@@ -633,15 +687,30 @@ class ConvertedModel(object):
         e.g. [(modelB.y, modelA.x)] will mean that y in modelB will be tied to x of modelA
     """
 
-    def __init__(self, models, tie_list=None):
+    def __init__(self, models, tie_list=None, rsp=None):
         self.model_dict = OrderedDict()
         try:
             models.parameters  # does it quack
             self.sherpa_model = self._astropy_to_sherpa_model(models)
+            self.rsp = rsp
+            if rsp is not None:
+                self.sherpa_model = rsp(self.sherpa_model)
+
             self.model_dict[models] = self.sherpa_model
         except AttributeError:
-            for mod in models:
+            try:
+                n_rsp = len(rsp)
+                assert len(models) == n_rsp, AstropyUserWarning("The number of responses must be either 1 or the numeber of models %i" % len(models))
+                zipped = zip(models, rsp)
+
+            except TypeError:
+                zipped = zip(models, [rsp for _ in range(len(models))])
+
+            for mod, rsp in zipped:
                 self.model_dict[mod] = self._astropy_to_sherpa_model(mod)
+
+                if rsp is not None:
+                    self.sherpa_model[mod] = rsp(self.sherpa_model[mod])
 
                 if tie_list is not None:
                     for par1, par2 in tie_list:
