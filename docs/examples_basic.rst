@@ -75,13 +75,13 @@ Once again plotting the data.
 .. image:: _generated/example_plot_fitted.png
 
 Now we have a fit we can look at the outputs by doing:
-	
+
 .. code-block:: ipython
-	
+
 	print(sfit.fit_info)
 
 .. code-block:: ipython
-	
+
 		datasets       = None
 		itermethodname = none
 		methodname     = levmar
@@ -103,18 +103,18 @@ Now we have a fit we can look at the outputs by doing:
 Uncertainty estimation and config
 ---------------------------------
 
-One of the main driving forces behind this that using `sherpa` gives access to the uncertainty estimation methods, they are accessed through  `~saba.SherpaFitter.est_errors` method which uses the sherpa's  `~sherpa.fit.Fit.est_errors` method. 
+One of the main driving forces behind this that using `sherpa` gives access to the uncertainty estimation methods, they are accessed through  `~saba.SherpaFitter.est_errors` method which uses the sherpa's  `~sherpa.fit.Fit.est_errors` method.
 As with the `~sherpa.optmethods` before we are able to adjust the configuration of the `~sherpa.estmethods`. Some of the properties can be passed through `~saba.SherpaFitter.est_errors` as keyword arguments such as the `sigma` however for access to all options we have the `est_config` property.
 
 .. code-block:: ipython
-	
+
 	print(sfitter.est_config)
 	sfitter.est_config['numcores'] = 5
 	sfitter.est_config['max_rstat'] = 4
 	print(sfitter.est_config)
-	
+
 .. code-block:: ipython
-	
+
 	{'eps': 0.01,
 	 'fast': False,
 	 'max_rstat': 3,
@@ -147,14 +147,14 @@ As with the `~sherpa.optmethods` before we are able to adjust the configuration 
 Then to use get the errors we can simply (N.B we can pass `sigma` in as a keyword). 
 
 .. code-block:: ipython
-	
+
 	print(sfitter.est_config)
 	sfitter.est_config['numcores'] = 5
 	sfitter.est_config['max_rstat'] = 4
 	print(sfitter.est_config)
-	
+
 .. code-block:: ipython
-	
+
 	{'eps': 0.01,
 	 'fast': False,
 	 'max_rstat': 3,
@@ -184,14 +184,14 @@ Then to use get the errors we can simply (N.B we can pass `sigma` in as a keywor
 	 'verbose': False}
 
 
-Then to use get the errors we can simply (N.B we can pass `sigma` in as a keyword). 
-One of the main driving forces behind this that using sherpa gives access to the uncertainty estimation methods, they are accessed through  `~saba.SherpaFitter.est_errors` method which uses the sherpa's  `~sherpa.fit.Fit.est_errors` method. Then to use get the errors we can simply (N.B we can pass `sigma` in as a keyword). 
+Then to use get the errors we can simply (N.B we can pass `sigma` in as a keyword).
+One of the main driving forces behind this that using sherpa gives access to the uncertainty estimation methods, they are accessed through  `~saba.SherpaFitter.est_errors` method which uses the sherpa's  `~sherpa.fit.Fit.est_errors` method. Then to use get the errors we can simply (N.B we can pass `sigma` in as a keyword).
 
 .. code-block:: ipython
 
 	param_errors = sfit.est_errors(sigma=3)
 
-In return we get a tuple of (prameter_name, best_fit_value, lower_value, upper_value) for the sake of plotting them we make models for the upper and lower values, lets output the values while we're at it. 
+In return we get a tuple of (prameter_name, best_fit_value, lower_value, upper_value) for the sake of plotting them we make models for the upper and lower values, lets output the values while we're at it.
 
 .. code-block:: ipython
 
