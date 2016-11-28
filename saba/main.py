@@ -14,9 +14,11 @@ from sherpa.estmethods import Confidence, Covariance, Projection
 from sherpa.sim import MCMC
 import warnings
 
+from astropy.extern.six.moves import range
 from astropy.utils import format_doc
 from astropy.utils.exceptions import AstropyUserWarning
 from astropy.tests.helper import catch_warnings
+
 
 with catch_warnings(AstropyUserWarning) as warns:
     """this is to stop the import warning
@@ -152,8 +154,10 @@ class SherpaMCMC(object):
         self.acception_rate = (self._accepted.sum() * 100.0 /
                                self._accepted.size)
         self.parameters = OrderedDict()
+
+        parameter_key_list = list(self.parameter_map.keys())
         for n, parameter_set in enumerate(self._parameter_vals):
-            pname = self.parameter_map.keys()[n]
+            pname = parameter_key_list[n]
             self.parameters[pname] = self._parameter_vals[n, :]
         return draws
 
@@ -318,7 +322,7 @@ class SherpaFitter(Fitter):
 
         setattr(self.__class__, 'opt_config', property(lambda s: s._opt_config, doc=self._opt_method.__doc__))
         # sherpa doesn't currently have a docstring for est_method but maybe the future
-        setattr(self.__class__, 'est_config', property(lambda s: s._est_config, doc=self._est_method.__doc__))  
+        setattr(self.__class__, 'est_config', property(lambda s: s._est_config, doc=self._est_method.__doc__))
 
 
     def __call__(self, models, x, y, z=None, xbinsize=None, ybinsize=None, err=None, bkg=None, bkg_scale=1, **kwargs):
@@ -367,7 +371,7 @@ class SherpaFitter(Fitter):
         if self._data.ndata > 1:
 
             if len(models) == 1:
-                self._fitmodel = ConvertedModel([models.copy() for _ in xrange(self._data.ndata)], tie_list)
+                self._fitmodel = ConvertedModel([models.copy() for _ in range(self._data.ndata)], tie_list)
                 # Copy the model so each data set has the same model!
             elif len(models) == self._data.ndata:
                 self._fitmodel = ConvertedModel(models, tie_list)
@@ -569,7 +573,7 @@ class Dataset(SherpaWrapper):
             else:
                 if err is None:
                     if bkg is None:
-                        
+
                         data = Data1DInt("wrapped_data", xlo=x - bs, xhi=x + bs, y=y)
                     else:
                         data = Data1DIntBkg("wrapped_data", xlo=x - bs, xhi=x + bs, y=y, bkg=bkg, bkg_scale=bkg_scale)
@@ -617,7 +621,7 @@ class Dataset(SherpaWrapper):
             the number of times you want to copy the dataset i.e if you want 2 datasets total you put 1!
         """
 
-        self.data = DataSimulFit("wrapped_data", [self.data for _ in xrange(numdata)])
+        self.data = DataSimulFit("wrapped_data", [self.data for _ in range(numdata)])
         self.ndata = numdata + 1
 
 
