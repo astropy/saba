@@ -1,11 +1,10 @@
-name: astropy
+name: saba
 
 channels:
   - astropy
-  - https://conda.binstar.org/sherpa
+  - sherpa
 
 dependencies:
-  - astropy-helpers
   - numpy
   - cython
   - matplotlib
