@@ -40,6 +40,7 @@ matrix:
         # Testing the docs building
         - python: 3.5
           env: SHERPA_VERSION>=4.8.2 SETUP_CMD='build_sphinx -w'
+               CONDA_DEPENDENCIES='sherpa ipython'
 
         # Test old numpy versions
         - python: 3.5
