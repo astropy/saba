@@ -94,7 +94,7 @@ for saba_entry_point in saba_entry_point_list:
 # Note that requires and provides should not be included in the call to
 # ``setup``, since these are now deprecated. See this link for more details:
 # https://groups.google.com/forum/#!topic/astropy-dev/urYO8ckB2uM
-print(entry_points)
+
 setup(name=PACKAGENAME,
       version=VERSION,
       description=DESCRIPTION,

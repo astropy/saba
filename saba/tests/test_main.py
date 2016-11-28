@@ -329,7 +329,6 @@ class TestMCMC(object):
         """
         Check that the parameters values found are reasonable
         """
-        print("hello")
         parameters = self.sampler.parameters
         for nn, pname in enumerate(('c0', 'c1', 'c2')):
             y, xx = np.histogram(parameters[pname][self.sampler.accepted],
