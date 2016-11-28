@@ -20,7 +20,8 @@ env:
         # saba requires astropy >=1.3 which is not yet released
         - ASTROPY_VERSION=dev
         - SETUP_CMD='test'
-        - CONDA_DEPENDENCIES='Cython jinja2 six coverage pytest pytest-cov sherpa'
+        - CONDA_DEPENDENCIES='sherpa'
+        - CONDA_CHANNELS='sherpa'
 
     matrix:
         - SETUP_CMD='egg_info'
