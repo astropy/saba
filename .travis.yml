@@ -37,6 +37,10 @@ matrix:
         - python: 3.5
           env: SHERPA_VERSION>=4.8.2
 
+        # Testing the docs building
+        - python: 3.5
+          env: SHERPA_VERSION>=4.8.2 SETUP_CMD='build_sphinx -w'
+
         # Test old numpy versions
         - python: 3.5
           env: SHERPA_VERSION>=4.8.2 NUMPY_VERSION=1.10
