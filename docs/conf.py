@@ -51,13 +51,7 @@ sys.path.insert(0, os.path.join(os.path.abspath('.'), 'code'))
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 
-print("***** DEBUG")
-print(automodapi_toctreedirnm)
-print(autosummary_generate)
-print(exclude_patterns)
 # automodapi_writereprocessed = True
-print(extensions)
-print("***** DEBUG")
 
 # With my test setup, whey using 'python setup.py build_sphinx',
 # the api docs get written to the top-level - i.e. *not* within
@@ -240,12 +234,12 @@ html_theme_options = {
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo ="saba_logo.png"
+html_favicon = os.path.join('_static', 'saba_logo.png')
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-html_favicon = "favicon.ico"
+html_favicon = os.path.join('_static', 'favicon.ico')
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
