@@ -4,13 +4,7 @@ python:
     - 2.7
     - 3.5
 
-# Setting sudo to false opts in to Travis-CI container-based builds.
 sudo: false
-
-# The apt packages below are needed for sphinx builds. A full list of packages
-# that can be included can be found here:
-#
-# https://github.com/travis-ci/apt-package-whitelist/blob/master/ubuntu-precise
 
 addons:
     apt:
@@ -22,31 +16,16 @@ addons:
 
 env:
     global:
-
-        # The following versions are the 'default' for tests, unless
-        # overridden underneath. They are defined here in order to save having
-        # to repeat them for all configurations.
         - NUMPY_VERSION=stable
-        #- ASTROPY_VERSION=stable
+        # saba requires astropy >=1.3 which is not yet released
+        - ASTROPY_VERSION=dev
         - SETUP_CMD='test'
-        #- PIP_DEPENDENCIES='jinja2'
-
-        # For this package-template, we include examples of Cython modules,
-        # so Cython is required for testing. If your package does not include
-        # Cython code, you can set CONDA_DEPENDENCIES=''
-        - CONDA_DEPENDENCIES='Cython jinja2 six coverage pytest pytest-cov'
-
-        # If there are matplotlib or other GUI tests, uncomment the following
-        # line to use the X virtual framebuffer.
-        # - SETUP_XVFB=True
+        - CONDA_DEPENDENCIES='sherpa'
+        - CONDA_CHANNELS='sherpa'
 
     matrix:
-        # Make sure that egg_info works without dependencies
         - SETUP_CMD='egg_info'
-        # Try all python versions with the latest numpy
-        - SETUP_CMD='test'
 
-          
 matrix:
     include:
 
@@ -54,70 +33,34 @@ matrix:
         - python: 2.7
           env: SETUP_CMD='test --coverage'
 
-        # Check for sphinx doc build warnings - we do this first because it
-        # may run for a long time
-        #- python: 2.7
-        #  env: SETUP_CMD='build_sphinx -w'
+        # Sherpa 4.8.2 is the first to support python3
+        - python: 3.5
+          env: SHERPA_VERSION>=4.8.2
 
-        # Try Astropy development version
-        #- python: 2.7
-        #  env: ASTROPY_VERSION=development
-        - python: 2.7
-          env: NUMPY_VERSION=1.10
+        # Testing the docs building
+        - python: 3.5
+          env: SHERPA_VERSION>=4.8.2 SETUP_CMD='build_sphinx -w'
+               CONDA_DEPENDENCIES='sherpa ipython'
+
+        # Test old numpy versions
+        - python: 3.5
+          env: SHERPA_VERSION>=4.8.2 NUMPY_VERSION=1.10
         - python: 2.7
           env: NUMPY_VERSION=1.9
         - python: 2.7
           env: NUMPY_VERSION=1.8
-        - python: 2.7
-          env: NUMPY_VERSION=1.7
-        - python: 3.5
-          env: NUMPY_VERSION=1.10
-
 
 install:
-
-    # We now use the ci-helpers package to set up our testing environment.
-    # This is done by using Miniconda and then using conda and pip to install
-    # dependencies. Which dependencies are installed using conda and pip is
-    # determined by the CONDA_DEPDENDENCIES and PIP_DEPENDENCIES variables,
-    # which should be space-delimited lists of package names. See the README
-    # in https://github.com/astropy/ci-helpers for information about the full
-    # list of environment variables that can be used to customize your
-    # environment. In some cases, ci-helpers may not offer enough flexibility
-    # in how to install a package, in which case you can have additional
-    # commands in the install: section below.
-
     - git clone git://github.com/astropy/ci-helpers.git
     - source ci-helpers/travis/setup_conda_$TRAVIS_OS_NAME.sh
 
-    # As described above, using ci-helpers, you should be able to set up an
-    # environment with dependencies installed using conda and pip, but in some
-    # cases this may not provide enough flexibility in how to install a
-    # specific dependency (and it will not be able to install non-Python
-    # dependencies). Therefore, you can also include commands below (as
-    # well as at the start of the install section or in the before_install
-    # section if they are needed before setting up conda) to install any
-    # other dependencies.
-    - if [[ $SETUP_CMD == "egg_info" ]]; then conda install $CONDA_DEPENDENCIES; fi
-    - source ./travis_astropy.sh
-    - if  [[ $TRAVIS_PYTHON_VERSION  == 3.5 ]]; 
-         then conda install -c https://conda.anaconda.org/sherpa/channel/dev sherpa=4.8py3;
-         else conda install -c sherpa sherpa;
-      fi
-
 script:
-   - if [[ $SETUP_CMD != 'test --coverage' ]]; 
-       then python setup.py $SETUP_CMD;
-       else
-         python setup.py develop;
-         py.test --cov=saba --cov-report=xml --cov-config=saba/tests/coveragerc --cov-report=term-missing saba;
-    fi
+    - python setup.py $SETUP_CMD
 
 after_success:
-    # If coveralls.io is set up for this package, uncomment the line
-    # below and replace "packagename" with the name of your package.
-    # The coveragerc file may be customized as needed for your package.
-    - if [[ $SETUP_CMD == 'test --coverage' ]]; then coveralls --rcfile='saba/tests/coveragerc'; fi
+    - if [[ $SETUP_CMD == 'test --coverage' ]]; then
+         coveralls --rcfile='saba/tests/coveragerc';
+      fi
 
 notifications:
   email: false
