@@ -21,4 +21,3 @@ API/Reference
 Sherpa to Astropy Mapping
 -------------------------
 .. image:: _static/saba_api_map.png
-	

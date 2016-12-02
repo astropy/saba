@@ -24,6 +24,7 @@ We need to define some data so we use the `~astropy.modeling.functional_models.G
     mexp = truth(x0, x1).reshape(shape)
     merr = np.abs(np.random.poisson(mexp) - mexp)
 
+    plt.rcParams['figure.figsize'] = (15, 5)
     plt.subplot(1, 3, 1)
     plt.imshow(mexp, origin='lower', cmap='viridis',
                extent=(x0low, x0high, x1low, x1high),
@@ -105,6 +106,7 @@ Here we flatten the arrays and then adjust the error bars for the fit:
                  xbinsize=np.ones(x0.size)*dx, ybinsize=np.ones(x1.size)*dx,
                  err=merr.flatten()+np.random.uniform(-0.5, 0.5, x0.size))
 
+    plt.rcParams['figure.figsize'] = (15, 5)
     plt.subplot(1, 2, 1)
     plt.imshow(fitmo(x0, x1).reshape(shape), origin='lower', cmap='viridis',
                extent=(x0low, x0high, x1low, x1high),
