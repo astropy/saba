@@ -137,8 +137,10 @@ We can first plot the histogram of the accepted draws for each parameter value a
     x = np.arange(0, 10, 0.1)
     y = 2+3*x**2+0.5*x
     sfit = SherpaFitter(statistic="Cash")
+    print(sfit(Polynomial1D(2), x, y))
 
     sampler = sfit.get_sampler()
+
 
     def lognorm(x):
         # center on 10^20 cm^2 with a sigma of 0.5
@@ -152,6 +154,7 @@ We can first plot the histogram of the accepted draws for each parameter value a
     sampler.set_prior("c0", lognorm)
     _ = sampler(20000)
 
+
     def plotter(xx, yy, c):
         px = []
         py = []
@@ -161,22 +164,23 @@ We can first plot the histogram of the accepted draws for each parameter value a
             py.extend([y, y])
         plt.plot(px, py, c=c)
 
+
     def plot_hist(sampler, pname, nbins, c="b"):
         yy, xx = np.histogram(sampler.parameters[pname][sampler.accepted], nbins)
         plotter(xx, yy, c)
         plt.axvline(sampler.parameter_map[pname].val, c=c)
 
     plt.figure(figsize=(3.2, 6))
+
+
     plt.subplot(311)
     plot_hist(sampler, 'c0', 100, 'k')
-    plt.title("c0")
+    plt.title("Histograms of c0, c1, and c2")
     plt.subplot(312)
     plot_hist(sampler, 'c1', 100, 'r')
-    plt.title("c1")
     plt.ylabel("Number of accepted fits")
     plt.subplot(313)
     plot_hist(sampler, 'c2', 100, 'b')
-    plt.title("c2")
     plt.xlabel("Parameter value")
 
 Then a quick cdf:
@@ -197,8 +201,10 @@ Then a quick cdf:
     x = np.arange(0, 10, 0.1)
     y = 2+3*x**2+0.5*x
     sfit = SherpaFitter(statistic="Cash")
+    print(sfit(Polynomial1D(2), x, y))
 
     sampler = sfit.get_sampler()
+
 
     def lognorm(x):
         # center on 10^20 cm^2 with a sigma of 0.5
@@ -212,6 +218,7 @@ Then a quick cdf:
     sampler.set_prior("c0", lognorm)
     _ = sampler(20000)
 
+
     def plotter(xx, yy, c):
         px = []
         py = []
@@ -220,6 +227,7 @@ Then a quick cdf:
             px.extend([xlo, xhi])
             py.extend([y, y])
         plt.plot(px, py, c=c)
+
 
     def plot_cdf(sampler, pname, nbins, c="b", sigfrac=0.682689):
         y, xx = np.histogram(sampler.parameters[pname][sampler.accepted], nbins)
@@ -244,6 +252,7 @@ Then a quick cdf:
 
     plt.subplot(311)
     plot_cdf(sampler, 'c0', 100, 'k')
+    plt.title("CDFs of c0, c1, and c2")
     plt.subplot(312)
     plot_cdf(sampler, 'c1', 100, 'r')
     plt.ylabel("CDF")
