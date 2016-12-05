@@ -5,6 +5,7 @@ channels:
   - sherpa
 
 dependencies:
+  - astropy_helpers
   - numpy
   - cython
   - matplotlib
