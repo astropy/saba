@@ -5,7 +5,7 @@ This is just a very quick example of what can be done with the `~saba.SherpaMCMC
 Let's quickly define some data and a model:
 
 .. code-block:: ipython
-	
+
         from astropy.modeling.models import Polynomial1D
         x = np.arange(0, 10, 0.1)
         y = 2 + 0.5 * x + 3 * x**2
@@ -127,7 +127,61 @@ We can first plot the histogram of the accepted draws for each parameter value a
         plot_hist(sampler, 'c1', 100, 'r')
         plot_hist(sampler, 'c2', 100, 'b')
 
-.. image:: _generated/example_plot_mcmc_hist.png
+.. plot::
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from saba import SherpaFitter
+    from astropy.modeling.models import Polynomial1D
+
+    x = np.arange(0, 10, 0.1)
+    y = 2+3*x**2+0.5*x
+    sfit = SherpaFitter(statistic="Cash")
+    print(sfit(Polynomial1D(2), x, y))
+
+    sampler = sfit.get_sampler()
+
+
+    def lognorm(x):
+        # center on 10^20 cm^2 with a sigma of 0.5
+        sigma = 0.5
+        x0 = 1
+        # nH is in units of 10^-22 so convert
+        dx = np.log10(x) - x0
+        norm = sigma / np.sqrt(2 * np.pi)
+        return norm * np.exp(-0.5*dx*dx/(sigma*sigma))
+
+    sampler.set_prior("c0", lognorm)
+    _ = sampler(20000)
+
+
+    def plotter(xx, yy, c):
+        px = []
+        py = []
+        for (xlo, xhi), y in zip(zip(xx[:-1], xx[1:]), yy):
+
+            px.extend([xlo, xhi])
+            py.extend([y, y])
+        plt.plot(px, py, c=c)
+
+
+    def plot_hist(sampler, pname, nbins, c="b"):
+        yy, xx = np.histogram(sampler.parameters[pname][sampler.accepted], nbins)
+        plotter(xx, yy, c)
+        plt.axvline(sampler.parameter_map[pname].val, c=c)
+
+    plt.figure(figsize=(3.2, 6))
+
+
+    plt.subplot(311)
+    plot_hist(sampler, 'c0', 100, 'k')
+    plt.title("Histograms of c0, c1, and c2")
+    plt.subplot(312)
+    plot_hist(sampler, 'c1', 100, 'r')
+    plt.ylabel("Number of accepted fits")
+    plt.subplot(313)
+    plot_hist(sampler, 'c2', 100, 'b')
+    plt.xlabel("Parameter value")
 
 Then a quick cdf:
 
@@ -137,6 +191,73 @@ Then a quick cdf:
         plot_cdf(sampler, 'c1', 100, 'r')
         plot_cdf(sampler, 'c2', 100, 'b')
 
-.. image:: _generated/example_plot_mcmc_cdf.png
+.. plot::
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from saba import SherpaFitter
+    from astropy.modeling.models import Polynomial1D
+
+    x = np.arange(0, 10, 0.1)
+    y = 2+3*x**2+0.5*x
+    sfit = SherpaFitter(statistic="Cash")
+    print(sfit(Polynomial1D(2), x, y))
+
+    sampler = sfit.get_sampler()
+
+
+    def lognorm(x):
+        # center on 10^20 cm^2 with a sigma of 0.5
+        sigma = 0.5
+        x0 = 1
+        # nH is in units of 10^-22 so convert
+        dx = np.log10(x) - x0
+        norm = sigma / np.sqrt(2 * np.pi)
+        return norm * np.exp(-0.5*dx*dx/(sigma*sigma))
+
+    sampler.set_prior("c0", lognorm)
+    _ = sampler(20000)
+
+
+    def plotter(xx, yy, c):
+        px = []
+        py = []
+        for (xlo, xhi), y in zip(zip(xx[:-1], xx[1:]), yy):
+
+            px.extend([xlo, xhi])
+            py.extend([y, y])
+        plt.plot(px, py, c=c)
+
+
+    def plot_cdf(sampler, pname, nbins, c="b", sigfrac=0.682689):
+        y, xx = np.histogram(sampler.parameters[pname][sampler.accepted], nbins)
+        cdf = [y[0]]
+        for yy in y[1:]:
+            cdf.append(cdf[-1]+yy)
+        cdf = np.array(cdf)
+        cdf = cdf / float(cdf[-1])
+
+        plotter(xx, cdf, c)
+        plt.axvline(sampler.parameter_map[pname].val, c=c)
+        med_ind = np.argmin(abs(cdf-0.5))
+        plt.axvline((xx[med_ind]+xx[med_ind+1])/2, ls="--", c=c)
+        siglo = (1-sigfrac)/2.0
+        sighi = (1+sigfrac)/2.0
+        lo_ind = np.argmin(abs(cdf-siglo))
+        hi_ind = np.argmin(abs(cdf-sighi))
+        plt.axvline((xx[lo_ind]+xx[lo_ind+1])/2, ls="--", c=c)
+        plt.axvline((xx[hi_ind]+xx[hi_ind+1])/2, ls="--", c=c)
+
+    plt.figure(figsize=(3, 6))
+
+    plt.subplot(311)
+    plot_cdf(sampler, 'c0', 100, 'k')
+    plt.title("CDFs of c0, c1, and c2")
+    plt.subplot(312)
+    plot_cdf(sampler, 'c1', 100, 'r')
+    plt.ylabel("CDF")
+    plt.subplot(313)
+    plot_cdf(sampler, 'c2', 100, 'b')
+    plt.xlabel("Parameter value")
 
 Both the fit values and the draws middle points are about 2, 0.5 and 3 for c0, c1 and c2 respectively, which are the true values.

@@ -8,7 +8,7 @@ First a quick preamble to do some imports and create our |SherpaFitter| object.
 
 .. code-block:: ipython
 
-    from astropy.modeling.fitting import SherpaFitter
+    from saba import SherpaFitter
     sfit = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='confidence')
 
     from astropy.modeling.models import Gaussian1D
@@ -18,37 +18,52 @@ First a quick preamble to do some imports and create our |SherpaFitter| object.
 Parameter constraints
 ---------------------
 
-If you place any of the parameter constraints on the astropy models then they will be respected by the fitter. Let's take a quick look at that. Firstly let's make a compound model by adding two `~astropy.modeling.functional_models.Gaussian1D` instances:
+Parameter constraints can be set in astropy models, and those constraints are
+taken into account during the fitting procedure. Let's take a quick look at
+that. Firstly, let's make a compound model by adding two `~astropy.modeling.functional_models.Gaussian1D` instances.
 
-.. code-block:: ipython
+After that, let's set the following constraint on the parameter `amplitude_1`
+(the amplitude of the right hand side `~astropy.modeling.functional_models.Gaussian1D`):
+`1.2*amplitude_0`.
 
-    double_gaussian = (Gaussian1D(amplitude=10, mean=-1.5, stddev=0.5) +
-                       Gaussian1D(amplitude=3, mean=0.9, stddev=0.5))
+In addition, let's create some synthetic data:
 
-Now we have the compound model lets add tie `amplitude_1` (the amplitude of the right hand side `~astropy.modeling.functional_models.Gaussian1D`) to `1.2*amplitude_0` and while we're at it let us generate some data, too.
-To do this we must first define the `tiedfunc`:
+.. plot::
+    :include-source:
 
-.. code-block:: ipython
+    from astropy.modeling.models import Gaussian1D
+    import numpy as np
+    np.random.seed(0x1337)
 
-    def tiedfunc(self): # a function used for tying amplitude_1
-        return 1.2*self.amplitude_0
+    double_gaussian = Gaussian1D(
+        amplitude=10, mean=-1.5, stddev=0.5) + Gaussian1D(amplitude=1, mean=0.9,
+                                                         stddev=0.5)
+
+    def tiedfunc(obj):  # a function used for tying amplitude_1
+        return 1.2 * obj.amplitude_0
 
     double_gaussian.amplitude_1.tied = tiedfunc
+    double_gaussian.amplitude_1.value = double_gaussian.amplitude_1.tied(
+        double_gaussian)
 
     err = 0.8
     step = 0.2
     x = np.arange(-3, 3, step)
     y = double_gaussian(x) + err * np.random.uniform(-1, 1, size=len(x))
     yerrs = err * np.random.uniform(0.2, 1, size=len(x))
-    binsize=(step/2) * np.ones(x.shape)
+    # please note these are binsize/2 not true errors!
+    binsize = (step / 2) * np.ones(x.shape)
+
+    plt.errorbar(x, y, xerr=binsize, yerr=yerrs, ls="", label="data")
+    # once again xerrs are binsize/2 not true errors!
+    plt.plot(x, double_gaussian(x), label="True")
+    plt.legend(loc=(0.78, 0.8), frameon=False)
+    plt.xlim((-3, 3))
 
 .. note :: without astropy PR #5129 we need to do this
     ``double_gaussian.amplitude_1.value = double_gaussian.amplitude_1.tied(double_gaussian)``
 
-.. image:: _generated/example_plot_data2.png
-   :width: 500px
-
-Let's add some more parameter constraints to the model and fit the data.
+Let's set some more parameter constraints to the model and fit the data.
 We can print the sherpa models to check things are doing what they should.
 
 .. code-block:: ipython
@@ -64,14 +79,15 @@ We can print the sherpa models to check things are doing what they should.
 Fitting Config
 --------------
 
-An initialized `~saba.SherpaFitter` object has the `opt_config` property which holds the configuration details for the optimization routine. It's docstring contains information about the the properties of the optimizer.
+A `~saba.SherpaFitter` object has the `opt_config` property which holds the
+configuration details for the optimization routine. Its docstring contains
+information about the the properties of the optimizer.
+
+We can see those configuration details by using ``print(sfit.opt_config)``
+which outputs:
 
 .. code-block:: ipython
 
-    print(sfit.opt_config)
-
-.. code-block:: ipython
-   
     {'epsfcn': 1.1920928955078125e-07,
     'factor': 100.0,
     'ftol': 1.1920928955078125e-07,
@@ -80,9 +96,7 @@ An initialized `~saba.SherpaFitter` object has the `opt_config` property which h
     'verbose': 0,
     'xtol': 1.1920928955078125e-07}
 
-.. code-block:: ipython
-
-    print(sfit.opt_config.__doc__)  # as help returns the help for the returned object
+Similarly for ``print(sfit.opt_config.__doc__)``:
 
 .. code-block:: ipython
 
@@ -109,10 +123,9 @@ An initialized `~saba.SherpaFitter` object has the `opt_config` property which h
        is the smallest number x such that `1.0 != 1.0 + x`. The
        conditions are satisfied when the relative error between two
        consecutive iterates is, at most, `xtol`.
-
     ...
 
-The parameters can be changed by
+The parameters can be changed as
 
 .. code-block:: ipython
 
@@ -130,19 +143,81 @@ The parameters can be changed by
      'xtol': 1.1920928955078125e-07}
 
 
-Fitting this model is the same as earlier and we can also fit an unconstrained model for comparison:
+Fitting this model is similar as showing previously. For the sake of
+comparison let's also fit and unconstrained model:
 
 .. code-block:: ipython
 
-    fitted_gg = sfit(fit_gg,x, y, xbinsize=binsize, err=yerrs)
+    fitted_gg = sfit(fit_gg, x, y, xbinsize=binsize, err=yerrs)
 
-    sfit2 = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='covariance')
+    sfit_unconstrained = SherpaFitter(statistic='chi2', optimizer='levmar',
+                                      estmethod='covariance')
+    free_gg = sfit_unconstrained(double_gaussian.copy(), x, y,
+                                 xbinsize=binsize, err=yerrs)
 
-    free_gg = sfit2(double_gaussian.copy(), x, y, xbinsize=binsize, err=yerrs)
+    plt.figure(figsize=(10, 5))
+    plt.plot(x, double_gaussian(x), label="True")
+    plt.errorbar(x, y, xerr=binsize, yerr=yerrs, ls="", label="data")
+    plt.plot(x, fit_gg(x), label="Pre fit")
+    plt.plot(x, fitted_gg(x), label="Fitted")
+    plt.plot(x, free_gg(x), label="Free")
+    plt.subplots_adjust(right=0.8)
+    plt.legend(loc=(1.01, 0.55), frameon=False)
+    plt.xlim((-3, 3))
+
+.. plot::
+
+    from saba import SherpaFitter
+    from astropy.modeling.models import Gaussian1D
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    sfit = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='confidence')
+
+    double_gaussian = Gaussian1D(
+        amplitude=10, mean=-1.5, stddev=0.5) + Gaussian1D(amplitude=1, mean=0.9,
+                                                         stddev=0.5)
+
+    def tiedfunc(self):  # a function used for tying amplitude_1
+        return 1.2 * self.amplitude_0
+
+    double_gaussian.amplitude_1.tied = tiedfunc
+    double_gaussian.amplitude_1.value = double_gaussian.amplitude_1.tied(
+        double_gaussian)
+
+    err = 0.8
+    step = 0.2
+    x = np.arange(-3, 3, step)
+    y = double_gaussian(x) + err * np.random.uniform(-1, 1, size=len(x))
+    yerrs = err * np.random.uniform(0.2, 1, size=len(x))
+    # please note these are binsize/2 not true errors!
+    binsize = (step / 2) * np.ones(x.shape)
+
+    fit_gg = double_gaussian.copy()
+    fit_gg.mean_0.value = -0.5
+    # sets the lower bound so we can force the parameter against it
+    fit_gg.mean_0.min = -1.25
+    fit_gg.mean_1.value = 0.8
+    fit_gg.stddev_0.value = 0.9
+    fit_gg.stddev_0.fixed = True
+
+    fitted_gg = sfit(fit_gg, x, y, xbinsize=binsize, err=yerrs)
+    sfit_unconstrained = SherpaFitter(statistic='chi2', optimizer='levmar',
+                                      estmethod='confidence')
+    free_gg = sfit_unconstrained(double_gaussian.copy(), x, y,
+                                 xbinsize=binsize, err=yerrs)
+
+    plt.figure(figsize=(10, 5))
+    plt.plot(x, double_gaussian(x), label="True")
+    plt.errorbar(x, y, xerr=binsize, yerr=yerrs, ls="", label="data")
+    plt.plot(x, fit_gg(x), label="Pre fit")
+    plt.plot(x, fitted_gg(x), label="Fitted")
+    plt.plot(x, free_gg(x), label="Free")
+    plt.subplots_adjust(right=0.8)
+    plt.legend(loc=(1.01, 0.55), frameon=False)
+    plt.xlim((-3, 3))
 
 
-.. image:: _generated/example_plot_fitted2.png
-   :width: 500px
 
 The fitter keeps a copy of the converted model so we can use it to compare the constrained and unconstrained model setups:
 
@@ -158,7 +233,7 @@ The fitter keeps a copy of the converted model so we can use it to compare the c
     print("##Fit with constraints")
     print(sfit._fitmodel.sherpa_model)
     print("##Fit without constraints")
-    print(sfit2._fitmodel.sherpa_model)
+    print(sfit_unconstrained._fitmodel.sherpa_model)
 
 .. code-block:: ipython
 
@@ -251,8 +326,54 @@ We quickly copy the two models above and supply them to the fitter as a list - h
 
     fm1, fm2 = sfit([fit_gg, double_gaussian.copy()], x, y, xbinsize=binsize, err=yerrs)
 
-.. image:: _generated/example_plot_simul.png
-   :width: 500px
+.. plot::
+
+    from saba import SherpaFitter
+    from astropy.modeling.models import Gaussian1D, Gaussian2D
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    sfitter = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='confidence')
+
+    double_gaussian = Gaussian1D(
+        amplitude=10, mean=-1.5, stddev=0.5) + Gaussian1D(amplitude=1, mean=0.9,
+                                                         stddev=0.5)
+
+    def tiedfunc(self):  # a function used for tying amplitude_1
+        return 1.2 * self.amplitude_0
+
+    double_gaussian.amplitude_1.tied = tiedfunc
+    double_gaussian.amplitude_1.value = double_gaussian.amplitude_1.tied(
+        double_gaussian)
+
+    err = 0.8
+    step = 0.2
+    x = np.arange(-3, 3, step)
+    y = double_gaussian(x) + err * np.random.uniform(-1, 1, size=len(x))
+    yerrs = err * np.random.uniform(0.2, 1, size=len(x))
+    # please note these are binsize/2 not true errors!
+    binsize = (step / 2) * np.ones(x.shape)
+
+    fit_gg = double_gaussian.copy()
+    fit_gg.mean_0.value = -0.5
+    fit_gg.mean_0.min = -1.25
+    fit_gg.mean_1.value = 0.8
+    fit_gg.stddev_0.value = 0.9
+    fit_gg.stddev_0.fixed = True
+
+    fm1, fm2 = sfitter([fit_gg, double_gaussian.copy()],
+                       x, y, xbinsize=binsize, err=yerrs)
+
+    plt.figure(figsize=(10, 5))
+    plt.plot(x, double_gaussian(x), label="True")
+    plt.errorbar(x, y, xerr=binsize, yerr=yerrs, ls="", label="data")
+    plt.plot(x, fit_gg(x), label="Pre fit")
+    plt.plot(x, fm1(x), label="Constrained")
+    plt.plot(x, fm2(x), label="Free")
+    plt.subplots_adjust(right=0.8)
+    plt.legend(loc=(1.01, 0.55), frameon=False)
+    plt.xlim((-3, 3))
+
 
 We also can fit multiple datasets with a single model so let's make a second dataset:
 
@@ -283,8 +404,67 @@ Here we supply lists for each of the data parameters. You can also use ``None`` 
 
     fm1, fm2 = sfit(fit_gg, x=[x, x], y=[y, y2], xbinsize=[binsize, None], err=[yerrs, y2errs])
 
-.. image:: _generated/example_plot_simul2.png
-   :width: 500px
+.. plot::
+
+    from saba import SherpaFitter
+    from astropy.modeling.models import Gaussian1D, Gaussian2D
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    sfitter = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='confidence')
+
+    double_gaussian = Gaussian1D(
+        amplitude=10, mean=-1.5, stddev=0.5) + Gaussian1D(amplitude=1, mean=0.9,
+                                                         stddev=0.5)
+
+    def tiedfunc(self):  # a function used for tying amplitude_1
+        return 1.2 * self.amplitude_0
+
+    double_gaussian.amplitude_1.tied = tiedfunc
+    double_gaussian.amplitude_1.value = double_gaussian.amplitude_1.tied(
+        double_gaussian)
+
+    err = 0.8
+    step = 0.2
+    x = np.arange(-3, 3, step)
+    y = double_gaussian(x) + err * np.random.uniform(-1, 1, size=len(x))
+    yerrs = err * np.random.uniform(0.2, 1, size=len(x))
+    # please note these are binsize/2 not true errors!
+    binsize = (step / 2) * np.ones(x.shape)
+
+    fit_gg = double_gaussian.copy()
+    fit_gg.mean_0 = -2.3
+    fit_gg.mean_1 = 0.7
+    fit_gg.amplitude_0 = 2
+    fit_gg.amplitude_1 = 3
+    fit_gg.stddev_0 = 0.3
+    fit_gg.stddev_1 = 0.5
+
+    second_gg = double_gaussian.copy()
+    second_gg.mean_0 = -2
+    second_gg.mean_1 = 0.5
+    second_gg.amplitude_0 = 8
+    second_gg.amplitude_1 = 5
+    second_gg.stddev_0 = 0.4
+    second_gg.stddev_1 = 0.8
+    second_gg.amplitude_1.value = second_gg.amplitude_1.tied(second_gg)
+
+    yy2 = second_gg(x) + err * np.random.uniform(-1, 1, size=len(x))
+    yy2errs = err * np.random.uniform(0.2, 1, size=len(x))
+
+    plt.errorbar(x, y, xerr=binsize, yerr=yerrs, ls="", label="data1")
+    plt.errorbar(x, yy2, yerr=yy2errs, ls="", label="data2")
+    plt.plot(x, fit_gg(x), label="Prefit")
+
+    fitted_model = sfitter(fit_gg, x=[x, x], y=[y, yy2], xbinsize=[
+                           binsize, None], err=[yerrs, yy2errs])
+
+    plt.plot(x, fitted_model[0](x), label="Fitted")
+    plt.plot(x, fitted_model[1](x), label="Fitted")
+    plt.subplots_adjust(right=0.8)
+
+    plt.legend(loc=(1.01, 0.55), frameon=False)
+    plt.xlim((-3, 3))
 
 Background Data
 ---------------
@@ -299,5 +479,44 @@ This is done by supplying a background array using the `bkg` keyword.  If there 
     cfit = SherpaFitter(statistic='cstat', optimizer='levmar', estmethod='covariance')
     cfit(fit_gg, x=x, y=y, xbinsize=binsize, err=yerrs, bkg=y, bkg_scale=0.3)
 
-.. image:: _generated/example_plot_bkg.png
-   :width: 500px
+.. plot::
+
+    from saba import SherpaFitter
+    from astropy.modeling.models import Gaussian1D, Gaussian2D
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    double_gaussian = Gaussian1D(
+        amplitude=10, mean=-1.5, stddev=0.5) + Gaussian1D(amplitude=1, mean=0.9,
+                                                         stddev=0.5)
+
+    def tiedfunc(self):  # a function used for tying amplitude_1
+        return 1.2 * self.amplitude_0
+
+    double_gaussian.amplitude_1.tied = tiedfunc
+    double_gaussian.amplitude_1.value = double_gaussian.amplitude_1.tied(
+        double_gaussian)
+
+    err = 0.8
+    step = 0.2
+    x = np.arange(-3, 3, step)
+    y = double_gaussian(x) + err * np.random.uniform(-1, 1, size=len(x))
+    yerrs = err * np.random.uniform(0.2, 1, size=len(x))
+    # please note these are binsize/2 not true errors!
+    binsize = (step / 2) * np.ones(x.shape)
+
+    y[y<0]=0
+    cfitter = SherpaFitter(statistic='cstat', optimizer='levmar', estmethod='covariance')
+
+    fit_gg = double_gaussian.copy()
+    fit_gg.mean_0 = -2.3
+    fit_gg.mean_1 = 0.7
+    fit_gg.amplitude_0 = 2
+    fit_gg.amplitude_1 = 3
+    fit_gg.stddev_0 = 0.3
+    fit_gg.stddev_1 = 0.5
+
+    cmo=cfitter(fit_gg, x=x, y=y, xbinsize=binsize, err=yerrs, bkg=y, bkg_scale=0.3)
+
+    plt.errorbar(x, y, yerr=yerrs, xerr=binsize)
+    plt.plot(x, cmo(x))

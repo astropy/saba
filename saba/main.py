@@ -127,7 +127,7 @@ class SherpaMCMC(object):
                                              pars))
         else:
             raise AstropyUserWarning("Must have valid fit! "
-                                     "Convariance matrix is not present")
+                                     "Covariance matrix is not present")
 
     def __call__(self, niter=200000):
         '''
