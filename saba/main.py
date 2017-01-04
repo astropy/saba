@@ -295,6 +295,7 @@ class SherpaFitter(Fitter):
                stat=", ".join(Stat._sherpa_values.keys()),
                est=", ".join(EstMethod._sherpa_values.keys()))  # is this evil?
 
+    supported_constraints = ['bounds', 'fixed','tied']
 
     def __init__(self, optimizer="levmar", statistic="leastsq", estmethod="covariance"):
         try:
