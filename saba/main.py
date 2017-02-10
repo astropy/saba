@@ -272,6 +272,14 @@ class SherpaMCMC(object):
         return self._stat_values
 
 
+def _check_model_dimensions(models):
+    n_inputs = models[0].n_inputs
+    for mod in models[1:]:
+        assert n_inputs = mod.n_inputs, AstropyUserWarning("Models 0 and {n1} have a different number of \
+                                                            dimensions  of {m0} and {m1} \
+                                                            repectively".format(n1=n, m0=n_inputs, m1=mod.n_inputs))
+
+
 class SherpaFitter(Fitter):
     __doc__ = """
     Sherpa Fitter for astropy models.
@@ -364,6 +372,7 @@ class SherpaFitter(Fitter):
         tie_list = []
         try:
             n_inputs = models[0].n_inputs
+            _check_model_dimensions(models)
         except TypeError:
             n_inputs = models.n_inputs
 
@@ -574,7 +583,6 @@ class Dataset(SherpaWrapper):
             else:
                 if err is None:
                     if bkg is None:
-
                         data = Data1DInt("wrapped_data", xlo=x - bs, xhi=x + bs, y=y)
                     else:
                         data = Data1DIntBkg("wrapped_data", xlo=x - bs, xhi=x + bs, y=y, bkg=bkg, bkg_scale=bkg_scale)
@@ -639,12 +647,14 @@ class ConvertedModel(object):
     """
 
     def __init__(self, models, tie_list=None):
+
         self.model_dict = OrderedDict()
         try:
             models.parameters  # does it quack
             self.sherpa_model = self._astropy_to_sherpa_model(models)
             self.model_dict[models] = self.sherpa_model
         except AttributeError:
+            _check_model_dimensions(models)
             for mod in models:
                 self.model_dict[mod] = self._astropy_to_sherpa_model(mod)
 
