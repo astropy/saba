@@ -1,7 +1,9 @@
 from __future__ import (absolute_import, unicode_literals, division,
                         print_function)
 import numpy as np
-from collections import OrderedDict
+import warnings
+
+from collections import OrderedDict, defaultdict
 from sherpa.fit import Fit
 from sherpa.data import Data1D, Data1DInt, Data2D, Data2DInt, DataSimulFit
 from sherpa.data import BaseData
@@ -12,13 +14,13 @@ from sherpa.stats import CStat, WStat, Cash
 from sherpa.optmethods import GridSearch, LevMar, MonCar, NelderMead
 from sherpa.estmethods import Confidence, Covariance, Projection
 from sherpa.sim import MCMC
-import warnings
-
 from astropy.extern.six.moves import range
 from astropy.utils import format_doc
 from astropy.utils.exceptions import AstropyUserWarning
 from astropy.tests.helper import catch_warnings
 
+from astropy.modeling.utils import _combine_equivalency_dict
+from astropy.units import Quantity
 
 with catch_warnings(AstropyUserWarning) as warns:
     """this is to stop the import warning
@@ -29,7 +31,6 @@ for w in warns:
     if "SherpaFitter" not in w.message.message:
         warnings.warn(w)
 
-# from astropy.modeling
 
 __all__ = ('SherpaFitter', 'SherpaMCMC')
 
@@ -94,8 +95,6 @@ class EstMethod(SherpaWrapper):
 
     _sherpa_values = {'confidence': Confidence, 'covariance': Covariance,
                       'projection': Projection}
-
-
 
 
 class SherpaMCMC(object):
@@ -325,7 +324,6 @@ class SherpaFitter(Fitter):
         # sherpa doesn't currently have a docstring for est_method but maybe the future
         setattr(self.__class__, 'est_config', property(lambda s: s._est_config, doc=self._est_method.__doc__))
 
-
     def __call__(self, models, x, y, z=None, xbinsize=None, ybinsize=None, err=None, bkg=None, bkg_scale=1, **kwargs):
         """
         Fit the astropy model with a the sherpa fit routines.
@@ -362,6 +360,9 @@ class SherpaFitter(Fitter):
         """
 
         tie_list = []
+
+        _models, _x, _y, _z, _xbinsize, _ybinsize, _err, _bkg = self.remove_units(models, x, y, z, xbinsize, ybinsize, err, bkg)
+
         try:
             n_inputs = models[0].n_inputs
         except TypeError:
@@ -438,6 +439,157 @@ class SherpaFitter(Fitter):
         This returns and instance of `SherpaMCMC` with it's self as the fitter
         """
         return SherpaMCMC(self, *args, **kwargs)
+
+    def remove_units(self, models, x, y, z=None, xbinsize=None, ybinsize=None, err=None, bkg=None, equivalencies=None):
+        """
+        This stripts data of there units so they can be fit.
+        """
+        #try to get a model, x, y, z, xbin, ybin, err, bkg tuple
+        #see how many models
+        print(models)
+        try:
+            models._supports_unit_fitting
+            n_models = 1
+            models = [models]
+        except AttributeError:
+            n_models = len(models)
+
+        #try to figure out the is multiple datasets
+        #assume all data has same type?
+        try:
+            n_data = x.ndim
+            if z  is None:
+                assert x.ndim == y.ndim, AstropyUserWarning("x and y dimensions don't match")
+            else:
+                assert x.ndim == y.ndim == z.ndim, AstropyUserWarning("x, y and z dimensions don't match")
+        except AttributeError:
+            n_data = len(x)
+            if z  is None:
+                assert len(x) == len(y), AstropyUserWarning("x and y dimensions don't match")
+            else:
+                assert len(x) == len(y) == len(z), AstropyUserWarning("x, y and z dimensions don't match")
+
+        if n_data == 1 and n_models > 1:
+            n_data = n_models
+            x = np.asanyarray(x)
+            y = np.asanyarray(y)
+
+            x = [x.copy() for _ in range(n_data)]
+            y = [y.copy() for _ in range(n_data)]
+
+            if z is not None:
+                z = np.asanyarray(z)
+                z = [z.copy() for _ in range(n_data)]
+
+        elif n_data > 1 and  n_models == 1 :
+                n_models  = n_data
+                models = [models[0].copy() for _ in range(n_models)]
+
+        elif n_data is not 1 and n_models is not 1 and not n_data ==  n_models:
+            raise Exception("Don't know how to handle multiple models "
+                            "unless there is one foreach dataset")
+
+        else:
+            x = [np.asanyarray(x)]
+            y = [np.asanyarray(y)]
+            if z is not None:
+                z = [np.asanyarray(z)]
+
+        if z is None:
+            z = n_data * [None]
+
+        if xbinsize is None:
+            xbinsize = n_data * [None]
+
+        if ybinsize is None:
+            ybinsize = n_data * [None]
+
+        if err is None:
+            err = n_data * [None]
+
+        if bkg is None:
+            bkg = n_data * [None]
+
+        #iterate over all the things
+        self.units_sets = defaultdict(list)
+        _x = []
+        _y = []
+        _z = []
+        _xbinsize = []
+        _ybinsize = []
+        _err = []
+        _bkg = []
+        _models = []
+
+        for  model, xx, yy, zz, xxbin, yybin, eerr, bbkg in zip(models, x, y, z, xbinsize, ybinsize, err, bkg):
+            if model._supports_unit_fitting:
+                input_units_equivalencies = _combine_equivalency_dict(model.inputs,
+                                                                      equivalencies,
+                                                                      model.input_units_equivalencies)
+                if model.input_units is not None:
+                    if isinstance(xx, Quantity):
+                        self.units_sets['x'].append(xx.unit)
+                        xx = xx.to(model.input_units['x'], equivalencies=input_units_equivalencies['x'])
+
+                    if isinstance(yy, Quantity) and z is not None:
+                        self.units_sets['y'].append(yy.unit)
+                        yy = yy.to(model.input_units['y'], equivalencies=input_units_equivalencies['y'])
+
+                    if  xxbin is not None and isinstance(xxbin, Quantity):
+                        xxbin = xxbin.to(model.input_units['x'], equivalencies=input_units_equivalencies['x'])
+
+                    if  yybin is not None and isinstance(yybin, Quantity) and z is not None:
+                        yybin = yybin.to(model.input_units['y'], equivalencies=input_units_equivalencies['y'])
+
+                    if eerr is not None and isinstance(eerr, Quantity):
+                        if z is not None:
+                            eerr = eerr.to(model.input_units['z'], equivalencies=input_units_equivalencies['z'])
+                        else:
+                            eerr = eerr.to(model.input_units['y'], equivalencies=input_units_equivalencies['y'])
+
+                    if bbkg is not None and isinstance(bbkg, Quantity):
+                        if z is not None:
+                            bbkg = bbkg.to(model.input_units['z'], equivalencies=input_units_equivalencies['z'])
+                        else:
+                            bbkg = bbkg.to(model.input_units['y'], equivalencies=input_units_equivalencies['y'])
+
+                    if zz is not None and isinstance(zz, Quantity):
+                            self.units_sets['z'].append(zz.unit)
+                            zz = zz.to(model.input_units['z'], equivalencies=input_units_equivalencies['z'])
+                    else:
+                        self.units_sets['z'].append(None)
+
+                    _x.append(xx)
+                    _y.append(yy)
+                    _z.append(zz)
+                    _xbinsize.append(xxbin)
+                    _ybinsize.append(yybin)
+                    _err.append(eerr)
+                    _bkg.append(bbkg)
+                    _models.append(model.without_units_for_data(x=xx, y=yy, z=zz))
+            else:
+                if isinstance(xx, Quantity) or isinstance(yy, Quantity) or isinstance(zz, Quantity):
+                    warnings.warn(AstropyUserWarning("This model{0} does not support being fit to data with units the units will be ignored this may produce erroneous results".format(len())))
+
+                _x.append(xx)
+                _y.append(yy)
+                _z.append(zz)
+                _xbinsize.append(xxbin)
+                _ybinsize.append(yybin)
+                _err.append(eerr)
+                _bkg.append(bbkg)
+                _models.append(model)
+
+            return _models, _x, _y, _z, _xbinsize, _ybinsize, _err, _bkg
+
+
+
+
+    def restore_units():
+        """
+        This retores the units to data .
+        """
+        pass
 
 
 class Dataset(SherpaWrapper):
@@ -712,6 +864,8 @@ class ConvertedModel(object):
         else:
             return return_models[0]
 
+    def are_model_units_sane(models):
+        pass #  TODO
 
 class Data1DIntBkg(Data1DInt):
     """
