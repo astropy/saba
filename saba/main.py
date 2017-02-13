@@ -390,7 +390,7 @@ class SherpaFitter(Fitter):
         self._fitter = Fit(self._data.data, self._fitmodel.sherpa_model, self._stat_method, self._opt_method, self._est_method, **kwargs)
         self.fit_info = self._fitter.fit()
 
-        return self._fitmodel.get_astropy_model()
+        return self.remove_units(elf._fitmodel.get_astropy_model())
 
     def est_errors(self, sigma=None, maxiters=None, numcores=1, methoddict=None, parlist=None):
         """
@@ -579,18 +579,23 @@ class SherpaFitter(Fitter):
                 _err.append(eerr)
                 _bkg.append(bbkg)
                 _models.append(model)
+                self.units_sets['x'].append(None)
+                self.units_sets['y'].append(None)
+                self.units_sets['z'].append(None)
 
             return _models, _x, _y, _z, _xbinsize, _ybinsize, _err, _bkg
 
-
-
-
-    def restore_units():
+    def restore_units(self,models):
         """
         This retores the units to data .
         """
-        pass
-
+        _models = []
+        for n, model in enumerate(models):
+            if self.units_sets['x'][n] is not None and self.units_sets['y'] is not None:
+                _models.append(model.with_units_from_data(x=1 * self.units_sets['x'][n], y=1 * self.units_sets['y'][n], z=1 * self.units_sets['z'][n]))
+            else:
+                _models.append(model)
+        return _models
 
 class Dataset(SherpaWrapper):
 
