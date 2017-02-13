@@ -324,7 +324,7 @@ class SherpaFitter(Fitter):
         # sherpa doesn't currently have a docstring for est_method but maybe the future
         setattr(self.__class__, 'est_config', property(lambda s: s._est_config, doc=self._est_method.__doc__))
 
-    def __call__(self, models, x, y, z=None, xbinsize=None, ybinsize=None, err=None, bkg=None, bkg_scale=1, **kwargs):
+    def __call__(self, models, x, y, z=None, xbinsize=None, ybinsize=None, err=None, bkg=None, bkg_scale=1, equivalencies=None, **kwargs):
         """
         Fit the astropy model with a the sherpa fit routines.
 
@@ -361,7 +361,9 @@ class SherpaFitter(Fitter):
 
         tie_list = []
 
-        _models, _x, _y, _z, _xbinsize, _ybinsize, _err, _bkg = self.remove_units(models, x, y, z, xbinsize, ybinsize, err, bkg)
+        _models, _x, _y, _z, _xbinsize, _ybinsize, _err, _bkg = self.remove_units(models, x, y, z, xbinsize, ybinsize, err, bkg, equivalencies)
+
+
 
         try:
             n_inputs = models[0].n_inputs
@@ -390,7 +392,7 @@ class SherpaFitter(Fitter):
         self._fitter = Fit(self._data.data, self._fitmodel.sherpa_model, self._stat_method, self._opt_method, self._est_method, **kwargs)
         self.fit_info = self._fitter.fit()
 
-        return self.remove_units(elf._fitmodel.get_astropy_model())
+        return self.restore_units(self._fitmodel.get_astropy_model())
 
     def est_errors(self, sigma=None, maxiters=None, numcores=1, methoddict=None, parlist=None):
         """
@@ -446,7 +448,6 @@ class SherpaFitter(Fitter):
         """
         #try to get a model, x, y, z, xbin, ybin, err, bkg tuple
         #see how many models
-        print(models)
         try:
             models._supports_unit_fitting
             n_models = 1
@@ -511,7 +512,7 @@ class SherpaFitter(Fitter):
             bkg = n_data * [None]
 
         #iterate over all the things
-        self.units_sets = defaultdict(list)
+        self._units_sets = defaultdict(list)
         _x = []
         _y = []
         _z = []
@@ -528,12 +529,20 @@ class SherpaFitter(Fitter):
                                                                       model.input_units_equivalencies)
                 if model.input_units is not None:
                     if isinstance(xx, Quantity):
-                        self.units_sets['x'].append(xx.unit)
+                        self._units_sets['x'].append(1 * xx.unit)
                         xx = xx.to(model.input_units['x'], equivalencies=input_units_equivalencies['x'])
+                    else:
+                        self._units_sets['x'].append(None)
 
-                    if isinstance(yy, Quantity) and z is not None:
-                        self.units_sets['y'].append(yy.unit)
+
+
+                    if isinstance(yy, Quantity) and zz is not None:
+                        self._units_sets['y'].append(1 * yy.unit)
                         yy = yy.to(model.input_units['y'], equivalencies=input_units_equivalencies['y'])
+                    elif  isinstance(yy, Quantity):
+                        self._units_sets['y'].append(1 * yy.unit)
+                    else:
+                        self._units_sets['y'].append(None)
 
                     if  xxbin is not None and isinstance(xxbin, Quantity):
                         xxbin = xxbin.to(model.input_units['x'], equivalencies=input_units_equivalencies['x'])
@@ -541,23 +550,23 @@ class SherpaFitter(Fitter):
                     if  yybin is not None and isinstance(yybin, Quantity) and z is not None:
                         yybin = yybin.to(model.input_units['y'], equivalencies=input_units_equivalencies['y'])
 
+                    if isinstance(zz, Quantity):
+                        self._units_sets['z'].append(1 * zz.unit)
+                    else:
+                        self._units_sets['z'].append(None)
+
                     if eerr is not None and isinstance(eerr, Quantity):
                         if z is not None:
-                            eerr = eerr.to(model.input_units['z'], equivalencies=input_units_equivalencies['z'])
+                            eerr = eerr.to(self._units_sets['z'])
                         else:
-                            eerr = eerr.to(model.input_units['y'], equivalencies=input_units_equivalencies['y'])
+                            eerr = eerr.to(self._units_sets['y'])
 
                     if bbkg is not None and isinstance(bbkg, Quantity):
                         if z is not None:
-                            bbkg = bbkg.to(model.input_units['z'], equivalencies=input_units_equivalencies['z'])
+                            bbkg = bbkg.to(self._units_sets['z'])
                         else:
-                            bbkg = bbkg.to(model.input_units['y'], equivalencies=input_units_equivalencies['y'])
+                            bbkg = bbkg.to(self._units_sets['y'])
 
-                    if zz is not None and isinstance(zz, Quantity):
-                            self.units_sets['z'].append(zz.unit)
-                            zz = zz.to(model.input_units['z'], equivalencies=input_units_equivalencies['z'])
-                    else:
-                        self.units_sets['z'].append(None)
 
                     _x.append(xx)
                     _y.append(yy)
@@ -567,10 +576,23 @@ class SherpaFitter(Fitter):
                     _err.append(eerr)
                     _bkg.append(bbkg)
                     _models.append(model.without_units_for_data(x=xx, y=yy, z=zz))
+                else:
+                    _x.append(xx)
+                    _y.append(yy)
+                    _z.append(zz)
+                    _xbinsize.append(xxbin)
+                    _ybinsize.append(yybin)
+                    _err.append(eerr)
+                    _bkg.append(bbkg)
+                    _models.append(model)
+                    self._units_sets['x'].append(None)
+                    self._units_sets['y'].append(None)
+                    self._units_sets['z'].append(None)
             else:
                 if isinstance(xx, Quantity) or isinstance(yy, Quantity) or isinstance(zz, Quantity):
-                    warnings.warn(AstropyUserWarning("This model{0} does not support being fit to data with units the units will be ignored this may produce erroneous results".format(len())))
-
+                    warnings.warn(AstropyUserWarning("This model{0} does not support being fit to data "
+                                                     "with units the units will be ignored this may "
+                                                     "produce erroneous results".format(len(self._units_sets['x']))))
                 _x.append(xx)
                 _y.append(yy)
                 _z.append(zz)
@@ -579,23 +601,29 @@ class SherpaFitter(Fitter):
                 _err.append(eerr)
                 _bkg.append(bbkg)
                 _models.append(model)
-                self.units_sets['x'].append(None)
-                self.units_sets['y'].append(None)
-                self.units_sets['z'].append(None)
+                self._units_sets['x'].append(None)
+                self._units_sets['y'].append(None)
+                self._units_sets['z'].append(None)
 
-            return _models, _x, _y, _z, _xbinsize, _ybinsize, _err, _bkg
+        return _models, _x, _y, _z, _xbinsize, _ybinsize, _err, _bkg
 
     def restore_units(self,models):
         """
         This retores the units to data .
         """
         _models = []
-        for n, model in enumerate(models):
-            if self.units_sets['x'][n] is not None and self.units_sets['y'] is not None:
-                _models.append(model.with_units_from_data(x=1 * self.units_sets['x'][n], y=1 * self.units_sets['y'][n], z=1 * self.units_sets['z'][n]))
-            else:
-                _models.append(model)
-        return _models
+        try:
+            if models._supports_unit_fitting and self._units_sets['x'][0] is not None and self._units_sets['y'][0] is not None:
+                return models.with_units_from_data(x=self._units_sets['x'][0], y=self._units_sets['y'][0], z=self._units_sets['z'][0])
+        except AttributeError:
+            for n, model in enumerate(models):
+                if self._units_sets['x'][n] is not None and self._units_sets['y'][n] is not None:
+                    _models.append(model.with_units_from_data(x=1 * self._units_sets['x'][n], y=1 * self._units_sets['y'][n], z=1 * self._units_sets['z'][n]))
+                else:
+                    _models.append(model)
+                return _models
+        return models
+
 
 class Dataset(SherpaWrapper):
 
