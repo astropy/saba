@@ -360,16 +360,14 @@ class SherpaFitter(Fitter):
         """
 
         tie_list = []
-
-        _models, _x, _y, _z, _xbinsize, _ybinsize, _err, _bkg = self.remove_units(models, x, y, z, xbinsize, ybinsize, err, bkg, equivalencies)
-
-
+        models, x, y, z, xbinsize, ybinsize, err, bkg = self.remove_units(models, x, y, z, xbinsize, ybinsize, err, bkg, equivalencies)
 
         try:
             n_inputs = models[0].n_inputs
         except TypeError:
             n_inputs = models.n_inputs
 
+        #print("x={x}\ny={y}\nz={z}\nerr={err}\nxbinsize={xbinsize}\nybinsize={ybinsize}\nbkg={bkg}".format(x=x, y=y, z=z, err=err, xbinsize=xbinsize, ybinsize=ybinsize, bkg=bkg))
         self._data = Dataset(n_inputs, x, y, z, xbinsize, ybinsize, err, bkg, bkg_scale)
 
         if self._data.ndata > 1:
@@ -444,73 +442,70 @@ class SherpaFitter(Fitter):
 
     def remove_units(self, models, x, y, z=None, xbinsize=None, ybinsize=None, err=None, bkg=None, equivalencies=None):
         """
-        This stripts data of there units so they can be fit.
+        This stripts data and models of their units so they can be fit.
         """
-        #try to get a model, x, y, z, xbin, ybin, err, bkg tuple
-        #see how many models
         try:
             models._supports_unit_fitting
             n_models = 1
-            models = [models]
         except AttributeError:
             n_models = len(models)
 
-        #try to figure out the is multiple datasets
-        #assume all data has same type?
-        try:
-            n_data = x.ndim
-            if z  is None:
-                assert x.ndim == y.ndim, AstropyUserWarning("x and y dimensions don't match")
-            else:
-                assert x.ndim == y.ndim == z.ndim, AstropyUserWarning("x, y and z dimensions don't match")
-        except AttributeError:
-            n_data = len(x)
-            if z  is None:
-                assert len(x) == len(y), AstropyUserWarning("x and y dimensions don't match")
-            else:
-                assert len(x) == len(y) == len(z), AstropyUserWarning("x, y and z dimensions don't match")
+        _x = np.array(x)
+        _y = np.array(y)
+        n_data = 1
+        if _x.ndim == 2 or (_x.dtype == np.object or _y.dtype == np.object):
+            n_data = _x.shape[0]
 
-        if n_data == 1 and n_models > 1:
-            n_data = n_models
-            x = np.asanyarray(x)
-            y = np.asanyarray(y)
-
-            x = [x.copy() for _ in range(n_data)]
-            y = [y.copy() for _ in range(n_data)]
-
-            if z is not None:
-                z = np.asanyarray(z)
-                z = [z.copy() for _ in range(n_data)]
-
-        elif n_data > 1 and  n_models == 1 :
-                n_models  = n_data
-                models = [models[0].copy() for _ in range(n_models)]
-
-        elif n_data is not 1 and n_models is not 1 and not n_data ==  n_models:
+        if n_data > 1 and n_models > 1 and not n_data == n_models: #check if we can handle n_data and n_models
             raise Exception("Don't know how to handle multiple models "
                             "unless there is one foreach dataset")
-
         else:
-            x = [np.asanyarray(x)]
-            y = [np.asanyarray(y)]
-            if z is not None:
-                z = [np.asanyarray(z)]
+            n_dim  = max(n_data,n_models)
+            if  n_data == 1:
+                # make them match n_dim if n_dim is 1 it wont matter anyway although perhaps its inefficeint?
+                # do range so that each data and model are completely independent dont want pointer like problems
+                x = [x.copy() for _ in range(n_dim)]
+                y = [y.copy() for _ in range(n_dim)]
 
-        if z is None:
-            z = n_data * [None]
+                if z is None:
+                    z = n_dim * [z]
+                else:
+                    z = [z.copy() for _ in range(n_dim)]
+                if err is None:
+                    err = n_dim * [err]
+                else:
+                    err = [err.copy() for _ in range(n_dim)]
+                if xbinsize is None:
+                    xbinsize = n_dim * [xbinsize]
+                else:
+                    xbinsize = [xbinsize.copy() for _ in range(n_dim)]
+                if ybinsize is None:
+                    ybinsize = n_dim * [ybinsize]
+                else:
+                    ybinsize = [ybinsize.copy() for _ in range(n_dim)]
+                if bkg is None:
+                    bkg = n_dim * [bkg]
+                else:
+                    bkg = [bkg.copy() for _ in range(n_dim)]
+            else:
+                if z is None:
+                    z = n_dim * [z]
+                if err is None:
+                    err = n_dim * [err]
+                if xbinsize is None:
+                    xbinsize = n_dim * [xbinsize]
+                if ybinsize is None:
+                    ybinsize = n_dim * [ybinsize]
+                if bkg is None:
+                    bkg = n_dim * [bkg]
 
-        if xbinsize is None:
-            xbinsize = n_data * [None]
+            if n_models  == 1:
+                models = [models.copy() for _ in range(n_dim)]
 
-        if ybinsize is None:
-            ybinsize = n_data * [None]
-
-        if err is None:
-            err = n_data * [None]
-
-        if bkg is None:
-            bkg = n_data * [None]
-
+            assert len(x) == len(y) == len(z) == len(err) == len(xbinsize) == len(ybinsize) == len(bkg), ValueError("lenghts of one of your parameters don't match models{lm}, x({lx}), y({ly}), "
+                                                                                                                    "z{lz}, err({lerr}), xbinsize({lxbin}), ybinsize({lybin}), bkg({lbkg})".format(lm=len(models), lx=len(x),
+                                                                                                                    ly=len(y), lz=len(z), lerr=len(err), lxbin=len(xbinsize), lybin=len(ybinsize),
+                                                                                                                    lbkg=len(bkg)))
         #iterate over all the things
         self._units_sets = defaultdict(list)
         _x = []
@@ -521,8 +516,9 @@ class SherpaFitter(Fitter):
         _err = []
         _bkg = []
         _models = []
-
+        #print("x={x}\ny={y}\nz={z}\nerr={err}\nxbinsize={xbinsize}\nybinsize={ybinsize}\nbkg={bkg}".format(x=repr(x), y=y, z=repr(z), err=repr(err), xbinsize=repr(xbinsize), ybinsize=repr(ybinsize), bkg=repr(bkg)))
         for  model, xx, yy, zz, xxbin, yybin, eerr, bbkg in zip(models, x, y, z, xbinsize, ybinsize, err, bkg):
+
             if model._supports_unit_fitting:
                 input_units_equivalencies = _combine_equivalency_dict(model.inputs,
                                                                       equivalencies,
@@ -605,6 +601,10 @@ class SherpaFitter(Fitter):
                 self._units_sets['y'].append(None)
                 self._units_sets['z'].append(None)
 
+        #print("x={x}\ny={y}\nz={z}\nerr={err}\nxbinsize={xbinsize}\nybinsize={ybinsize}\nbkg={bkg}".format(x=_x, y=_y, z=_z, err=err, xbinsize=_xbinsize, ybinsize=_ybinsize, bkg=_bkg))
+        print(_models,_x)
+        if n_dim == 1:
+            return _models[0], _x[0], _y[0], _z[0], _xbinsize[0], _ybinsize[0], _err[0], _bkg[0]
         return _models, _x, _y, _z, _xbinsize, _ybinsize, _err, _bkg
 
     def restore_units(self,models):
@@ -721,7 +721,7 @@ class Dataset(SherpaWrapper):
         if z is None:
             assert x.shape == y.shape, "shape of x and y don't match in dataset %i" % n
         else:
-            z = np.asarray(z)
+            z = np.array(z)
             assert x.shape == y.shape == z.shape, "shapes x,y and z don't match in dataset %i" % n
 
         if xbinsize is not None:
@@ -943,7 +943,7 @@ class Data1DIntBkg(Data1DInt):
         return self._backgrounds[index]
 
     def __init__(self, name, xlo, xhi, y, bkg, staterror=None, bkg_scale=1, src_scale=1):
-        self._bkg = np.asanyarray(bkg)
+        self._bkg = np.array(bkg)
         self._bkg_scale = src_scale
         self.exposure = 1
 
@@ -999,7 +999,7 @@ class Data1DBkg(Data1D):
         return self._backgrounds[index]
 
     def __init__(self, name, x, y, bkg, staterror=None, bkg_scale=1, src_scale=1):
-        self._bkg = np.asanyarray(bkg)
+        self._bkg = np.array(bkg)
         self._bkg_scale = src_scale
         self.exposure = 1
         self.subtracted = False
@@ -1059,7 +1059,7 @@ class Data2DIntBkg(Data2DInt):
         return self._backgrounds[index]
 
     def __init__(self, name, xlo, xhi, ylo, yhi, z, bkg, staterror=None, bkg_scale=1, src_scale=1):
-        self._bkg = np.asanyarray(bkg)
+        self._bkg = np.array(bkg)
         self._bkg_scale = src_scale
         self.exposure = 1
 
@@ -1120,7 +1120,7 @@ class Data2DBkg(Data2D):
         return self._backgrounds[index]
 
     def __init__(self, name, x, y, z, bkg, staterror=None, bkg_scale=1, src_scale=1):
-        self._bkg = np.asanyarray(bkg)
+        self._bkg = np.array(bkg)
         self._bkg_scale = src_scale
         self.exposure = 1
         self.subtracted = False
