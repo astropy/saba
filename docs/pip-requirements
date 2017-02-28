@@ -4,5 +4,5 @@ jinja2
 Sphinx 
 Graphviz 
 Pillow
--e git+https://github.com/nocturnalastro/astropy.git@sherpa_bridge_v2#egg=astropy
-astropy_helpers
+astropy
+astropy-helpers
