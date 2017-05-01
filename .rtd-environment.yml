@@ -11,5 +11,4 @@ dependencies:
   - wcsaxes
   - scipy
   - sherpa
-  - ipython
   - astropy-helpers

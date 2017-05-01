@@ -45,7 +45,7 @@ We need to define some data so we use the `~astropy.modeling.functional_models.G
 Now we have some data so let's fit a model after the parameters have been offset.
 Here we flatten the arrays and then adjust the error bars for the fit:
 
-.. code-block:: ipython
+.. doctest-skip::
 
     sfit = SherpaFitter(statistic="chi2")
     fitmo = truth.copy()

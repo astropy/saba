@@ -6,7 +6,7 @@ Usage details
 Now that you have the basics let's move on to some more complex usage of the fitter interface.
 First a quick preamble to do some imports and create our |SherpaFitter| object.
 
-.. code-block:: ipython
+.. doctest-skip::
 
     from saba import SherpaFitter
     sfit = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='confidence')
@@ -66,7 +66,7 @@ In addition, let's create some synthetic data:
 Let's set some more parameter constraints to the model and fit the data.
 We can print the sherpa models to check things are doing what they should.
 
-.. code-block:: ipython
+.. doctest-skip::
 
     fit_gg = double_gaussian.copy()
     fit_gg.mean_0.value = -0.5
@@ -86,7 +86,7 @@ information about the the properties of the optimizer.
 We can see those configuration details by using ``print(sfit.opt_config)``
 which outputs:
 
-.. code-block:: ipython
+.. doctest-skip::
 
     {'epsfcn': 1.1920928955078125e-07,
     'factor': 100.0,
@@ -98,7 +98,7 @@ which outputs:
 
 Similarly for ``print(sfit.opt_config.__doc__)``:
 
-.. code-block:: ipython
+.. doctest-skip::
 
     Levenberg-Marquardt optimization method.
 
@@ -127,12 +127,12 @@ Similarly for ``print(sfit.opt_config.__doc__)``:
 
 The parameters can be changed as
 
-.. code-block:: ipython
+.. doctest-skip::
 
     sfit.opt_config['ftol'] = 1e-5
     print(sfit.opt_config)
 
-.. code-block:: ipython
+.. doctest-skip::
 
     {'epsfcn': 1.1920928955078125e-07,
      'factor': 100.0,
@@ -146,7 +146,7 @@ The parameters can be changed as
 Fitting this model is similar as showing previously. For the sake of
 comparison let's also fit and unconstrained model:
 
-.. code-block:: ipython
+.. doctest-skip::
 
     fitted_gg = sfit(fit_gg, x, y, xbinsize=binsize, err=yerrs)
 
@@ -228,14 +228,14 @@ The fitter keeps a copy of the converted model so we can use it to compare the c
 
     "wrap\_" is just perpended to the model name (we didn't set one so it's blank) on conversion to the sherpa `~sherpa.models.model.Model`.
 
-.. code-block:: ipython
+.. doctest-skip::
 
     print("##Fit with constraints")
     print(sfit._fitmodel.sherpa_model)
     print("##Fit without constraints")
     print(sfit_unconstrained._fitmodel.sherpa_model)
 
-.. code-block:: ipython
+.. doctest-skip::
 
     ##Fit with constraints
 
@@ -265,14 +265,14 @@ Error Estimation Configuration
 As with the `~sherpa.optmethods` before we are able to adjust the configuration of the `~sherpa.estmethods`. Some of the properties can be passed through `~saba.SherpaFitter.est_errors` as keyword arguments such as the `sigma` however for access to all options we have the `est_config` property.
 
 
-.. code-block:: ipython
+.. doctest-skip::
 
     print(sfit.est_config)
     sfit.est_config['numcores'] = 5
     sfit.est_config['max_rstat'] = 4
     print(sfit.est_config)
 
-.. code-block:: ipython
+.. doctest-skip::
 
     {'eps': 0.01,
      'fast': False,
@@ -315,7 +315,7 @@ We have three scenarios we can handle:
 If ``N > 1`` for any of the scenarios then calling the fitter will return a list of models. Firstly we look at a single dataset with the two models as above.
 We quickly copy the two models above and supply them to the fitter as a list - hopefully we get the same result.
 
-.. code-block:: ipython
+.. doctest-skip::
 
     fit_gg = double_gaussian.copy()
     fit_gg.mean_0.value = -0.5
@@ -377,7 +377,7 @@ We quickly copy the two models above and supply them to the fitter as a list - h
 
 We also can fit multiple datasets with a single model so let's make a second dataset:
 
-.. code-block:: ipython
+.. doctest-skip::
 
     second_gg = double_gaussian.copy()
     second_gg.mean_0 = -2
@@ -392,7 +392,7 @@ We also can fit multiple datasets with a single model so let's make a second dat
 
 Here we supply lists for each of the data parameters. You can also use ``None`` for when you don't have something like a missing binsizes - a lack of binsizes is a contrived example but a lack of ``y`` errors is not suitable for a chi:sup:2 fit and you don't want to make a new fitter.
 
-.. code-block:: ipython
+.. doctest-skip::
 
     fit_gg = double_gaussian.copy()
     fit_gg.mean_0 = -2.3
@@ -473,7 +473,7 @@ It is also possible specify background data which is required for several of the
 
 This is done by supplying a background array using the `bkg` keyword.  If there is a scaling of the background relative to the source data then you can use the `bkg_scale` keyword
 
-.. code-block:: ipython
+.. doctest-skip::
 
     y[y<0]=0
     cfit = SherpaFitter(statistic='cstat', optimizer='levmar', estmethod='covariance')

@@ -78,16 +78,12 @@ extensions = [
     # 'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
-    'IPython.sphinxext.ipython_console_highlighting',
-    'IPython.sphinxext.ipython_directive'
     'matplotlib.sphinxext.plot_directive'
     'sphinx.ext.intersphinx',
     'numpydoc.numpydoc'
 
 ]
 """
-
-extensions += ['IPython.sphinxext.ipython_console_highlighting']
 
 # override math generation
 # - name depends on what version of astropy_helpers is installed
@@ -98,8 +94,6 @@ for n in ['pngmath', 'imgmath']:
         pass
 
 extensions.append('sphinx.ext.mathjax')
-
-ipython_savefig_dir = ['_generated']
 
 # Add any paths that contain templates here, relative to this directory.
 #
@@ -187,7 +181,6 @@ rst_prolog = ""
 rst_epilog = ""
 renamed_rst_epilog = """
 .. _AstroPy: http://www.astropy.org/
-.. _IPython: http://ipython.org/
 .. _matplotlib: http://matplotlib.org/
 .. _Sphinx: http://sphinx.pocoo.org/
 

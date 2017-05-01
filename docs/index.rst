@@ -37,7 +37,7 @@ Prerequisites
  * sherpa
 
 
-.. code-block:: ipython
+.. doctest-skip::
 
    conda install numpy
 
@@ -50,7 +50,7 @@ Otherwise one can just use the latest stable ``astropy`` via::
 Next install Sherpa_ using the conda ``sherpa`` channel.  Note that Sherpa
 currently needs to be installed after astropy on Mac OSX.
 
-.. code-block:: ipython
+.. doctest-skip::
 
    conda install -c sherpa sherpa
 
@@ -78,7 +78,7 @@ through the plugin registry system.  The latter method is preferred but requires
 
 or
 
-.. code-block:: ipython
+.. doctest-skip::
 
     from astropy.modeling.fitting import SherpaFitter
 
@@ -92,7 +92,7 @@ values for those can be found in the docstring of |SherpaFitter| and
 relate to objects within `sherpa.stats`, `sherpa.optmethods` and
 `sherpa.estmethods`.
 
-.. code-block:: ipython
+.. doctest-skip::
 
     sfit = SherpaFitter(statistic='chi2', optimizer='levmar', estmethod='confidence')
 
@@ -102,7 +102,7 @@ full description astropy's model and capabilities can be found in the ``astropy`
 `Instantiating and Evaluating Models
 <http://docs.astropy.org/en/stable/modeling/models.html>`_ section.
 
-.. code-block:: ipython
+.. doctest-skip::
 
     from astropy.modeling.models import Gaussian1D
 
@@ -196,11 +196,11 @@ Once again plotting the data.
 
 Now we have a fit we can look at the outputs by doing:
 
-.. code-block:: ipython
+.. doctest-skip::
 
     print(sfit.fit_info)
 
-.. code-block:: ipython
+.. doctest-skip::
 
     datasets       = None
     itermethodname = none
@@ -232,7 +232,7 @@ methods provided by Sherpa_.  This is done through the
 `~saba.SherpaFitter.est_errors` method which uses the Sherpa's
 `~sherpa.fit.Fit.est_errors` method. To get the errors make a call such as:
 
-.. code-block:: ipython
+.. doctest-skip::
 
     param_errors = sfit.est_errors(sigma=3)  # Note that sigma can be an input
 
@@ -240,7 +240,7 @@ In return we get a tuple of (``parameter_name``, ``best_fit_value``,
 ``lower_value`` , ``upper_value``).  For the sake of plotting them we make
 models for the upper and lower values, and then output the values while we're at it.
 
-.. code-block:: ipython
+.. doctest-skip::
 
     min_model = fitted_model.copy()
     max_model = fitted_model.copy()
@@ -250,7 +250,7 @@ models for the upper and lower values, and then output the values while we're at
             getattr(min_model, pname).value = pval + pmin
             getattr(max_model, pname).value = pval + pmax
 
-.. code-block:: ipython
+.. doctest-skip::
 
     ('amplitude', 3.0646789274093185, -0.50152026852144349, 0.56964617033348119)
     ('mean', 0.77853851419777986, -0.096264447380365548, 0.10293940565584792)
@@ -323,4 +323,4 @@ API/Reference
 Credit
 ------
 
-The development of this package was made possible by the generous support of the `Google Summer of Code <https://summerofcode.withgoogle.com/>`_ program in 2016 under the `OpenAstronomy <http://openastronomy.org/>`_ by `Michele Costa <https://github.com/nocturnalastro>`_ with the support and advice of mentors `Tom Aldcroft <https://github.com/taldcroft>`_, `Omar Laurino <https://github.com/olaurino>`_, `Moritz Guenther <https://github.com/hamogu>`_, and `Doug Burke <https://github.com/DougBurke>`_. 
+The development of this package was made possible by the generous support of the `Google Summer of Code <https://summerofcode.withgoogle.com/>`_ program in 2016 under the `OpenAstronomy <http://openastronomy.org/>`_ by `Michele Costa <https://github.com/nocturnalastro>`_ with the support and advice of mentors `Tom Aldcroft <https://github.com/taldcroft>`_, `Omar Laurino <https://github.com/olaurino>`_, `Moritz Guenther <https://github.com/hamogu>`_, and `Doug Burke <https://github.com/DougBurke>`_.
