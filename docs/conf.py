@@ -312,7 +312,7 @@ latex_elements = {
 #'pointsize': '10pt',
 
 # Additional stuff for the LaTeX preamble.
-#'preamble': '',
+'preamble': '',
 
 # Latex figure (float) alignment
 #'figure_align': 'htbp',
@@ -322,7 +322,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (master_doc, 'astrosherpabridge.tex', u'AstroSherpaBridge Documentation',
+  (master_doc, 'saba.tex', u'Saba Documentation',
    u'', 'manual'),
 ]
 
@@ -332,7 +332,7 @@ latex_documents = [
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
-#latex_use_parts = False
+#latex_toplevel_sectioning = 'part'
 
 # If true, show page references after internal links.
 #latex_show_pagerefs = False
@@ -352,7 +352,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'astrosherpabridge', u'AstroSherpaBridge Documentation',
+    (master_doc, 'saba', u'Saba Documentation',
      [author], 1)
 ]
 
@@ -366,8 +366,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (master_doc, 'astrosherpabridge', u'AstroSherpaBridge Documentation',
-   author, 'AstroSherpaBridge', 'One line description of project.',
+  (master_doc, 'saba', u'Saba Documentation',
+   author, 'saba', 'Allowing the use of astropy models with sherpa fitters',
    'Miscellaneous'),
 ]
 
