@@ -21,6 +21,7 @@ import warnings
 
 from saba import SherpaFitter, Dataset, ConvertedModel
 from astropy.modeling.models import Gaussian1D, Gaussian2D, Polynomial1D
+from astropy import units as u
 
 _RANDOM_SEED = 0x1337
 np.random.seed(_RANDOM_SEED)
@@ -343,3 +344,25 @@ class TestMCMC(object):
             x_med = (xx[med_ind] + xx[med_ind + 1]) / 2.0
 
             assert_allclose(self.params[nn], x_med, atol=0.1)
+
+
+
+class TestSherpaQuantiesFitter(object):
+
+    def setup_class(self):
+        self.x = np.linspace(1, 5, 30) * u.micron
+        self.y = np.exp(-0.5 * (self.x - 2.5 * u.micron)**2 / (200 * u.nm)**2) * u.mJy
+        self.model_micron = Gaussian1D(mean=3 * u.micron, stddev=1 * u.micron, amplitude=1 * u.Jy)
+        self.model_thz =  Gaussian1D(mean=110 * u.THz, stddev=10 * u.THz, amplitude=1 * u.Jy)
+        self.fitter = SherpaFitter()
+
+    def test_basic(self):
+        self.fitter(self.model_micron, self.x, self.y)
+
+
+    def test_user_equivalencies(self):
+        self.fitter(self.model_thz, self.x, self.y, equivalencies={'x': u.spectral()})
+
+    def test_model_equivalencies(self):
+        self.model_thz.input_units_equivalencies = {'x': u.spectral()}
+        self.fitter(self.model_thz, self.x, self.y)
