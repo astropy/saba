@@ -17,8 +17,7 @@ addons:
 env:
     global:
         - NUMPY_VERSION=stable
-        # saba requires astropy >=1.3 which is not yet released
-        - ASTROPY_VERSION=dev
+        - ASTROPY_VERSION=stable
         - SETUP_CMD='test'
         - CONDA_DEPENDENCIES='sherpa'
         - CONDA_CHANNELS='sherpa'
@@ -33,9 +32,12 @@ matrix:
         - python: 2.7
           env: SETUP_CMD='test --coverage'
 
-        # Sherpa 4.8.2 is the first to support python3
+        # Sherpa 4.8.2 is the first to support python
         - python: 3.5
-          env: SHERPA_VERSION>=4.8.2
+          env: SHERPA_VERSION>=4.8.2 
+
+        - python: 3.5
+          env: SHERPA_VERSION>=4.8.2 ASTROPY_VERSION=dev
 
         # Testing the docs building
         - python: 3.5
