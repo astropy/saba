@@ -17,17 +17,17 @@ import warnings
 from astropy.extern.six.moves import range
 from astropy.utils import format_doc
 from astropy.utils.exceptions import AstropyUserWarning
-from astropy.tests.helper import catch_warnings
+#from astropy.tests.helper import catch_warnings
 
 
-with catch_warnings(AstropyUserWarning) as warns:
-    """this is to stop the import warning
-    occuring when we import into saba"""
-    from astropy.modeling.fitting import Fitter
-
-for w in warns:
-    if "SherpaFitter" not in w.message.message:
-        warnings.warn(w)
+#with catch_warnings(AstropyUserWarning) as warns:
+#    """this is to stop the import warning
+#    occuring when we import into saba"""
+from astropy.modeling.fitting import Fitter
+#
+#for w in warns:
+#    if "SherpaFitter" not in w.message.message:
+#        warnings.warn(w)
 
 # from astropy.modeling
 
