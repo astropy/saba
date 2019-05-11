@@ -183,7 +183,7 @@ renamed_rst_epilog = """
 .. _AstroPy: http://www.astropy.org/
 .. _matplotlib: http://matplotlib.org/
 .. _Sphinx: http://sphinx.pocoo.org/
-
+.. _Sherpa: http://cxc.cfa.harvard.edu/contrib/sherpa/
 """
 
 # -- Options for HTML output ----------------------------------------------

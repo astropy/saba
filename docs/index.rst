@@ -1,5 +1,3 @@
-.. include:: references.txt
-
 Saba: Sherpa-Astropy Bridge
 ===========================
 
@@ -15,9 +13,9 @@ assuming given priors.
 
 Once Saba and Sherpa are installed, the Saba package exposes the above Sherpa
 functionality within the `astropy.modeling.fitting` package via a single
-|SherpaFitter| class which acts as a fitting backend within astropy.  If
+`~saba.SherpaFitter` class which acts as a fitting backend within astropy.  If
 using the latest version of astropy (development or >= 1.3), a plugin registry
-system automatically makes the |SherpaFitter| class available within the
+system automatically makes the `~saba.SherpaFitter` class available within the
 `astropy.modeling.fitting` module without requiring an explicit import.
 
 ``Saba`` is the Sherpa people's word for "bridge".
@@ -41,7 +39,7 @@ Prerequisites
 
    conda install numpy
 
-To make use of the entry points plugin registry which automatically makes the |SherpaFitter| class available within `astropy.modeling.fitting` install ``astropy`` version >= 1.3.
+To make use of the entry points plugin registry which automatically makes the `~saba.SherpaFitter` class available within `astropy.modeling.fitting` install ``astropy`` version >= 1.3.
 
 Otherwise one can just use the latest stable ``astropy`` via::
 
@@ -68,8 +66,8 @@ If you are not already familiar with `astropy.modeling`, now is a good time to
 review the introductory documentation there along with the
 `astropy.modeling.fitting` module details.
 
-To start with Saba let's import the |SherpaFitter| class which is the interface
-with Sherpa's fitting routines.  |SherpaFitter| is available in one of
+To start with Saba let's import the `~saba.SherpaFitter` class which is the interface
+with Sherpa's fitting routines.  `~saba.SherpaFitter` is available in one of
 two ways, either directly from `saba` or through `astropy.modeling.fitting`
 through the plugin registry system.  The latter method is preferred but requires
 `astropy` version >= 1.3 or the latest development (master) version.  Use::
@@ -88,7 +86,7 @@ Initialization
 
 To initialize a fitter we provide string values to define the ``statistic``,
 ``optimizer`` and ``estmethod`` (error estimation method).  The available
-values for those can be found in the docstring of |SherpaFitter| and
+values for those can be found in the docstring of `~saba.SherpaFitter` and
 relate to objects within `sherpa.stats`, `sherpa.optmethods` and
 `sherpa.estmethods`.
 
@@ -219,7 +217,7 @@ Now we have a fit we can look at the outputs by doing:
     message        = successful termination
     nfev           = 84
 
-Note that the ``fit_info`` attribute is custom to the |SherpaFitter| class and
+Note that the ``fit_info`` attribute is custom to the `~saba.SherpaFitter` class and
 provides a direct link to the internal fitting results from the Sherpa fit
 process.
 

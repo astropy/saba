@@ -1,10 +1,8 @@
-.. include:: references.txt
-
 Usage details
 ==============
 
 Now that you have the basics let's move on to some more complex usage of the fitter interface.
-First a quick preamble to do some imports and create our |SherpaFitter| object.
+First a quick preamble to do some imports and create our `~saba.SherpaFitter` object.
 
 .. doctest-skip::
 
