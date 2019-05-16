@@ -4,19 +4,20 @@ Saba: Sherpa-Astropy Bridge
 The Saba package provides a bridge between the convenient model definition
 language provided in the `astropy.modeling` package and the powerful fitting
 capabilities of the Sherpa_ modeling and fitting package.  In particular,
-Sherpa has a selection of robust optimization algorithms coupled with
-configurable fit statistics.  Once the model fit is complete Sherpa has three
+Sherpa_ has a selection of robust optimization algorithms coupled with
+configurable fit statistics.  Once the model fit is complete Sherpa_ has three
 different ways to estimate parameter confidence intervals, including methods
-that allow for coupled non-gaussian errors.  Finally, Sherpa has an MCMC
+that allow for coupled non-gaussian errors.  Finally, Sherpa_ has an MCMC
 sampler that can be used to generate draws from the probability distribution
 assuming given priors.
 
-Once Saba and Sherpa are installed, the Saba package exposes the above Sherpa
-functionality within the `astropy.modeling.fitting` package via a single
-`~saba.SherpaFitter` class which acts as a fitting backend within astropy.  If
-using the latest version of astropy (development or >= 1.3), a plugin registry
-system automatically makes the `~saba.SherpaFitter` class available within the
-`astropy.modeling.fitting` module without requiring an explicit import.
+Once Saba and Sherpa_ are installed, the Saba package exposes the above
+Sherpa_ functionality within the `astropy.modeling.fitting` package via
+a single `~saba.SherpaFitter` class which acts as a fitting backend
+within astropy. A plugin registry system automatically makes the
+`~saba.SherpaFitter` class available within the
+`astropy.modeling.fitting` module without requiring an explicit
+import.
 
 ``Saba`` is the Sherpa people's word for "bridge".
 
@@ -29,10 +30,10 @@ assume use of the conda + Anaconda package system.
 Prerequisites
 ^^^^^^^^^^^^^
 
- * Python 2.7 (support for Python 3.5+ is in work)
- * numpy
- * astropy
- * sherpa
+ * Python 3.5+
+ * numpy 1.15
+ * astropy_ 2.0 or higher (3.0 or higher recommended, as support for 2.0 will be dropped soon)
+ * sherpa 4.11
 
 
 .. doctest-skip::
