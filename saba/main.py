@@ -12,7 +12,6 @@ from sherpa.estmethods import Confidence, Covariance, Projection
 from sherpa.sim import MCMC
 import warnings
 
-from astropy.extern.six.moves import range
 from astropy.utils import format_doc
 from astropy.utils.exceptions import AstropyUserWarning
 #from astropy.tests.helper import catch_warnings
