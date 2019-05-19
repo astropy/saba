@@ -49,6 +49,7 @@ distribute-*.tar.gz
 .tox
 .*.sw[op]
 *~
+.vscode
 
 # Mac OSX
 .DS_Store
