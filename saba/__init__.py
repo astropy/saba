@@ -12,4 +12,7 @@ from ._astropy_init import *
 
 # For egg_info test builds to pass, put package imports here.
 if not _ASTROPY_SETUP_:
-    from .main import SherpaFitter, SherpaMCMC, Stat, OptMethod, EstMethod, Dataset, ConvertedModel
+    from .main import SherpaFitter, SherpaMCMC, Stat, OptMethod, EstMethod
+    from . import util
+    from . import datasets
+    from . import stat_methods
