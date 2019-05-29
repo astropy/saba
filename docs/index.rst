@@ -31,7 +31,7 @@ Prerequisites
 ^^^^^^^^^^^^^
 
  * Python 3.5+
- * numpy 1.15
+ * numpy 1.15+
  * astropy_ 2.0 or higher (3.0 or higher recommended, as support for 2.0 will be dropped soon)
  * sherpa 4.11
 
