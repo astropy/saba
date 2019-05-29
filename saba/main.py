@@ -1,5 +1,3 @@
-from __future__ import (absolute_import, unicode_literals, division,
-                        print_function)
 import numpy as np
 from collections import OrderedDict
 from sherpa.fit import Fit
@@ -12,22 +10,20 @@ from sherpa.stats import CStat, WStat, Cash
 from sherpa.optmethods import GridSearch, LevMar, MonCar, NelderMead
 from sherpa.estmethods import Confidence, Covariance, Projection
 from sherpa.sim import MCMC
-import warnings
 
-from astropy.extern.six.moves import range
 from astropy.utils import format_doc
 from astropy.utils.exceptions import AstropyUserWarning
-from astropy.tests.helper import catch_warnings
+#from astropy.tests.helper import catch_warnings
 
 
-with catch_warnings(AstropyUserWarning) as warns:
-    """this is to stop the import warning
-    occuring when we import into saba"""
-    from astropy.modeling.fitting import Fitter
-
-for w in warns:
-    if "SherpaFitter" not in w.message.message:
-        warnings.warn(w)
+#with catch_warnings(AstropyUserWarning) as warns:
+#    """this is to stop the import warning
+#    occuring when we import into saba"""
+from astropy.modeling.fitting import Fitter
+#
+#for w in warns:
+#    if "SherpaFitter" not in w.message.message:
+#        warnings.warn(w)
 
 # from astropy.modeling
 

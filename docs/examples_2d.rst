@@ -57,7 +57,6 @@ Here we flatten the arrays and then adjust the error bars for the fit:
     fitmo.amplitude = 50
 
     fitmo = sfit(fitmo, x=x0.flatten(), y=x1.flatten(), z=mexp.flatten()+merr.flatten(),
-                 xbinsize=np.ones(x0.size)*dx, ybinsize=np.ones(x1.size)*dx,
                  err=merr.flatten()+np.random.uniform(-0.5,0.5,x0.size))
 
     plt.subplot(1, 2, 1)
@@ -103,7 +102,6 @@ Here we flatten the arrays and then adjust the error bars for the fit:
 
     fitmo = sfit(fitmo, x0.flatten(), x1.flatten(),
                  mexp.flatten()+merr.flatten(),
-                 xbinsize=np.ones(x0.size)*dx, ybinsize=np.ones(x1.size)*dx,
                  err=merr.flatten()+np.random.uniform(-0.5, 0.5, x0.size))
 
     plt.rcParams['figure.figsize'] = (15, 5)

@@ -20,7 +20,7 @@ import os
 # pre-installed, rather than something that cna be bootstrap-installed
 # during the documentation-build process).
 #
-from astropy_helpers.sphinx.conf import *
+from sphinx_astropy.conf import *
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -178,12 +178,10 @@ todo_include_todos = False
 # Define standard header/footers.
 
 rst_prolog = ""
-rst_epilog = ""
-renamed_rst_epilog = """
-.. _AstroPy: http://www.astropy.org/
+rst_epilog = """
+.. _astropy: http://www.astropy.org/
 .. _matplotlib: http://matplotlib.org/
-.. _Sphinx: http://sphinx.pocoo.org/
-
+.. _Sherpa: http://cxc.cfa.harvard.edu/contrib/sherpa/
 """
 
 # -- Options for HTML output ----------------------------------------------
