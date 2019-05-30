@@ -5,10 +5,10 @@ channels:
   - sherpa
 
 dependencies:
+  - python>=3.6
   - numpy
-  - cython
+  - Cython
   - matplotlib
-  - wcsaxes
-  - scipy
   - sherpa
-  - astropy-helpers
+  - astropy
+  - sphinx-astropy
