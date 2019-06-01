@@ -3,11 +3,11 @@ name: saba
 channels:
   - astropy
   - sherpa
+  - conda-forge
 
 dependencies:
-  - python>=3.5
   - numpy
-  - Cython
+  - cython
   - matplotlib
   - sherpa
   - astropy
