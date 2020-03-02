@@ -673,12 +673,12 @@ class ConvertedModel(object):
         linkedpars = []
         for pname in model.param_names:
             param = getattr(model, pname)
-            vals = [param.name, param.value, param.min, param.max, param.min,
+            vals = [pname, param.value, param.min, param.max, param.min,
                     param.max, None, param.fixed, False]
             attrnames = ["name", "val", "min", "max", "hard_min", "hard_max",
                          "units", "frozen", "alwaysfrozen"]
             if model.name is None:
-                model._name = ""
+                model._name = "astropy_model"
 
             pars.append(Parameter(modelname="wrap_" + model.name, **dict([(atr, val) for atr, val in zip(attrnames, vals) if val is not None])))
             if param.tied is not False:
