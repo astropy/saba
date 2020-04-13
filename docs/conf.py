@@ -62,7 +62,6 @@ exclude_patterns.append('_templates')
 # This is added to the end of RST files - a good place to put substitutions to
 # be used globally.
 rst_epilog += """
-.. _astropy: http://www.astropy.org/
 .. _matplotlib: http://matplotlib.org/
 .. _Sherpa: http://cxc.cfa.harvard.edu/contrib/sherpa/
 """
