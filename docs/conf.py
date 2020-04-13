@@ -146,7 +146,7 @@ html_context = {
     'css_files': ['_static/saba.css'],
 }
 
-intersphinx_mapping['sherpa'] = ('http://sherpa.readthedocs.io/en/stable/', None)
+intersphinx_mapping['sherpa'] = ('http://sherpa.readthedocs.io/en/latest/', None)
 
 # -- Options for LaTeX output -------------------------------------------------
 
