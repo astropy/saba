@@ -1,7 +1,0 @@
-numpy
-cython
-jinja2
-Sphinx
-Graphviz
-Pillow
--e git+https://github.com/astropy/astropy.git#egg=astropy
