@@ -71,7 +71,7 @@ To start with Saba let's import the `~saba.SherpaFitter` class which is the inte
 with Sherpa's fitting routines.  `~saba.SherpaFitter` is available in one of
 two ways, either directly from `saba` or through `astropy.modeling.fitting`
 through the plugin registry system.  The latter method is preferred but requires
-`astropy` version >= 1.3 or the latest development (master) version.  Use::
+`astropy` version >= 1.3 or the latest development (main) version.  Use::
 
     from saba import SherpaFitter
 
