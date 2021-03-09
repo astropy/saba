@@ -108,8 +108,8 @@ source_suffix = '.rst'
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'
 
-# The main toctree document.
-main_doc = 'index'
+# The master toctree document.
+master_doc = 'index'
 
 # General information about the project.
 project = u'saba'
@@ -320,7 +320,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  (main_doc, 'astrosherpabridge.tex', u'AstroSherpaBridge Documentation',
+  (master_doc, 'astrosherpabridge.tex', u'AstroSherpaBridge Documentation',
    u'', 'manual'),
 ]
 
@@ -350,7 +350,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (main_doc, 'astrosherpabridge', u'AstroSherpaBridge Documentation',
+    (master_doc, 'astrosherpabridge', u'AstroSherpaBridge Documentation',
      [author], 1)
 ]
 
@@ -364,7 +364,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  (main_doc, 'astrosherpabridge', u'AstroSherpaBridge Documentation',
+  (master_doc, 'astrosherpabridge', u'AstroSherpaBridge Documentation',
    author, 'AstroSherpaBridge', 'One line description of project.',
    'Miscellaneous'),
 ]
