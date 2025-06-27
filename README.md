@@ -1,3 +1,6 @@
+**Saba is no longer actively maintained and will not work with recent versions of astropy or Sherpa. If you want to use a wider range of opimizers in astropy, we 
+recommend to look at [optimagic](https://optimagic.readthedocs.io/en/latest/).**
+
 # Saba
 
 [![Build Status](https://travis-ci.org/astropy/saba.svg?branch=main)](https://travis-ci.org/astropy/saba)
