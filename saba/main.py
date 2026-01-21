@@ -2,7 +2,7 @@ import numpy as np
 from collections import OrderedDict
 from sherpa.fit import Fit
 from sherpa.data import Data1D, Data1DInt, Data2D, Data2DInt, DataSimulFit
-from sherpa.data import BaseData
+from sherpa.data import Data
 from sherpa.models import UserModel, Parameter, SimulFitModel
 from sherpa.stats import Chi2, Chi2ConstVar, Chi2DataVar, Chi2Gehrels
 from sherpa.stats import Chi2ModVar, Chi2XspecVar, LeastSq
@@ -673,12 +673,12 @@ class ConvertedModel(object):
         linkedpars = []
         for pname in model.param_names:
             param = getattr(model, pname)
-            vals = [param.name, param.value, param.min, param.max, param.min,
+            vals = [pname, param.value, param.min, param.max, param.min,
                     param.max, None, param.fixed, False]
             attrnames = ["name", "val", "min", "max", "hard_min", "hard_max",
                          "units", "frozen", "alwaysfrozen"]
             if model.name is None:
-                model._name = ""
+                model._name = "astropy_model"
 
             pars.append(Parameter(modelname="wrap_" + model.name, **dict([(atr, val) for atr, val in zip(attrnames, vals) if val is not None])))
             if param.tied is not False:
@@ -759,12 +759,7 @@ class Data1DIntBkg(Data1DInt):
         self.subtracted = False
 
         self._backgrounds = [BkgDataset(bkg, bkg_scale)]
-        BaseData.__init__(self)
-
-        self.xlo = xlo
-        self.xhi = xhi
-        self.y = y
-        self.staterror = staterror
+        Data.__init__(self, (xlo, xhi), y, staterror)
 
 
 class Data1DBkg(Data1D):
@@ -814,11 +809,8 @@ class Data1DBkg(Data1D):
         self.subtracted = False
 
         self._backgrounds = [BkgDataset(bkg, bkg_scale)]
-        BaseData.__init__(self)
+        Data.__init__(self, name, (x, ), y, staterror)
 
-        self.x = x
-        self.y = y
-        self.staterror = staterror
 
 
 class Data2DIntBkg(Data2DInt):
@@ -875,14 +867,7 @@ class Data2DIntBkg(Data2DInt):
         self.subtracted = False
 
         self._backgrounds = [BkgDataset(bkg, bkg_scale)]
-        BaseData.__init__(self)
-
-        self.xlo = xlo
-        self.xhi = xhi
-        self.ylo = ylo
-        self.yhi = yhi
-        self.z = z
-        self.staterror = staterror
+        Data.__init__(self, (xlo, xhi, ylo, yhi), z, staterror)
 
 
 class Data2DBkg(Data2D):
@@ -935,13 +920,8 @@ class Data2DBkg(Data2D):
         self.subtracted = False
 
         self._backgrounds = [BkgDataset(bkg, bkg_scale)]
-        BaseData.__init__(self)
-
-        self.x = x
-        self.y = y
-        self.z = z
-        self.staterror = staterror
-
+        Data.__init__(self, name, (x, y), z, staterror)
+        
 
 class BkgDataset(object):
     """
